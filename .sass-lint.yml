@@ -1,0 +1,45 @@
+options:
+  merge-default-rules: true
+  max-warnings: 0
+
+files:
+  include:
+    - 'src/**/*.s+(a|c)ss'
+  ignore:
+    - 'node_modules/**/*.s+(a|c)ss'
+
+rules:
+  no-important: 0
+  final-newline: 0
+  no-vendor-prefixes: 0
+  no-color-keywords: 0
+  force-element-nesting: 0
+  force-attribute-nesting: 0
+  force-pseudo-nesting: 0
+  no-qualifying-elements: 0
+  quotes: 0
+  zero-unit: 0
+  border-zero: 2
+  hex-length:
+    - 1
+    - style: long
+  nesting-depth:
+    - 0
+  zero-unit: 1
+  attribute-quotes:
+    - 0
+  no-warn: 0
+  no-color-literals:
+    - 0
+  mixins-before-declarations:
+    - 1
+    - exclude:
+      - 'respond-to'
+      - 'custom-radio-checkbox'
+      - 'custom-radio-checkbox-checked'
+      - 'custom-radio-checkbox-hover'
+  class-name-format:
+    - 1
+    - convention: hyphenatedbem
+  property-sort-order:
+    - 0
