@@ -1,6 +1,8 @@
 {
   "name": "omegle-nostr",
   "version": "0.0.0",
+  "author": "António Conselheiro",
+  "license": "UNGOVERNABLE",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -8,7 +10,10 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
-  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/antonioconselheiro/omegle-nostr.git"
+  },
   "dependencies": {
     "@angular/animations": "^16.2.0",
     "@angular/common": "^16.2.0",
