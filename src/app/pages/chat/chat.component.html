@@ -1,37 +1,46 @@
 
 <section class="navbar">
-  <img class="logo" src="/assets/logo.png" alt="logo" />
+  <img class="logo" src="/omegle-nostr/assets/logo.png" alt="logo" />
   <h2 class="description">Talk to strangers!</h2>
   <h2 class="online">{{currentOnline}}</h2>
 </section>
 
 <main class="main">
   <section #conversation class="conversation">
-    
+    <div
+      *ngFor="let message of messages"
+      class="chat"
+     >
+      <span
+        [class.author-stranger]="message.author === AUTHOR_STRANGE"
+        [class.author-you]="message.author === AUTHOR_YOU"
+      >{{message.author | author}}: </span>
+      <span class="text">{{message.text}}</span>
+  </div>
   </section>
 
-  <form (submit)="sendMessage(message.value)" class="form" novalidate autocomplete="off">
-    <button *ngIf="state === STATE_DISCONNECTED" type="button" class="btn start bottom-left-radius">
+  <form (submit)="sendMessage(messageField.value)" class="form" novalidate autocomplete="off">
+    <button *ngIf="currentState === STATE_DISCONNECTED" type="button" class="btn start bottom-left-radius">
       Start
     </button>
-    <button *ngIf="state === STATE_CONNECTED" type="button" class="btn bottom-left-radius">
+    <button *ngIf="currentState === STATE_CONNECTED" type="button" class="btn bottom-left-radius">
       Stop
     </button>
-    <button *ngIf="state === STATE_UP_TO_DISCONNECT" type="button" class="btn bottom-left-radius bold">
+    <button *ngIf="currentState === STATE_UP_TO_DISCONNECT" type="button" class="btn bottom-left-radius bold">
       Really?
     </button>
     <textarea
       name="text"
-      #message
+      #messageField
       class="textarea"
-      [attr.disabled]="state === STATE_DISCONNECTED ? true : null"
-      (keydown.enter)="sendMessage(message.value)"
+      [attr.disabled]="currentState === STATE_DISCONNECTED ? true : null"
+      (keydown.enter)="sendMessage(messageField.value)"
     ></textarea>
     <button
       type="submit"
       #send
       class="btn bottom-right-radius"
-      [attr.disabled]="state === STATE_DISCONNECTED ? true : null"
+      [attr.disabled]="currentState === STATE_DISCONNECTED ? true : null"
     >
       Send
     </button>

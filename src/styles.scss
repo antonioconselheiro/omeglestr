@@ -77,16 +77,14 @@ body {
   margin-bottom: 0.7rem;
 }
 
-.name {
+.author-stranger {
+  color: #ff0101;
   font-weight: 700;
 }
 
-.title-stranger {
-  color: #ff0101;
-}
-
-.title-you {
+.author-you {
   color: #0101ff;
+  font-weight: 700;
 }
 
 .form {
@@ -116,13 +114,6 @@ body {
 
 .bottom-right-radius {
   border-bottom-right-radius: 7px;
-}
-
-.start {
-  background-color: #121830;
-  color: white !important;
-  font-weight: 600 !important;
-  border: none !important;
 }
 
 .start:focus {
