@@ -81,11 +81,11 @@ body {
   font-weight: 700;
 }
 
-.red {
+.title-stranger {
   color: #ff0101;
 }
 
-.blue {
+.title-you {
   color: #0101ff;
 }
 
@@ -99,15 +99,13 @@ body {
 
 .btn {
   height: 100%;
-  background-color: #121830;
+  color: #121830;
+  background-color: white;
   font-size: 3rem;
   border: 1px solid #cccccc;
   cursor: pointer;
 }
 
-#send {
-  color: white;
-}
 .btn:focus {
   outline: none;
 }
@@ -129,10 +127,6 @@ body {
 
 .start:focus {
   outline: none;
-}
-
-#stop {
-  color: white;
 }
 
 .textarea {
