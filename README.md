@@ -1,32 +1,25 @@
-> "Then saith the woman of Samaria unto him, How is it that thou, being a Jew, askest drink of me, which am a woman of Samaria? for the Jews have no dealings with the Samaritans."
+> "Then saith the woman of Samaria unto him, How is it that thou, being a Jew, askest drink of me, which am a woman of Samaria? For the Jews have no dealings with the Samaritans."
 > John 4:9
 
 # Omegle on Nostr
+_don't thread on Omegle_
 
-Don't thread on Omegle
+## Donate
+Do you want more protests in favor of free speech, freedom of software and freedom of work similar to this one?
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.2.1.
+This client nostr is a demonstration of a fraction of my power, as I have no funding other than my goodwill, with a contribution in satoshis you help me fund other products.
 
-## Development server
+Any open source that has its code physically decentralized around the world is likely to be a perpetual service to every human being with access to technology.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+There's still a lot of work to do.
 
-## Code scaffolding
+Lighting donate: <a href="lightning:peevedbeer57@walletofsatoshi.com">lightning:peevedbeer57@walletofsatoshi.com</a>
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+![zap me](./docs/qrcode-wallet-lighting.png)
 
-## Build
+Bitcoin onchain donate: <a href="bitcoin:bc1qrm99lmmpwk7zsh7njpgthw87yvdm38j2lzpq7q">bc1qrm99lmmpwk7zsh7njpgthw87yvdm38j2lzpq7q</a>
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+![zap me](./docs/qrcode-wallet-bitcoin.png)
 
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+## Contribute
+- See [CONTRIBUTE.md](./CONTRIBUTE.md)
