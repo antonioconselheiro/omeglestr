@@ -1,7 +1,9 @@
-> João 4
-> ⁹ Then saith the woman of Samaria unto him, How is it that thou, being a Jew, askest drink of me, which am a woman of Samaria? for the Jews have no dealings with the Samaritans.  
+> "Then saith the woman of Samaria unto him, How is it that thou, being a Jew, askest drink of me, which am a woman of Samaria? for the Jews have no dealings with the Samaritans."
+> John 4:9
 
 # Omegle on Nostr
+
+Don't thread on Omegle
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.2.1.
 
