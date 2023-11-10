@@ -1,0 +1,26 @@
+version: '3.9'
+
+volumes:
+  node_modules_vol:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./node_modules
+
+services:
+  omegle-nostr-dev:
+    image: omegle-nostr-dev
+    container_name: omegle-nostr-dev
+    build:
+      context: ../.
+      dockerfile: ./.devcontainer/Dockerfile
+    working_dir: /omegle-nostr
+    ports:
+      - "9229:9229"
+      - "4200:4200"
+    volumes:
+      - ..:/omegle-nostr:cached
+      - /var/run/docker.sock:/var/run/docker.sock
+      - node_modules_vol:/omegle-nostr/node_modules
+    tty: true
