@@ -15,11 +15,11 @@ There's still a lot of work to do.
 
 Lighting donate: <a href="lightning:peevedbeer57@walletofsatoshi.com">lightning:peevedbeer57@walletofsatoshi.com</a>
 
-![zap me](./docs/qrcode-wallet-lighting.png)
+![zap me](./imgs/qrcode-wallet-lighting.png)
 
 Bitcoin onchain donate: <a href="bitcoin:bc1qrm99lmmpwk7zsh7njpgthw87yvdm38j2lzpq7q">bc1qrm99lmmpwk7zsh7njpgthw87yvdm38j2lzpq7q</a>
 
-![zap me](./docs/qrcode-wallet-bitcoin.png)
+![zap me](./imgs/qrcode-wallet-bitcoin.png)
 
 ## Contribute
 - See [CONTRIBUTE.md](./CONTRIBUTE.md)
