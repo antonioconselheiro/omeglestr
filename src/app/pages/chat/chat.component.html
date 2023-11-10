@@ -2,31 +2,36 @@
 <section class="navbar">
   <img class="logo" src="/assets/logo.png" alt="logo" />
   <h2 class="description">Talk to strangers!</h2>
-  <h2 class="online"></h2>
+  <h2 class="online">{{currentOnline}}</h2>
 </section>
 
 <main class="main">
-  <section class="conversation"></section>
+  <section #conversation class="conversation">
+    
+  </section>
 
-  <form class="form">
-    <button type="button" class="btn start bottom-left-radius">
+  <form (submit)="sendMessage(message.value)" class="form" novalidate autocomplete="off">
+    <button *ngIf="state === STATE_DISCONNECTED" type="button" class="btn start bottom-left-radius">
       Start
     </button>
-    <button type="button" class="btn bottom-left-radius hide">
+    <button *ngIf="state === STATE_CONNECTED" type="button" class="btn bottom-left-radius">
       Stop
     </button>
-    <button
-      type="button"
-      class="btn bottom-left-radius bold hide"
-    >
+    <button *ngIf="state === STATE_UP_TO_DISCONNECT" type="button" class="btn bottom-left-radius bold">
       Really?
     </button>
-    <textarea name="text" id="text" class="textarea" disabled></textarea>
+    <textarea
+      name="text"
+      #message
+      class="textarea"
+      [attr.disabled]="state === STATE_DISCONNECTED ? true : null"
+      (keydown.enter)="sendMessage(message.value)"
+    ></textarea>
     <button
       type="submit"
-      id="send"
+      #send
       class="btn bottom-right-radius"
-      disabled
+      [attr.disabled]="state === STATE_DISCONNECTED ? true : null"
     >
       Send
     </button>

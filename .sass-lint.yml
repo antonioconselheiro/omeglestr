@@ -25,7 +25,6 @@ rules:
     - style: long
   nesting-depth:
     - 0
-  zero-unit: 1
   attribute-quotes:
     - 0
   no-warn: 0
