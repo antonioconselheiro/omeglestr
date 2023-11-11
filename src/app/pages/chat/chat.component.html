@@ -23,7 +23,12 @@
     <button *ngIf="currentState === STATE_DISCONNECTED" type="button" class="btn start bottom-left-radius">
       Start
     </button>
-    <button *ngIf="currentState === STATE_CONNECTED" type="button" class="btn bottom-left-radius">
+    <button
+      type="button"
+      class="btn bottom-left-radius"
+      *ngIf="currentState === STATE_CONNECTED"
+      (click)="currentState = STATE_UP_TO_DISCONNECT"
+    >
       Stop
     </button>
     <button *ngIf="currentState === STATE_UP_TO_DISCONNECT" type="button" class="btn bottom-left-radius bold">

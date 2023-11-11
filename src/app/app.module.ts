@@ -3,6 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ChatModule } from './pages/chat/chat.module';
+import { NostrApiModule } from './shared/nostr-api/nostr-api.module';
 
 @NgModule({
   declarations: [
@@ -11,7 +12,8 @@ import { ChatModule } from './pages/chat/chat.module';
   imports: [
     ChatModule,
     BrowserModule,
-    AppRoutingModule
+    AppRoutingModule,
+    NostrApiModule
   ],
   providers: [],
   bootstrap: [AppComponent]
