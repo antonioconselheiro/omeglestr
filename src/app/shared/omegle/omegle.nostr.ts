@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { NostrService } from '../nostr-api/nostr.service';
+import { NostrEventKind } from '@domain/nostr-event-kind.enum';
 
 /**
  * Nip 38 e nip 4 vou usar
@@ -22,6 +23,11 @@ export class OmegleNostr {
   ) { }
 
   updateStatus() {
-    this.nostrService.get();
+    this.nostrService.get([
+      {
+        kinds: [ NostrEventKind.UserStatuses ],
+        '#t': [ 'wannachat' ]
+      }
+    ]);
   }
 }

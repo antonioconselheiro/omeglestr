@@ -1,14 +1,17 @@
 import { Injectable } from '@angular/core';
 import { NostrEventKind } from '@domain/nostr-event-kind.enum';
 import { NostrUser } from '@domain/nostr-user';
-import { Event, UnsignedEvent, getEventHash, getSignature } from 'nostr-tools';
+import { UnsignedEvent, getEventHash, getSignature, nip04 } from 'nostr-tools';
 
 @Injectable({
   providedIn: 'root'
 })
 export class NostrEventFactory {
 
-  constructor() { }
+  /**
+   * default expiration time in seconds
+   */
+  private readonly DEFAULT_EXPIRATION_TIME = 60;
 
   private getCurrentTimestamp(): number {
     const oneMillisecond = 1000;
@@ -19,7 +22,7 @@ export class NostrEventFactory {
    * @param expireIn time in seconds to expire, default to 60
    * @returns expiration timestamp
    */
-  private getExpirationTimestamp(expireIn = 60): string {
+  private getExpirationTimestamp(expireIn = this.DEFAULT_EXPIRATION_TIME): string {
     const oneMillisecond = 1000;
     const expirationTimestamp = Math.floor(Date.now() / oneMillisecond) + expireIn;
     return String(expirationTimestamp);
@@ -27,6 +30,7 @@ export class NostrEventFactory {
 
   /**
    * NIP 4
+   * https://github.com/nostr-protocol/nips/blob/master/04.md
    */
   createEncryptedDirectMessage() {
 
@@ -40,7 +44,7 @@ export class NostrEventFactory {
     const unsignedEvent: UnsignedEvent = {
       kind: NostrEventKind.UserStatuses,
       content: "#wannachat",
-      pubkey: user.pubkey,
+      pubkey: user.publicKeyHex,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       created_at: this.getCurrentTimestamp(),
       tags: [

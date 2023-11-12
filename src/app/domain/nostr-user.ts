@@ -1,4 +1,4 @@
-import { getPublicKey, nip19 } from 'nostr-tools';
+import { generatePrivateKey, getPublicKey, nip19 } from 'nostr-tools';
 
 export class NostrUser {
 
@@ -13,17 +13,12 @@ export class NostrUser {
   readonly nostrPublic: string;
 
   /**
-   * 
-   */
-  readonly pubkey: string;
-
-  /**
    * nsec decoded
    */
   readonly privateKeyHex: string;
 
   /**
-   * npub decoded
+   * npub decoded, famous pubkey
    */
   readonly publicKeyHex: string;
 
@@ -31,7 +26,7 @@ export class NostrUser {
     /**
      * npub or nsec
      */
-    nostrString: string
+    nostrString = generatePrivateKey()
   ) {
     const { type, data } = nip19.decode(nostrString);
     if (type === 'nsec') {
@@ -39,7 +34,6 @@ export class NostrUser {
       this.privateKeyHex = data.toString();
       this.publicKeyHex = getPublicKey(this.privateKeyHex);
       this.nostrPublic = nip19.npubEncode(this.publicKeyHex);
-      this.pubkey = this.nostrPublic.replace(/^npub/, '');
     } else {
       throw new Error('Invalid argument, NostrUser expect nsec or npub string');
     }
