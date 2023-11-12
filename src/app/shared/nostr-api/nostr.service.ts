@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
+import { Event, Filter, SimplePool } from 'nostr-tools';
 import { defaultRelays } from '../../default-relays.const';
-import { Filter, Event, SimplePool, UnsignedEvent } from 'nostr-tools';
-import { NostrUser } from 'src/app/domain/nostr-user';
 
 @Injectable({
   providedIn: 'root'
