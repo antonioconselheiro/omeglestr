@@ -23,8 +23,9 @@ export class OmegleProxy {
     try {
       const strangeStatus = await this.omegleNostr.findByStatus();
       if (strangeStatus.length) {
-        const random = Math.floor(Math.random() * strangeStatus.length);
-        return new NostrUser(nip19.npubEncode(strangeStatus[random].pubkey))
+        this.inviteRandomToChating(user, strangeStatus);
+        //  depois disso precisarei escutar o status da
+        //  confirmação de conexão do chat
       } else {
         this.publishWannaChatStatus(user);
       }
@@ -33,13 +34,31 @@ export class OmegleProxy {
     }
   }
 
-  private publishWannaChatStatus(user: Required<NostrUser>): void {
-    const wannaChatStatus = this.nostrEventFactory.createWannaChatUserStatus(user);
-    this.nostrService.publish(wannaChatStatus);
+  private inviteRandomToChating(user: Required<NostrUser>, strangeStatus: Event[]): Promise<void> {
+    const random = Math.floor(Math.random() * strangeStatus.length);
+    const stranger = new NostrUser(nip19.npubEncode(strangeStatus[random].pubkey));
+    return this.publishChatInviteStatus(user, stranger);
   }
 
-  sendMessage(): void {
+  listenWannaChatStatus(): Promise<NostrUser> {
+    //  write a listening to a reply for wanna chat status published
+    //  include one minute timeout (one minute based in the event
+    //  expiration time, maybe should try to centralize this config)
+  }
 
+  private publishWannaChatStatus(user: Required<NostrUser>): Promise<void> {
+    const wannaChatStatus = this.nostrEventFactory.createWannaChatUserStatus(user);
+    return this.nostrService.publish(wannaChatStatus);
+  }
+
+  private publishChatInviteStatus(user: Required<NostrUser>, stranger: NostrUser): Promise<void> {
+    const wannaChatStatus = this.nostrEventFactory.createChatingUserStatus(user, stranger);
+    return this.nostrService.publish(wannaChatStatus);
+  }
+
+  async sendMessage(you: Required<NostrUser>, stranger: NostrUser, message: string): Promise<void> {
+    const event = await this.nostrEventFactory.createEncryptedDirectMessage(you, stranger, message);
+    return this.nostrService.publish(event);
   }
 
   // shows strange new messages and confirm your message was send
@@ -47,15 +66,18 @@ export class OmegleProxy {
 
   }
 
-  isTyping(): void {
-    //  apply userstatuses, 'typing'
+  isTyping(user: Required<NostrUser>): void {
+    const wannaChatStatus = this.nostrEventFactory.createTypingUserStatus(user);
+    this.nostrService.publish(wannaChatStatus);
   }
 
-  stopTyping(): void {
-    //  clean userstatuses
+  stopTyping(user: Required<NostrUser>): void {
+    const wannaChatStatus = this.nostrEventFactory.cleanUserStatus(user);
+    this.nostrService.publish(wannaChatStatus);
   }
 
-  disconnect(): void {
-
+  disconnect(user: Required<NostrUser>): void {
+    const wannaChatStatus = this.nostrEventFactory.createDisconnectedUserStatus(user);
+    this.nostrService.publish(wannaChatStatus);
   }
 }
