@@ -28,9 +28,7 @@ export class NostrService {
     });
 
     return new Promise(resolve => {
-      sub.on('eose', () => {
-        resolve(events);
-      });
+      sub.on('eose', () => resolve(events));
     });
   }
 
@@ -44,7 +42,6 @@ export class NostrService {
     }
 
     await this.pool.publish(defaultRelays, event);
-
     return Promise.resolve();
   }
 }

@@ -33,7 +33,7 @@ export class NostrEventFactory {
    * https://github.com/nostr-protocol/nips/blob/master/04.md
    * https://github.com/nbd-wtf/nostr-tools/blob/master/nip04.test.ts
    */
-  async createEncryptedDirectMessage(you: NostrUser, stranger: NostrUser, message: string): Promise<Event<NostrEventKind.EncryptedDirectMessage>> {
+  async createEncryptedDirectMessage(you: Required<NostrUser>, stranger: NostrUser, message: string): Promise<Event<NostrEventKind.EncryptedDirectMessage>> {
     const encriptedMessage = await nip04.encrypt(you.nostrSecret, stranger.nostrPublic, message);
 
     const unsignedEvent: UnsignedEvent = {
@@ -57,7 +57,7 @@ export class NostrEventFactory {
    * NIP 38
    * https://github.com/nostr-protocol/nips/blob/master/38.md
    */
-  createUserStatuses(user: NostrUser): Event<NostrEventKind.UserStatuses> {
+  createWannaChatUserStatus(user: Required<NostrUser>): Event<NostrEventKind.UserStatuses> {
     const unsignedEvent: UnsignedEvent = {
       kind: NostrEventKind.UserStatuses,
       content: "#wannachat",
@@ -69,6 +69,46 @@ export class NostrEventFactory {
         ['expiration', this.getExpirationTimestamp()],
         ['t', 'wannachat']
       ]
+    };
+
+    const id = getEventHash(unsignedEvent);
+    const sig = getSignature(unsignedEvent, user.privateKeyHex);
+
+    return { id, sig, ...unsignedEvent };
+  }
+
+  createDisconnectedUserStatus(user: Required<NostrUser>): Event<NostrEventKind.UserStatuses> {
+    return this.createUserStatus(user, 'disconnected');
+  }
+
+  createTypingUserStatus(user: Required<NostrUser>): Event<NostrEventKind.UserStatuses> {
+    return this.createUserStatus(user, 'typing');
+  }
+
+  createChatingUserStatus(you: Required<NostrUser>, strange: NostrUser): Event<NostrEventKind.UserStatuses> {
+    return this.createUserStatus(you, 'chating', [ 'p', strange.publicKeyHex ]);
+  }
+
+  cleanUserStatus(user: Required<NostrUser>): Event<NostrEventKind.UserStatuses> {
+    return this.createUserStatus(user, '');
+  }
+
+  private createUserStatus(user: Required<NostrUser>, status: string, tag?: string[]): Event<NostrEventKind.UserStatuses> {
+    const tags = [
+      ['d', 'general']
+    ];
+
+    if (tag) {
+      tags.push(tag);
+    }
+
+    const unsignedEvent: UnsignedEvent = {
+      kind: NostrEventKind.UserStatuses,
+      content: status,
+      pubkey: user.publicKeyHex,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      created_at: this.getCurrentTimestamp(),
+      tags
     };
 
     const id = getEventHash(unsignedEvent);

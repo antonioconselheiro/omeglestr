@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { NostrService } from '../nostr-api/nostr.service';
 import { NostrEventKind } from '@domain/nostr-event-kind.enum';
+import { Event } from 'nostr-tools';
+import { NostrService } from '../nostr-api/nostr.service';
 
 @Injectable()
 export class OmegleNostr {
@@ -9,8 +10,8 @@ export class OmegleNostr {
     private nostrService: NostrService
   ) { }
 
-  findByStatus() {
-    this.nostrService.get([
+  findByStatus(): Promise<Event<NostrEventKind.UserStatuses>[]> {
+    return this.nostrService.get([
       {
         kinds: [ NostrEventKind.UserStatuses ],
         '#t': [ 'wannachat' ]
@@ -18,19 +19,7 @@ export class OmegleNostr {
     ]);
   }
 
-  updateUserStatus() {
-
-  }
-
   listenDirectMessage() {
-
-  }
-
-  sendDirectMessage() {
-
-  }
-
-  deleteAccount() {
 
   }
 }
