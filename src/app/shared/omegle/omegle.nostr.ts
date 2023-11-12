@@ -13,21 +13,35 @@ import { NostrEventKind } from '@domain/nostr-event-kind.enum';
  * Cada nova conversa por ser um novo nsec
  */
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class OmegleNostr {
 
   constructor(
     private nostrService: NostrService
   ) { }
 
-  updateStatus() {
+  findByStatus() {
     this.nostrService.get([
       {
         kinds: [ NostrEventKind.UserStatuses ],
         '#t': [ 'wannachat' ]
       }
     ]);
+  }
+
+  updateUserStatus() {
+
+  }
+
+  listenDirectMessage() {
+
+  }
+
+  sendDirectMessage() {
+
+  }
+
+  deleteAccount() {
+
   }
 }
