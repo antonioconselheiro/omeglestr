@@ -1,5 +1,6 @@
-import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { NgModule } from '@angular/core';
+import { NostrEventFactory } from './nostr-event.factory';
 import { NostrService } from './nostr.service';
 
 @NgModule({
@@ -7,7 +8,8 @@ import { NostrService } from './nostr.service';
     CommonModule
   ],
   providers: [
-    NostrService
+    NostrService,
+    NostrEventFactory
   ]
 })
 export class NostrApiModule { }

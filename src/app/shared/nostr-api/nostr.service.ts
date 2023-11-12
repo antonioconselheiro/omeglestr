@@ -1,18 +1,26 @@
 import { Injectable } from '@angular/core';
-import { Event, Filter, SimplePool } from 'nostr-tools';
+import { Event, Filter, SimplePool, validateEvent, verifySignature } from 'nostr-tools';
 import { defaultRelays } from '../../default-relays.const';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class NostrService {
-  private readonly relays = defaultRelays;
 
+  private static instance: NostrService | null = null;
+
+  pool = new SimplePool();
+
+  constructor() {
+    if (!NostrService.instance) {
+      NostrService.instance = this;
+    }
+
+    return NostrService.instance;
+  }
+  
   get<K extends number>(filters: Filter<K>[]): Promise<Array<Event<K>>> {
-    const pool = new SimplePool();
     const events = new Array<Event<K>>();
-    const sub = pool.sub(
-      this.relays, filters
+    const sub = this.pool.sub(
+      defaultRelays, filters
     );
 
     sub.on('event', event => {
@@ -22,9 +30,21 @@ export class NostrService {
     return new Promise(resolve => {
       sub.on('eose', () => {
         resolve(events);
-        sub.unsub();
-        pool.close(this.relays);
       });
     });
+  }
+
+  async publish<K extends number>(event: Event<K>): Promise<void> {
+    const ok = validateEvent(event);
+    const veryOk = verifySignature(event);
+
+    if (!ok || !veryOk) {
+      console.error(' :: event is not valid... aborting...');
+      return Promise.resolve();
+    }
+
+    await this.pool.publish(defaultRelays, event);
+
+    return Promise.resolve();
   }
 }
