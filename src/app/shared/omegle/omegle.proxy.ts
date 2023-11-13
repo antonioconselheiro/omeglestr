@@ -66,18 +66,18 @@ export class OmegleProxy {
 
   }
 
-  isTyping(user: Required<NostrUser>): void {
+  isTyping(user: Required<NostrUser>): Promise<void> {
     const wannaChatStatus = this.nostrEventFactory.createTypingUserStatus(user);
-    this.nostrService.publish(wannaChatStatus);
+    return this.nostrService.publish(wannaChatStatus);
   }
 
-  stopTyping(user: Required<NostrUser>): void {
+  stopTyping(user: Required<NostrUser>): Promise<void> {
     const wannaChatStatus = this.nostrEventFactory.cleanUserStatus(user);
-    this.nostrService.publish(wannaChatStatus);
+    return this.nostrService.publish(wannaChatStatus);
   }
 
-  disconnect(user: Required<NostrUser>): void {
+  disconnect(user: Required<NostrUser>): Promise<void> {
     const wannaChatStatus = this.nostrEventFactory.createDisconnectedUserStatus(user);
-    this.nostrService.publish(wannaChatStatus);
+    return this.nostrService.publish(wannaChatStatus);
   }
 }

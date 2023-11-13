@@ -18,6 +18,8 @@ export class NostrService {
   }
   
   get<K extends number>(filters: Filter<K>[]): Promise<Array<Event<K>>> {
+    // TODO: pode ser que o nostr-tools simule um eose por timeout interno configurado
+    //  na lib, estou estudando migrar pra NDK
     const events = new Array<Event<K>>();
     const sub = this.pool.sub(
       defaultRelays, filters
