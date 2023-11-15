@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { NostrEventKind } from '@domain/nostr-event-kind.enum';
-import { Event } from 'nostr-tools';
+import { NDKEvent } from '@nostr-dev-kit/ndk';
 import { NostrService } from '../nostr-api/nostr.service';
+import { Observable } from 'rxjs';
 
 @Injectable()
 export class OmegleNostr {
@@ -10,16 +11,39 @@ export class OmegleNostr {
     private nostrService: NostrService
   ) { }
 
-  findByStatus(): Promise<Event<NostrEventKind.UserStatuses>[]> {
+  findByStatus(): Promise<NDKEvent[]> {
     return this.nostrService.request([
       {
-        kinds: [ NostrEventKind.UserStatuses ],
+        kinds: [ +NostrEventKind.UserStatuses ],
         '#t': [ 'wannachat' ]
       }
     ]);
   }
 
-  listenDirectMessage() {
+  getProfileStatus(npubkey: string[]): Promise<NDKEvent[]> {
+    return this.nostrService.request([
+      {
+        kinds: [ +NostrEventKind.UserStatuses ],
+        authors: npubkey
+      }
+    ]);
+  }
 
+  listenDirectMessage(fromNostrPublic: string): Observable<NDKEvent> {
+    return this.nostrService.subscribe([
+      {
+        kinds: [ +NostrEventKind.EncryptedDirectMessage ],
+        authors: [ fromNostrPublic ]
+      }
+    ]);
+  }
+
+  listenChatInvite(author: string): Observable<NDKEvent> {
+    return this.nostrService.subscribe([
+      {
+        kinds: [ +NostrEventKind.EncryptedDirectMessage ],
+        '#p': [ author ]
+      }
+    ]);
   }
 }

@@ -18,8 +18,9 @@ export class OmegleProxy {
   publish<T extends number>(event: Event<T>): Promise<void> {
     return this.nostrService.publish(event);
   }
-
+  
   async searchStranger(user: Required<NostrUser>): Promise<NostrUser> {
+    this.publishWannaChatStatus(user);
     try {
       const strangeStatus = await this.omegleNostr.findByStatus();
       if (strangeStatus.length) {
@@ -30,7 +31,6 @@ export class OmegleProxy {
         this.publishWannaChatStatus(user);
       }
     } finally {
-      this.publishWannaChatStatus(user);
     }
   }
 

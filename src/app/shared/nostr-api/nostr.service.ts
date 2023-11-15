@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import NDK, { NDKEvent, NDKFilter, NDKKind, NDKSubscriptionCacheUsage } from '@nostr-dev-kit/ndk';
-import { defaultRelays } from '../../default-relays.const';
+import { Event } from 'nostr-tools';
 import { Observable, Subject, takeUntil } from 'rxjs';
-import { Event, UnsignedEvent } from 'nostr-tools';
+import { defaultRelays } from '../../default-relays.const';
 
 @Injectable()
 export class NostrService {
