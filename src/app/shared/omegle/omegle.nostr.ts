@@ -11,7 +11,7 @@ export class OmegleNostr {
   ) { }
 
   findByStatus(): Promise<Event<NostrEventKind.UserStatuses>[]> {
-    return this.nostrService.get([
+    return this.nostrService.request([
       {
         kinds: [ NostrEventKind.UserStatuses ],
         '#t': [ 'wannachat' ]

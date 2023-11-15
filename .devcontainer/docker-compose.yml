@@ -23,4 +23,6 @@ services:
       - ..:/omegle-nostr:cached
       - /var/run/docker.sock:/var/run/docker.sock
       - node_modules_vol:/omegle-nostr/node_modules
+    environment:
+      - DEBUG=ndk:*
     tty: true

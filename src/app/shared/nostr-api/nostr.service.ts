@@ -1,13 +1,17 @@
 import { Injectable } from '@angular/core';
-import { Event, Filter, SimplePool, validateEvent, verifySignature } from 'nostr-tools';
+import NDK, { NDKEvent, NDKFilter, NDKKind, NDKSubscriptionCacheUsage } from '@nostr-dev-kit/ndk';
 import { defaultRelays } from '../../default-relays.const';
+import { Observable, Subject, takeUntil } from 'rxjs';
+import { Event, UnsignedEvent } from 'nostr-tools';
 
 @Injectable()
 export class NostrService {
 
   private static instance: NostrService | null = null;
 
-  pool = new SimplePool();
+  ndk = new NDK({
+    explicitRelayUrls: defaultRelays
+  });
 
   constructor() {
     if (!NostrService.instance) {
@@ -16,34 +20,33 @@ export class NostrService {
 
     return NostrService.instance;
   }
+
+  subscribe(filters: NDKFilter<NDKKind> | NDKFilter<NDKKind>[]): Observable<NDKEvent> {
+    const subscription = this.ndk.subscribe(filters, {
+      cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST
+    });
+
+    const subject = new Subject<NDKEvent>();
+    const onDestroy$ = new Subject<void>();
+    onDestroy$.subscribe(() => {
+      subscription.stop();
+      onDestroy$.unsubscribe();
+    });
+    subject.asObservable().pipe(takeUntil(onDestroy$));
+    subscription.eventReceived = event => subject.next(event);
+
+    return subject.asObservable();    
+  }
   
-  get<K extends number>(filters: Filter<K>[]): Promise<Array<Event<K>>> {
-    // TODO: pode ser que o nostr-tools simule um eose por timeout interno configurado
-    //  na lib, estou estudando migrar pra NDK
-    const events = new Array<Event<K>>();
-    const sub = this.pool.sub(
-      defaultRelays, filters
-    );
-
-    sub.on('event', event => {
-      events.push(event);
-    });
-
-    return new Promise(resolve => {
-      sub.on('eose', () => resolve(events));
-    });
+  async request(filters: NDKFilter<NDKKind> | NDKFilter<NDKKind>[]): Promise<Array<NDKEvent>> {
+    const events = await this.ndk.fetchEvents(filters);
+    return Promise.resolve([...events]);
   }
 
-  async publish<K extends number>(event: Event<K>): Promise<void> {
-    const ok = validateEvent(event);
-    const veryOk = verifySignature(event);
-
-    if (!ok || !veryOk) {
-      console.error(' :: event is not valid... aborting...');
-      return Promise.resolve();
-    }
-
-    await this.pool.publish(defaultRelays, event);
+  async publish<T extends number>(event: Event<T>): Promise<void> {
+    const ndkEvent = new NDKEvent(this.ndk);
+    Object.assign(ndkEvent, event);
+    await ndkEvent.publish();
     return Promise.resolve();
   }
 }
