@@ -19,6 +19,26 @@ export class OmegleProxy {
     return this.nostrService.publish(event);
   }
   
+  /**
+   * 1. escutar por cinco segundos algum #wannachat disponível
+   * 1.a. timeout atingido:
+   *   - publicar #wannachat e escutar respostas para seu #wannachat
+   *   - #wannachat é respondido com chating usando seu pubkey como tag p
+   *   - responder com user status 'chating' com o a tag p contendo o autor do evento recebido
+   *   - ir para 2;
+   * 1.b. #wannachat encontrado
+   *   - publicar user status 'chating' com tag p preenchida com o pubkey do author do #wannachat
+   *   - escuta todos eventos de user status emitido pelo pubkey do stranger escolhido
+   * 1.b.a. user status é respondido com chating usando seu pubkey como tag p
+   *   - ir para 2;
+   * 1.b.b. user status do stranger escolhido é modificado para um diferente do esperado
+   *   - ir para 1;
+   * 
+   * 2. Chat é iniciado
+   *   - o textarea de mensagens e o enviar são habilitados
+   *   - a escuta de eventos do tipo encrypted direct message devem ser escutados e propagados
+   *   - o user status continua sendo atualizado como sem status (ou seja, '') typing e disconnected 
+   */
   async searchStranger(user: Required<NostrUser>): Promise<NostrUser> {
     this.publishWannaChatStatus(user);
     try {
