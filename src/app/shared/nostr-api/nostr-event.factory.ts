@@ -36,6 +36,7 @@ export class NostrEventFactory {
   async createEncryptedDirectMessage(you: Required<NostrUser>, stranger: NostrUser, message: string): Promise<Event<NostrEventKind.EncryptedDirectMessage>> {
     const encriptedMessage = await nip04.encrypt(you.nostrSecret, stranger.nostrPublic, message);
 
+    // FIXME: preciso descobrir como inserir o iv aqui
     const unsignedEvent: UnsignedEvent = {
       kind: NostrEventKind.EncryptedDirectMessage,
       content: encriptedMessage, // + '?iv=' + ivBase64,

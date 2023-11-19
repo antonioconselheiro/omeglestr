@@ -19,7 +19,8 @@
 				"wix.vscode-import-cost",
 				"stylelint.vscode-stylelint",
 				"esbenp.prettier-vscode",
-				"ahmadawais.shades-of-purple"
+				"ahmadawais.shades-of-purple",
+				"ms-vsliveshare.vsliveshare"
 			]
 		}
 	}

@@ -21,18 +21,18 @@ export class OmegleProxy {
   
   /**
    * 1. escutar por cinco segundos algum #wannachat disponível
-   * 1.a. timeout atingido:
-   *   - publicar #wannachat e escutar respostas para seu #wannachat
-   *   - #wannachat é respondido com chating usando seu pubkey como tag p
-   *   - responder com user status 'chating' com o a tag p contendo o autor do evento recebido
-   *   - ir para 2;
-   * 1.b. #wannachat encontrado
+   * 1.a. #wannachat encontrado
    *   - publicar user status 'chating' com tag p preenchida com o pubkey do author do #wannachat
    *   - escuta todos eventos de user status emitido pelo pubkey do stranger escolhido
-   * 1.b.a. user status é respondido com chating usando seu pubkey como tag p
+   * 1.a.a. user status é respondido com 'chating' usando seu pubkey como tag p
    *   - ir para 2;
-   * 1.b.b. user status do stranger escolhido é modificado para um diferente do esperado
+   * 1.a.b. user status do stranger escolhido é modificado para um diferente do esperado
    *   - ir para 1;
+   * 1.b. timeout atingido:
+   *   - publicar #wannachat e escutar respostas para seu #wannachat
+   *   - #wannachat é respondido com 'chating' usando seu pubkey como tag p
+   *   - responder com user status 'chating' com o a tag p contendo o autor do evento recebido
+   *   - ir para 2;
    * 
    * 2. Chat é iniciado
    *   - o textarea de mensagens e o enviar são habilitados
