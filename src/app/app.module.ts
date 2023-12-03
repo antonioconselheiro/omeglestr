@@ -5,6 +5,7 @@ import { AppComponent } from './app.component';
 import { ChatModule } from './pages/chat/chat.module';
 import { NostrApiModule } from './shared/nostr-api/nostr-api.module';
 import { GlobalConfigModule } from '@shared/global-config/global-config.module';
+import { OmegleServiceModule } from '@shared/omegle-service/omegle-service.module';
 
 @NgModule({
   declarations: [
@@ -15,9 +16,11 @@ import { GlobalConfigModule } from '@shared/global-config/global-config.module';
     BrowserModule,
     AppRoutingModule,
     GlobalConfigModule,
+    OmegleServiceModule,
     NostrApiModule
   ],
-  providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [
+    AppComponent
+  ]
 })
 export class AppModule { }
