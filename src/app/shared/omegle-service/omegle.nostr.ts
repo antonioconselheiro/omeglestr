@@ -4,6 +4,7 @@ import { NDKEvent } from '@nostr-dev-kit/ndk';
 import { NostrService } from '../nostr-api/nostr.service';
 import { Observable } from 'rxjs';
 import { GlobalConfigService } from '@shared/global-config/global-config.service';
+import { NostrUser } from '@domain/nostr-user';
 
 @Injectable()
 export class OmegleNostr {
@@ -40,6 +41,17 @@ export class OmegleNostr {
         kinds: [ Number(NostrEventKind.UserStatuses) ],
         since: Math.floor(new Date().getTime() / 1_000),
         limit: 1
+      }
+    ]);
+  }
+
+  listenChatingResponse(user: Required<NostrUser>): Observable<NDKEvent> {
+    return this.nostrService.subscribe([
+      {
+        kinds: [ Number(NostrEventKind.UserStatuses) ],
+        '#t': [ 'chating' ],
+        '#p': [ user.publicKeyHex ],
+        since: (new Date().getTime() / 1_000) - 5
       }
     ]);
   }

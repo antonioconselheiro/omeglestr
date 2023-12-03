@@ -6,7 +6,7 @@ import { GlobalConfigService } from '@shared/global-config/global-config.service
 import { NostrEventFactory } from '@shared/nostr-api/nostr-event.factory';
 import { NostrService } from '@shared/nostr-api/nostr.service';
 import { Event } from 'nostr-tools';
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom, fromEvent } from 'rxjs';
 import { OmegleNostr } from './omegle.nostr';
 
 @Injectable()
@@ -66,15 +66,17 @@ export class OmegleProxy {
 
       if (event) {
         return Promise.resolve(NostrUser.fromPubkey(event.pubkey));
+      } else {
+        this.disconnect(user);
+        //  disconnect and go to 1.b
       }
-
-    } else {
-      // 1.b
-      this.publishWannaChatStatus(user);
-      const event = await this.listenWannaChatRequest();
-
-      return Promise.resolve(NostrUser.fromPubkey(event.pubkey));
     }
+
+    // 1.b
+    this.publishWannaChatStatus(user);
+    const event = await this.listenWannaChatRequest(user);
+
+    return Promise.resolve(NostrUser.fromPubkey(event.pubkey));
   }
 
   private inviteToChating(user: Required<NostrUser>, strangeStatus: NDKEvent): Promise<void> {
@@ -82,8 +84,9 @@ export class OmegleProxy {
     return this.publishChatInviteStatus(user, stranger);
   }
 
-  private listenWannaChatRequest(): Promise<NDKEvent> {
-
+  private listenWannaChatRequest(user: Required<NostrUser>): Promise<NDKEvent> {
+    //  FIXME: verificar se o firstValueFrom da unsubscribe depois de receber o primeiro valor
+    return firstValueFrom(this.omegleNostr.listenChatingResponse(user));
   }
 
   private listenWannaChatConfirmation(pubkey: string, currentUser: Required<NostrUser>): Promise<NDKEvent | null> {
