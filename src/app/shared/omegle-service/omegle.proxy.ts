@@ -5,12 +5,16 @@ import { NostrService } from '@shared/nostr-api/nostr.service';
 import { OmegleNostr } from './omegle.nostr';
 import { NostrEventFactory } from '@shared/nostr-api/nostr-event.factory';
 import { NostrUser } from '@domain/nostr-user';
+import { NDKEvent } from '@nostr-dev-kit/ndk';
+import { GlobalConfigService } from '@shared/global-config/global-config.service';
+import { NostrEventKind } from '@domain/nostr-event-kind.enum';
 
 @Injectable()
 export class OmegleProxy {
 
   constructor(
     private nostrEventFactory: NostrEventFactory,
+    private globalConfigService: GlobalConfigService,
     private omegleNostr: OmegleNostr,
     private nostrService: NostrService
   ) {}
@@ -22,48 +26,133 @@ export class OmegleProxy {
   /**
    * 1. escutar por cinco segundos algum #wannachat disponível
    * 1.a. #wannachat encontrado
-   *   - publicar user status 'chating' com tag p preenchida com o pubkey do author do #wannachat
-   *   - escuta todos eventos de user status emitido pelo pubkey do stranger escolhido
-   * 1.a.a. user status é respondido com 'chating' usando seu pubkey como tag p
+   *   - publicar user status 'chating' com tag p preenchida com
+   *      o pubkey do author do #wannachat
+   *   - escuta todos eventos de user status emitido pelo pubkey
+   *      do stranger escolhido
+   * 1.a.a. user status é respondido com 'chating' usando seu pubkey
+   *      como tag p
    *   - ir para 2;
-   * 1.a.b. user status do stranger escolhido é modificado para um diferente do esperado
+   * 1.a.b. user status do stranger escolhido é modificado para um
+   *      diferente do esperado
    *   - ir para 1;
    * 1.b. timeout atingido:
    *   - publicar #wannachat e escutar respostas para seu #wannachat
-   *   - #wannachat é respondido com 'chating' usando seu pubkey como tag p
-   *   - responder com user status 'chating' com o a tag p contendo o autor do evento recebido
+   *   - #wannachat é respondido com 'chating' usando seu pubkey como
+   *      tag p
+   *   - responder com user status 'chating' com o a tag p contendo o
+   *      autor do evento recebido
    *   - ir para 2;
    * 
    * 2. Chat é iniciado
    *   - o textarea de mensagens e o enviar são habilitados
-   *   - a escuta de eventos do tipo encrypted direct message devem ser escutados e propagados
-   *   - o user status continua sendo atualizado como sem status (ou seja, '') typing e disconnected 
+   *   - a escuta de eventos do tipo encrypted direct message devem
+   *      ser escutados e propagados
+   *   - o user status continua sendo atualizado como sem status (ou
+   *      seja, '') typing e disconnected 
    */
   async searchStranger(user: Required<NostrUser>): Promise<NostrUser> {
-    this.publishWannaChatStatus(user);
-    try {
-      const strangeStatus = await this.omegleNostr.findByStatus();
-      if (strangeStatus.length) {
-        this.inviteRandomToChating(user, strangeStatus);
-        //  depois disso precisarei escutar o status da
-        //  confirmação de conexão do chat
-      } else {
-        this.publishWannaChatStatus(user);
+    const strangeStatus = await this.listenGlobalWannaChatStatus();
+
+    // 1.a.
+    if (strangeStatus) {
+      // 1.a.a.
+      await this.inviteToChating(user, strangeStatus);
+
+      // 1.a.b.
+      const event = await this.listenWannaChatConfirmation(
+        strangeStatus.pubkey, user
+      );
+
+      if (event) {
+        return Promise.resolve(NostrUser.fromPubkey(event.pubkey));
       }
-    } finally {
+
+    } else {
+      // 1.b
+      this.publishWannaChatStatus(user);
+      const event = await this.listenWannaChatRequest();
+
+      return Promise.resolve(NostrUser.fromPubkey(event.pubkey));
     }
   }
 
-  private inviteRandomToChating(user: Required<NostrUser>, strangeStatus: Event[]): Promise<void> {
-    const random = Math.floor(Math.random() * strangeStatus.length);
-    const stranger = new NostrUser(nip19.npubEncode(strangeStatus[random].pubkey));
+  private inviteToChating(user: Required<NostrUser>, strangeStatus: NDKEvent): Promise<void> {
+    const stranger = NostrUser.fromPubkey(strangeStatus.pubkey);
     return this.publishChatInviteStatus(user, stranger);
   }
 
-  listenWannaChatStatus(): Promise<NostrUser> {
-    //  write a listening to a reply for wanna chat status published
-    //  include one minute timeout (one minute based in the event
-    //  expiration time, maybe should try to centralize this config)
+  private listenWannaChatRequest(): Promise<NDKEvent> {
+
+  }
+
+  private listenWannaChatConfirmation(pubkey: string, currentUser: Required<NostrUser>): Promise<NDKEvent | null> {
+    //  incluir timeout caso o evento demore pra ser encontrado
+    //  nos dois casos acima devem ser respondidos por um disconnect event 
+    return new Promise((resolve, reject) => {
+      let timeoutId = 0;
+      const subscription = this.omegleNostr
+        .listenUpdatedProfileStatus(pubkey)
+        .subscribe(event => {
+          clearTimeout(timeoutId);
+          const isForMe = this.checkEventIsWannaChatConfirmation(
+            event, currentUser
+          );
+
+          if (isForMe) {
+            resolve(event);
+          } else {
+            resolve(null);
+          }
+        });
+  
+      timeoutId = +setTimeout(
+        () => {
+          subscription.unsubscribe();
+          resolve(null);
+        },
+        this.globalConfigService.SEARCH_GLOBAL_WANNACHAT_TIMEOUT_IN_MS
+      );
+    });
+  }
+
+  private checkEventIsWannaChatConfirmation(
+    event: NDKEvent, currentUser: Required<NostrUser>
+  ): boolean {
+    const taggedPubkey = event.tags
+      .filter(([tagType]) => tagType === 'p')
+      .map(([,profile]) => profile)
+      .at(0);
+
+    const strangerStatusIsForMe = taggedPubkey === currentUser.publicKeyHex;
+    
+    if (strangerStatusIsForMe) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private listenGlobalWannaChatStatus(): Promise<NDKEvent | null> {
+    return new Promise(resolve => {
+      let timeoutId = 0;
+      const subscription = this.omegleNostr
+        .listenGlobalWannaChatStatus()
+        .subscribe(ndk => {
+          //  FIXME: BUG: check if this is the updated author status 
+          //  FIXME: check if status has not expired
+          clearTimeout(timeoutId);
+          resolve(ndk);
+        });
+  
+      timeoutId = +setTimeout(
+        () => {
+          subscription.unsubscribe();
+          resolve(null);
+        },
+        this.globalConfigService.SEARCH_GLOBAL_WANNACHAT_TIMEOUT_IN_MS
+      );
+    });
   }
 
   private publishWannaChatStatus(user: Required<NostrUser>): Promise<void> {

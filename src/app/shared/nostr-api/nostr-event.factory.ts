@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { NostrEventKind } from '@domain/nostr-event-kind.enum';
 import { NostrUser } from '@domain/nostr-user';
+import { GlobalConfigService } from '@shared/global-config/global-config.service';
 import { Event, UnsignedEvent, getEventHash, getSignature, nip04 } from 'nostr-tools';
 
 @Injectable({
@@ -8,10 +9,9 @@ import { Event, UnsignedEvent, getEventHash, getSignature, nip04 } from 'nostr-t
 })
 export class NostrEventFactory {
 
-  /**
-   * default expiration time in seconds
-   */
-  private readonly DEFAULT_EXPIRATION_TIME = 60;
+  constructor(
+    private readonly globalConfigService: GlobalConfigService
+  ) {}
 
   private getCurrentTimestamp(): number {
     const oneMillisecond = 1000;
@@ -22,7 +22,9 @@ export class NostrEventFactory {
    * @param expireIn time in seconds to expire, default to 60
    * @returns expiration timestamp
    */
-  private getExpirationTimestamp(expireIn = this.DEFAULT_EXPIRATION_TIME): string {
+  private getExpirationTimestamp(
+    expireIn = this.globalConfigService.WANNACHAT_STATUS_DEFAULT_TIMEOUT_IN_MS
+  ): string {
     const oneMillisecond = 1000;
     const expirationTimestamp = Math.floor(Date.now() / oneMillisecond) + expireIn;
     return String(expirationTimestamp);
@@ -59,23 +61,11 @@ export class NostrEventFactory {
    * https://github.com/nostr-protocol/nips/blob/master/38.md
    */
   createWannaChatUserStatus(user: Required<NostrUser>): Event<NostrEventKind.UserStatuses> {
-    const unsignedEvent: UnsignedEvent = {
-      kind: NostrEventKind.UserStatuses,
-      content: "#wannachat",
-      pubkey: user.publicKeyHex,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      created_at: this.getCurrentTimestamp(),
-      tags: [
+    return this.createUserStatus(user, 'wannachat', [
         ['d', 'general'],
         ['expiration', this.getExpirationTimestamp()],
         ['t', 'wannachat']
-      ]
-    };
-
-    const id = getEventHash(unsignedEvent);
-    const sig = getSignature(unsignedEvent, user.privateKeyHex);
-
-    return { id, sig, ...unsignedEvent };
+      ]);
   }
 
   createDisconnectedUserStatus(user: Required<NostrUser>): Event<NostrEventKind.UserStatuses> {
@@ -87,21 +77,22 @@ export class NostrEventFactory {
   }
 
   createChatingUserStatus(you: Required<NostrUser>, strange: NostrUser): Event<NostrEventKind.UserStatuses> {
-    return this.createUserStatus(you, 'chating', [ 'p', strange.publicKeyHex ]);
+    return this.createUserStatus(you, 'chating', [
+      [ 'p', strange.publicKeyHex ]
+    ]);
   }
 
   cleanUserStatus(user: Required<NostrUser>): Event<NostrEventKind.UserStatuses> {
     return this.createUserStatus(user, '');
   }
 
-  private createUserStatus(user: Required<NostrUser>, status: string, tag?: string[]): Event<NostrEventKind.UserStatuses> {
-    const tags = [
+  private createUserStatus(user: Required<NostrUser>, status: string, tag?: string[][]): Event<NostrEventKind.UserStatuses> {
+    let tags = [
       ['d', 'general']
     ];
 
-    if (tag) {
-      tags.push(tag);
-    }
+    tags = tags.concat(tag || []);
+    tags.push(['t', 'omegle']);
 
     const unsignedEvent: UnsignedEvent = {
       kind: NostrEventKind.UserStatuses,
