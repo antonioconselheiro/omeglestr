@@ -61,23 +61,11 @@ export class NostrEventFactory {
    * https://github.com/nostr-protocol/nips/blob/master/38.md
    */
   createWannaChatUserStatus(user: Required<NostrUser>): Event<NostrEventKind.UserStatuses> {
-    const unsignedEvent: UnsignedEvent = {
-      kind: NostrEventKind.UserStatuses,
-      content: "#wannachat",
-      pubkey: user.publicKeyHex,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      created_at: this.getCurrentTimestamp(),
-      tags: [
+    return this.createUserStatus(user, 'wannachat', [
         ['d', 'general'],
         ['expiration', this.getExpirationTimestamp()],
         ['t', 'wannachat']
-      ]
-    };
-
-    const id = getEventHash(unsignedEvent);
-    const sig = getSignature(unsignedEvent, user.privateKeyHex);
-
-    return { id, sig, ...unsignedEvent };
+      ]);
   }
 
   createDisconnectedUserStatus(user: Required<NostrUser>): Event<NostrEventKind.UserStatuses> {
@@ -89,21 +77,22 @@ export class NostrEventFactory {
   }
 
   createChatingUserStatus(you: Required<NostrUser>, strange: NostrUser): Event<NostrEventKind.UserStatuses> {
-    return this.createUserStatus(you, 'chating', [ 'p', strange.publicKeyHex ]);
+    return this.createUserStatus(you, 'chating', [
+      [ 'p', strange.publicKeyHex ]
+    ]);
   }
 
   cleanUserStatus(user: Required<NostrUser>): Event<NostrEventKind.UserStatuses> {
     return this.createUserStatus(user, '');
   }
 
-  private createUserStatus(user: Required<NostrUser>, status: string, tag?: string[]): Event<NostrEventKind.UserStatuses> {
-    const tags = [
+  private createUserStatus(user: Required<NostrUser>, status: string, tag?: string[][]): Event<NostrEventKind.UserStatuses> {
+    let tags = [
       ['d', 'general']
     ];
 
-    if (tag) {
-      tags.push(tag);
-    }
+    tags = tags.concat(tag || []);
+    tags.push(['t', 'omegle']);
 
     const unsignedEvent: UnsignedEvent = {
       kind: NostrEventKind.UserStatuses,

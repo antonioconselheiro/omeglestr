@@ -7,6 +7,7 @@ import { NostrEventFactory } from '@shared/nostr-api/nostr-event.factory';
 import { NostrUser } from '@domain/nostr-user';
 import { NDKEvent } from '@nostr-dev-kit/ndk';
 import { GlobalConfigService } from '@shared/global-config/global-config.service';
+import { NostrEventKind } from '@domain/nostr-event-kind.enum';
 
 @Injectable()
 export class OmegleProxy {
@@ -56,18 +57,27 @@ export class OmegleProxy {
     // 1.a.
     if (strangeStatus) {
       // 1.a.a.
-      this.inviteRandomToChating(user, strangeStatus);
+      await this.inviteToChating(user, strangeStatus);
 
       // 1.a.b.
-      const event = await this.listenWannaChatConfirmation(strangeStatus.pubkey);
+      const event = await this.listenWannaChatConfirmation(
+        strangeStatus.pubkey, user
+      );
+
+      if (event) {
+        return Promise.resolve(NostrUser.fromPubkey(event.pubkey));
+      }
+
     } else {
       // 1.b
       this.publishWannaChatStatus(user);
       const event = await this.listenWannaChatRequest();
+
+      return Promise.resolve(NostrUser.fromPubkey(event.pubkey));
     }
   }
 
-  private inviteRandomToChating(user: Required<NostrUser>, strangeStatus: NDKEvent): Promise<void> {
+  private inviteToChating(user: Required<NostrUser>, strangeStatus: NDKEvent): Promise<void> {
     const stranger = NostrUser.fromPubkey(strangeStatus.pubkey);
     return this.publishChatInviteStatus(user, stranger);
   }
@@ -76,7 +86,7 @@ export class OmegleProxy {
 
   }
 
-  private listenWannaChatConfirmation(pubkey: string): Promise<NDKEvent> {
+  private listenWannaChatConfirmation(pubkey: string, currentUser: Required<NostrUser>): Promise<NDKEvent | null> {
     //  incluir timeout caso o evento demore pra ser encontrado
     //  nos dois casos acima devem ser respondidos por um disconnect event 
     return new Promise((resolve, reject) => {
@@ -84,20 +94,43 @@ export class OmegleProxy {
       const subscription = this.omegleNostr
         .listenUpdatedProfileStatus(pubkey)
         .subscribe(event => {
-          //  incluir exception caso o evento recebido seja diferente do esperado
           clearTimeout(timeoutId);
-          resolve(event);
+          const isForMe = this.checkEventIsWannaChatConfirmation(
+            event, currentUser
+          );
+
+          if (isForMe) {
+            resolve(event);
+          } else {
+            resolve(null);
+          }
         });
   
       timeoutId = +setTimeout(
         () => {
           subscription.unsubscribe();
-          reject();
+          resolve(null);
         },
         this.globalConfigService.SEARCH_GLOBAL_WANNACHAT_TIMEOUT_IN_MS
       );
-    })
+    });
+  }
+
+  private checkEventIsWannaChatConfirmation(
+    event: NDKEvent, currentUser: Required<NostrUser>
+  ): boolean {
+    const taggedPubkey = event.tags
+      .filter(([tagType]) => tagType === 'p')
+      .map(([,profile]) => profile)
+      .at(0);
+
+    const strangerStatusIsForMe = taggedPubkey === currentUser.publicKeyHex;
     
+    if (strangerStatusIsForMe) {
+      return true;
+    }
+
+    return false;
   }
 
   private listenGlobalWannaChatStatus(): Promise<NDKEvent | null> {
