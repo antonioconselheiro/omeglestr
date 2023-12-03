@@ -133,12 +133,21 @@ export class OmegleProxy {
     return false;
   }
 
-  private listenGlobalWannaChatStatus(): Promise<NDKEvent | null> {
+  private async listenGlobalWannaChatStatus(): Promise<NDKEvent | null> {
+    const publishedStatus = await this.omegleNostr.getRecentOmegleStatus();
+    const status = this.searchWannaGetEventStatus(publishedStatus);
+
+    if (status) {
+      return Promise.resolve(status);
+    }
+
     return new Promise(resolve => {
       let timeoutId = 0;
       const subscription = this.omegleNostr
-        .listenGlobalWannaChatStatus()
+        .listenNewWannaChatStatus()
         .subscribe(ndk => {
+          ndk
+
           //  FIXME: BUG: check if this is the updated author status 
           //  FIXME: check if status has not expired
           clearTimeout(timeoutId);
@@ -153,6 +162,30 @@ export class OmegleProxy {
         this.globalConfigService.SEARCH_GLOBAL_WANNACHAT_TIMEOUT_IN_MS
       );
     });
+  }
+
+  private searchWannaGetEventStatus(events: NDKEvent[]): NDKEvent | null {
+    const groupedByAuthor: { [pubkey: string]: NDKEvent[] } = {};
+    events.forEach(event => {
+      if (!groupedByAuthor[event.pubkey]) {
+        groupedByAuthor[event.pubkey] = [];
+      }
+
+      groupedByAuthor[event.pubkey].push(event);
+    });
+
+    Object
+      .keys(groupedByAuthor)
+      .forEach(pubkey => {
+        groupedByAuthor[pubkey] = groupedByAuthor[pubkey]
+          .sort((a, b) => (b.created_at || 0) - (a.created_at || 0))
+      });
+
+    const wannaChatEvent = Object
+      .values(groupedByAuthor)
+      .find(grouped => grouped[0].kind === NostrEventKind.UserStatuses && grouped[0].content === 'wannachat');
+
+    return wannaChatEvent && wannaChatEvent[0] || null;
   }
 
   private publishWannaChatStatus(user: Required<NostrUser>): Promise<void> {

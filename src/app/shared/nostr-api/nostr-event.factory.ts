@@ -36,12 +36,12 @@ export class NostrEventFactory {
    * https://github.com/nbd-wtf/nostr-tools/blob/master/nip04.test.ts
    */
   async createEncryptedDirectMessage(you: Required<NostrUser>, stranger: NostrUser, message: string): Promise<Event<NostrEventKind.EncryptedDirectMessage>> {
+    // TODO: validated encriptedMessage to check if it carry the iv parameter
     const encriptedMessage = await nip04.encrypt(you.nostrSecret, stranger.nostrPublic, message);
 
-    // FIXME: preciso descobrir como inserir o iv aqui
     const unsignedEvent: UnsignedEvent = {
       kind: NostrEventKind.EncryptedDirectMessage,
-      content: encriptedMessage, // + '?iv=' + ivBase64,
+      content: encriptedMessage,
       pubkey: you.publicKeyHex,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       created_at: this.getCurrentTimestamp(),

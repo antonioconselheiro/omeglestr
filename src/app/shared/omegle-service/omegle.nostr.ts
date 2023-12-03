@@ -3,11 +3,13 @@ import { NostrEventKind } from '@domain/nostr-event-kind.enum';
 import { NDKEvent } from '@nostr-dev-kit/ndk';
 import { NostrService } from '../nostr-api/nostr.service';
 import { Observable } from 'rxjs';
+import { GlobalConfigService } from '@shared/global-config/global-config.service';
 
 @Injectable()
 export class OmegleNostr {
 
   constructor(
+    private readonly config: GlobalConfigService,
     private nostrService: NostrService
   ) { }
 
@@ -16,6 +18,17 @@ export class OmegleNostr {
       {
         kinds: [ +NostrEventKind.UserStatuses ],
         authors: npubkey
+      }
+    ]);
+  }
+
+  getRecentOmegleStatus(): Promise<NDKEvent[]> {
+    const recent = (new Date().getTime() / 1_000) - this.config.WANNACHAT_STATUS_DEFAULT_TIMEOUT_IN_MS;
+    return this.nostrService.request([
+      {
+        kinds: [ Number(NostrEventKind.UserStatuses) ],
+        '#t': [ 'omegle' ],
+        since: recent
       }
     ]);
   }
@@ -31,11 +44,12 @@ export class OmegleNostr {
     ]);
   }
 
-  listenGlobalWannaChatStatus(): Observable<NDKEvent> {
+  listenNewWannaChatStatus(): Observable<NDKEvent> {
     return this.nostrService.subscribe([
       {
         kinds: [ Number(NostrEventKind.UserStatuses) ],
-        '#t': [ 'wannachat' ]
+        '#t': [ 'wannachat' ],
+        since: (new Date().getTime() / 1_000)
       }
     ]);
   }
