@@ -45,6 +45,10 @@ export class NostrUser {
     }
   }
 
+  static fromPubkey(pubkey: string): NostrUser {
+    return new NostrUser(nip19.npubEncode(pubkey));
+  }
+
   toString(): string {
     return this.publicKeyHex;
   }

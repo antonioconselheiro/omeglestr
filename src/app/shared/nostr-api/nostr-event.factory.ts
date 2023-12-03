@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { NostrEventKind } from '@domain/nostr-event-kind.enum';
 import { NostrUser } from '@domain/nostr-user';
+import { GlobalConfigService } from '@shared/global-config/global-config.service';
 import { Event, UnsignedEvent, getEventHash, getSignature, nip04 } from 'nostr-tools';
 
 @Injectable({
@@ -8,10 +9,9 @@ import { Event, UnsignedEvent, getEventHash, getSignature, nip04 } from 'nostr-t
 })
 export class NostrEventFactory {
 
-  /**
-   * default expiration time in seconds
-   */
-  private readonly DEFAULT_EXPIRATION_TIME = 60;
+  constructor(
+    private readonly globalConfigService: GlobalConfigService
+  ) {}
 
   private getCurrentTimestamp(): number {
     const oneMillisecond = 1000;
@@ -22,7 +22,9 @@ export class NostrEventFactory {
    * @param expireIn time in seconds to expire, default to 60
    * @returns expiration timestamp
    */
-  private getExpirationTimestamp(expireIn = this.DEFAULT_EXPIRATION_TIME): string {
+  private getExpirationTimestamp(
+    expireIn = this.globalConfigService.WANNACHAT_STATUS_DEFAULT_TIMEOUT_IN_MS
+  ): string {
     const oneMillisecond = 1000;
     const expirationTimestamp = Math.floor(Date.now() / oneMillisecond) + expireIn;
     return String(expirationTimestamp);

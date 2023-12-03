@@ -11,20 +11,31 @@ export class OmegleNostr {
     private nostrService: NostrService
   ) { }
 
-  findByStatus(): Promise<NDKEvent[]> {
-    return this.nostrService.request([
-      {
-        kinds: [ +NostrEventKind.UserStatuses ],
-        '#t': [ 'wannachat' ]
-      }
-    ]);
-  }
-
   getProfileStatus(npubkey: string[]): Promise<NDKEvent[]> {
     return this.nostrService.request([
       {
         kinds: [ +NostrEventKind.UserStatuses ],
         authors: npubkey
+      }
+    ]);
+  }
+
+  listenUpdatedProfileStatus(npubkey: string): Observable<NDKEvent> {
+    return this.nostrService.subscribe([
+      {
+        authors: [npubkey],
+        kinds: [ Number(NostrEventKind.UserStatuses) ],
+        since: Math.floor(new Date().getTime() / 1_000),
+        limit: 1
+      }
+    ]);
+  }
+
+  listenGlobalWannaChatStatus(): Observable<NDKEvent> {
+    return this.nostrService.subscribe([
+      {
+        kinds: [ Number(NostrEventKind.UserStatuses) ],
+        '#t': [ 'wannachat' ]
       }
     ]);
   }
