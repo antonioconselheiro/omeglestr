@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { OmegleNostr } from './omegle.nostr';
-import { OmegleProxy } from './omegle.proxy';
+import { FindStrangerNostr } from './find-stranger.nostr';
+import { FindStrangerProxy } from './find-stranger.proxy';
 import { OmegleConverter } from './omegle.converter';
 
 @NgModule({
@@ -9,8 +9,8 @@ import { OmegleConverter } from './omegle.converter';
     CommonModule
   ],
   providers: [
-    OmegleNostr,
-    OmegleProxy,
+    FindStrangerNostr,
+    FindStrangerProxy,
     OmegleConverter
   ]
 })

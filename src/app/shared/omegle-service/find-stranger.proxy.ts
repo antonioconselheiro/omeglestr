@@ -6,16 +6,16 @@ import { GlobalConfigService } from '@shared/global-config/global-config.service
 import { NostrEventFactory } from '@shared/nostr-api/nostr-event.factory';
 import { NostrService } from '@shared/nostr-api/nostr.service';
 import { Event } from 'nostr-tools';
-import { Observable, firstValueFrom, fromEvent } from 'rxjs';
-import { OmegleNostr } from './omegle.nostr';
+import { firstValueFrom } from 'rxjs';
+import { FindStrangerNostr } from './find-stranger.nostr';
 
 @Injectable()
-export class OmegleProxy {
+export class FindStrangerProxy {
 
   constructor(
     private nostrEventFactory: NostrEventFactory,
     private globalConfigService: GlobalConfigService,
-    private omegleNostr: OmegleNostr,
+    private omegleNostr: FindStrangerNostr,
     private nostrService: NostrService
   ) {}
 
@@ -200,11 +200,6 @@ export class OmegleProxy {
   async sendMessage(you: Required<NostrUser>, stranger: NostrUser, message: string): Promise<void> {
     const event = await this.nostrEventFactory.createEncryptedDirectMessage(you, stranger, message);
     return this.nostrService.publish(event);
-  }
-
-  // shows strange new messages and confirm your message was send
-  listenMessages(): Observable<[]> {
-
   }
 
   isTyping(user: Required<NostrUser>): Promise<void> {

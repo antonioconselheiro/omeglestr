@@ -7,7 +7,7 @@ import { GlobalConfigService } from '@shared/global-config/global-config.service
 import { NostrUser } from '@domain/nostr-user';
 
 @Injectable()
-export class OmegleNostr {
+export class FindStrangerNostr {
 
   constructor(
     private readonly config: GlobalConfigService,
