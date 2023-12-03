@@ -51,59 +51,68 @@ export class OmegleProxy {
    *      seja, '') typing e disconnected 
    */
   async searchStranger(user: Required<NostrUser>): Promise<NostrUser> {
-    const strangerWannaChatStatus = await this.listenGlobalWannaChatStatus();
+    const strangeStatus = await this.listenGlobalWannaChatStatus();
 
-    if (strangerWannaChatStatus) {
-      const stranger = NostrUser.fromPubkey(strangerWannaChatStatus.pubkey);
-      const chating = this.nostrEventFactory.createChatingUserStatus(
-        user, stranger
-      );
+    // 1.a.
+    if (strangeStatus) {
+      // 1.a.a.
+      this.inviteRandomToChating(user, strangeStatus);
+
+      // 1.a.b.
+      const event = await this.listenWannaChatConfirmation(strangeStatus.pubkey);
     } else {
-
-    }
-
-    this.publishWannaChatStatus(user);
-    try {
-      const strangeStatus = await this.omegleNostr.listenGlobalWannaChatStatus();
-      if (strangeStatus) {
-        this.inviteRandomToChating(user, strangeStatus);
-        //  depois disso precisarei escutar o status da
-        //  confirmação de conexão do chat
-      } else {
-        this.publishWannaChatStatus(user);
-      }
-    } finally {
+      // 1.b
+      this.publishWannaChatStatus(user);
+      const event = await this.listenWannaChatRequest();
     }
   }
 
-  private inviteRandomToChating(user: Required<NostrUser>, strangeStatus: Event[]): Promise<void> {
-    const random = Math.floor(Math.random() * strangeStatus.length);
-    const stranger = new NostrUser(nip19.npubEncode(strangeStatus[random].pubkey));
+  private inviteRandomToChating(user: Required<NostrUser>, strangeStatus: NDKEvent): Promise<void> {
+    const stranger = NostrUser.fromPubkey(strangeStatus.pubkey);
     return this.publishChatInviteStatus(user, stranger);
   }
 
-  private listenWannaChatConfirmation(pubkey: string) {
-    //  incluir timeout caso o evento demore pra ser encontrado
-    //  incluir exception caso o evento recebido seja diferente do esperado
-    //  nos dois casos acima devem ser respondidos por um disconnect event 
-    this.omegleNostr
-      .listenUpdatedProfileStatus(pubkey)
-      .subscribe(event => {
+  private listenWannaChatRequest(): Promise<NDKEvent> {
 
-      });
+  }
+
+  private listenWannaChatConfirmation(pubkey: string): Promise<NDKEvent> {
+    //  incluir timeout caso o evento demore pra ser encontrado
+    //  nos dois casos acima devem ser respondidos por um disconnect event 
+    return new Promise((resolve, reject) => {
+      let timeoutId = 0;
+      const subscription = this.omegleNostr
+        .listenUpdatedProfileStatus(pubkey)
+        .subscribe(event => {
+          //  incluir exception caso o evento recebido seja diferente do esperado
+          clearTimeout(timeoutId);
+          resolve(event);
+        });
+  
+      timeoutId = +setTimeout(
+        () => {
+          subscription.unsubscribe();
+          reject();
+        },
+        this.globalConfigService.SEARCH_GLOBAL_WANNACHAT_TIMEOUT_IN_MS
+      );
+    })
+    
   }
 
   private listenGlobalWannaChatStatus(): Promise<NDKEvent | null> {
     return new Promise(resolve => {
+      let timeoutId = 0;
       const subscription = this.omegleNostr
         .listenGlobalWannaChatStatus()
         .subscribe(ndk => {
           //  FIXME: BUG: check if this is the updated author status 
           //  FIXME: check if status has not expired
+          clearTimeout(timeoutId);
           resolve(ndk);
         });
   
-      setTimeout(
+      timeoutId = +setTimeout(
         () => {
           subscription.unsubscribe();
           resolve(null);
