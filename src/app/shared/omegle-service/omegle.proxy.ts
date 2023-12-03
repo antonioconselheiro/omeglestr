@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Event, nip19 } from 'nostr-tools';
-import { NostrService } from '@shared/nostr-api/nostr.service';
-import { OmegleNostr } from './omegle.nostr';
-import { NostrEventFactory } from '@shared/nostr-api/nostr-event.factory';
+import { NostrEventKind } from '@domain/nostr-event-kind.enum';
 import { NostrUser } from '@domain/nostr-user';
 import { NDKEvent } from '@nostr-dev-kit/ndk';
 import { GlobalConfigService } from '@shared/global-config/global-config.service';
-import { NostrEventKind } from '@domain/nostr-event-kind.enum';
+import { NostrEventFactory } from '@shared/nostr-api/nostr-event.factory';
+import { NostrService } from '@shared/nostr-api/nostr.service';
+import { Event } from 'nostr-tools';
+import { Observable } from 'rxjs';
+import { OmegleNostr } from './omegle.nostr';
 
 @Injectable()
 export class OmegleProxy {
@@ -146,10 +146,6 @@ export class OmegleProxy {
       const subscription = this.omegleNostr
         .listenNewWannaChatStatus()
         .subscribe(ndk => {
-          ndk
-
-          //  FIXME: BUG: check if this is the updated author status 
-          //  FIXME: check if status has not expired
           clearTimeout(timeoutId);
           resolve(ndk);
         });
