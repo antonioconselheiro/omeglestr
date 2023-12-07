@@ -39,7 +39,8 @@ export class NostrEventFactory {
     // TODO: validated encriptedMessage to check if it carry the iv parameter
     const encriptedMessage = await nip04.encrypt(you.nostrSecret, stranger.nostrPublic, message);
 
-    const unsignedEvent: UnsignedEvent = {
+    const unsignedEvent = {
+      id: '',
       kind: NostrEventKind.EncryptedDirectMessage,
       content: encriptedMessage,
       pubkey: you.publicKeyHex,
@@ -50,10 +51,10 @@ export class NostrEventFactory {
       ]
     };
 
-    const id = getEventHash(unsignedEvent);
+    unsignedEvent.id = getEventHash(unsignedEvent);
     const sig = getSignature(unsignedEvent, you.privateKeyHex);
 
-    return Promise.resolve({ id, sig, ...unsignedEvent });
+    return Promise.resolve({ sig, ...unsignedEvent } as object as Event);
   }
 
   /**
@@ -94,7 +95,8 @@ export class NostrEventFactory {
     tags = tags.concat(tag || []);
     tags.push(['t', 'omegle']);
 
-    const unsignedEvent: UnsignedEvent = {
+    const unsignedEvent = {
+      id: '',
       kind: NostrEventKind.UserStatuses,
       content: status,
       pubkey: user.publicKeyHex,
@@ -103,9 +105,9 @@ export class NostrEventFactory {
       tags
     };
 
-    const id = getEventHash(unsignedEvent);
+    unsignedEvent.id = getEventHash(unsignedEvent);
     const sig = getSignature(unsignedEvent, user.privateKeyHex);
 
-    return { id, sig, ...unsignedEvent };
+    return { sig, ...unsignedEvent } as object as Event;
   }
 }

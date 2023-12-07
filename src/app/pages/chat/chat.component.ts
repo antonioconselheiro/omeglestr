@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { ChatState } from './chat-state.enum';
 import { IMessage } from 'src/app/domain/message.interface';
 import { MessageAuthor } from 'src/app/domain/message-author.enum';
+import { FindStrangerNostr } from '@shared/omegle-service/find-stranger.nostr';
 
 @Component({
   selector: 'omg-chat',
@@ -40,6 +41,10 @@ export class ChatComponent {
       time: new Date().getTime()
     }
   ];
+
+  constructor(
+    findStrangerNostr: FindStrangerNostr
+  ) {}
 
   sendMessage(message: string): void {
 

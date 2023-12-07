@@ -138,7 +138,7 @@ export class FindStrangerProxy {
 
   private async listenGlobalWannaChatStatus(): Promise<NDKEvent | null> {
     const publishedStatus = await this.omegleNostr.getRecentOmegleStatus();
-    const status = this.searchWannaGetEventStatus(publishedStatus);
+    const status = this.searchWannaChatEventStatus(publishedStatus);
 
     if (status) {
       return Promise.resolve(status);
@@ -163,7 +163,7 @@ export class FindStrangerProxy {
     });
   }
 
-  private searchWannaGetEventStatus(events: NDKEvent[]): NDKEvent | null {
+  private searchWannaChatEventStatus(events: NDKEvent[]): NDKEvent | null {
     const groupedByAuthor: { [pubkey: string]: NDKEvent[] } = {};
     events.forEach(event => {
       if (!groupedByAuthor[event.pubkey]) {
