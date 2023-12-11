@@ -36,12 +36,25 @@ export class ChatComponent {
     private talkToStrangerProxy: TalkToStrangerProxy
   ) { }
 
-  onClickStart(): void {
+  findStranger(): void {
     this.you = this.findStrangerProxy.connect();
     this.findStrangerProxy
       .searchStranger(this.you)
       .then(stranger => this.startConversation(stranger))
       .catch(e => console.error(e));
+  }
+
+  disconnect(): Promise<void> {
+    if (this.you) {
+      return this.findStrangerProxy
+        .disconnect(this.you)
+        .then(() => {
+          this.currentState = ChatState.DISCONNECTED;
+          return Promise.resolve();
+        });
+    }
+
+    return Promise.resolve();
   }
 
   private startConversation(stranger: NostrUser): void {

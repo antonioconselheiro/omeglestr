@@ -27,7 +27,7 @@
   >
     <button
       type="button"
-      (click)="onClickStart()"
+      (click)="findStranger()"
       *ngIf="currentState === STATE_DISCONNECTED"
       class="btn start bottom-left-radius"
     >
@@ -44,6 +44,7 @@
     <button
       type="button"
       class="btn bottom-left-radius bold"
+      (click)="disconnect()"
       *ngIf="currentState === STATE_UP_TO_DISCONNECT"
     >
       Really?
