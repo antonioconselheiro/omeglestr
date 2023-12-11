@@ -19,7 +19,12 @@
   </div>
   </section>
 
-  <form (submit)="sendMessage(messageField.value)" class="form" novalidate autocomplete="off">
+  <form
+    novalidate
+    class="form"
+    autocomplete="off"
+    (submit)="sendMessage(messageField.value)"
+  >
     <button
       type="button"
       (click)="onClickStart()"
@@ -36,21 +41,26 @@
     >
       Stop
     </button>
-    <button *ngIf="currentState === STATE_UP_TO_DISCONNECT" type="button" class="btn bottom-left-radius bold">
+    <button
+      type="button"
+      class="btn bottom-left-radius bold"
+      *ngIf="currentState === STATE_UP_TO_DISCONNECT"
+    >
       Really?
     </button>
     <textarea
       name="text"
       #messageField
       class="textarea"
-      [attr.disabled]="currentState === STATE_DISCONNECTED ? true : null"
+      [attr.disabled]="currentState === STATE_DISCONNECTED ? 'disabled' : null"
       (keydown.enter)="sendMessage(messageField.value)"
+      (keydown)="onTyping()"
     ></textarea>
     <button
       type="submit"
       #send
       class="btn bottom-right-radius"
-      [attr.disabled]="currentState === STATE_DISCONNECTED ? true : null"
+      [attr.disabled]="currentState === STATE_DISCONNECTED ? 'disabled' : null"
     >
       Send
     </button>

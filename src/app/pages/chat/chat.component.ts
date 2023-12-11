@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
+import { MessageAuthor } from '@domain/message-author.enum';
+import { IMessage } from '@domain/message.interface';
 import { NostrUser } from '@domain/nostr-user';
 import { FindStrangerProxy } from '@shared/omegle-service/find-stranger.proxy';
-import { MessageAuthor } from '../../domain/message-author.enum';
-import { IMessage } from '../../domain/message.interface';
-import { ChatState } from './chat-state.enum';
 import { TalkToStrangerProxy } from '@shared/omegle-service/talk-to-stranger.proxy';
+import { ChatState } from './chat-state.enum';
 
 @Component({
   selector: 'omg-chat',
@@ -20,32 +20,16 @@ export class ChatComponent {
   readonly AUTHOR_STRANGE = MessageAuthor.STRANGE;
   readonly AUTHOR_YOU = MessageAuthor.YOU;
 
-  currentState = ChatState.DISCONNECTED;
+  readonly TYPING_TIMEOUT = 3_000;
 
+  typingTimeoutId = 0;
+  currentState = ChatState.DISCONNECTED;
   currentOnline = 0;
 
   you: Required<NostrUser> | null = null;
   stranger: NostrUser | null = null;
 
-  messages: IMessage[] = [
-    {
-      author: MessageAuthor.STRANGE,
-      text: 'hi',
-      time: new Date().getTime()
-    },
-
-    {
-      author: MessageAuthor.YOU,
-      text: 'hi tudo bem',
-      time: new Date().getTime()
-    },
-
-    {
-      author: MessageAuthor.STRANGE,
-      text: 'tudo bom nada',
-      time: new Date().getTime()
-    }
-  ];
+  messages: IMessage[] = [];
 
   constructor(
     private findStrangerProxy: FindStrangerProxy,
@@ -66,6 +50,21 @@ export class ChatComponent {
   }
 
   sendMessage(message: string): void {
+    const you = this.you;
+    const stranger = this.stranger;
+    if (you && stranger) {
+      this.talkToStrangerProxy.sendMessage(you, stranger, message);
+    }
+  }
 
+  onTyping(): void {
+    const you = this.you;
+    if (you) {
+      this.talkToStrangerProxy.isTyping(you);
+      clearTimeout(this.typingTimeoutId);
+      this.typingTimeoutId = Number(setTimeout(() => {
+        this.talkToStrangerProxy.stopTyping(you);
+      }, this.TYPING_TIMEOUT));
+    }
   }
 }

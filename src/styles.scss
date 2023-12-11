@@ -102,10 +102,16 @@ body {
   font-size: 3rem;
   border: 1px solid #cccccc;
   cursor: pointer;
-}
 
-.btn:focus {
-  outline: none;
+  &:focus {
+    outline: none;
+  }
+
+  &:disabled {
+    color: #999;
+    cursor: default;
+    background-color: rgba(239, 239, 239, 0.3);
+  }
 }
 
 .bottom-left-radius {
