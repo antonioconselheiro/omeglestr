@@ -5,7 +5,7 @@ import { NDKEvent } from '@nostr-dev-kit/ndk';
 import { GlobalConfigService } from '@shared/global-config/global-config.service';
 import { NostrEventFactory } from '@shared/nostr-api/nostr-event.factory';
 import { NostrService } from '@shared/nostr-api/nostr.service';
-import { Event } from 'nostr-tools';
+import { Event, generatePrivateKey } from 'nostr-tools';
 import { firstValueFrom } from 'rxjs';
 import { FindStrangerNostr } from './find-stranger.nostr';
 
@@ -17,7 +17,7 @@ export class FindStrangerProxy {
     private globalConfigService: GlobalConfigService,
     private omegleNostr: FindStrangerNostr,
     private nostrService: NostrService
-  ) {}
+  ) { }
 
   publish<T extends number>(event: Event<T>): Promise<void> {
     return this.nostrService.publish(event);
@@ -197,19 +197,9 @@ export class FindStrangerProxy {
     return this.nostrService.publish(wannaChatStatus);
   }
 
-  async sendMessage(you: Required<NostrUser>, stranger: NostrUser, message: string): Promise<void> {
-    const event = await this.nostrEventFactory.createEncryptedDirectMessage(you, stranger, message);
-    return this.nostrService.publish(event);
-  }
-
-  isTyping(user: Required<NostrUser>): Promise<void> {
-    const wannaChatStatus = this.nostrEventFactory.createTypingUserStatus(user);
-    return this.nostrService.publish(wannaChatStatus);
-  }
-
-  stopTyping(user: Required<NostrUser>): Promise<void> {
-    const wannaChatStatus = this.nostrEventFactory.cleanUserStatus(user);
-    return this.nostrService.publish(wannaChatStatus);
+  connect(): Required<NostrUser> {
+    const user = new NostrUser(generatePrivateKey());
+    return user as Required<NostrUser>;
   }
 
   disconnect(user: Required<NostrUser>): Promise<void> {

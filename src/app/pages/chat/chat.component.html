@@ -20,7 +20,12 @@
   </section>
 
   <form (submit)="sendMessage(messageField.value)" class="form" novalidate autocomplete="off">
-    <button *ngIf="currentState === STATE_DISCONNECTED" type="button" class="btn start bottom-left-radius">
+    <button
+      type="button"
+      (click)="onClickStart()"
+      *ngIf="currentState === STATE_DISCONNECTED"
+      class="btn start bottom-left-radius"
+    >
       Start
     </button>
     <button

@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { NostrEventKind } from '@domain/nostr-event-kind.enum';
-import { NDKEvent } from '@nostr-dev-kit/ndk';
-import { NostrService } from '../nostr-api/nostr.service';
-import { Observable } from 'rxjs';
-import { GlobalConfigService } from '@shared/global-config/global-config.service';
 import { NostrUser } from '@domain/nostr-user';
+import { NDKEvent } from '@nostr-dev-kit/ndk';
+import { GlobalConfigService } from '@shared/global-config/global-config.service';
+import { Observable } from 'rxjs';
+import { NostrService } from '../nostr-api/nostr.service';
 
 @Injectable()
 export class FindStrangerNostr {

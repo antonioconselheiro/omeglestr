@@ -1,8 +1,10 @@
 import { Component } from '@angular/core';
+import { NostrUser } from '@domain/nostr-user';
+import { FindStrangerProxy } from '@shared/omegle-service/find-stranger.proxy';
+import { MessageAuthor } from '../../domain/message-author.enum';
+import { IMessage } from '../../domain/message.interface';
 import { ChatState } from './chat-state.enum';
-import { IMessage } from 'src/app/domain/message.interface';
-import { MessageAuthor } from 'src/app/domain/message-author.enum';
-import { FindStrangerNostr } from '@shared/omegle-service/find-stranger.nostr';
+import { TalkToStrangerProxy } from '@shared/omegle-service/talk-to-stranger.proxy';
 
 @Component({
   selector: 'omg-chat',
@@ -21,6 +23,9 @@ export class ChatComponent {
   currentState = ChatState.DISCONNECTED;
 
   currentOnline = 0;
+
+  you: Required<NostrUser> | null = null;
+  stranger: NostrUser | null = null;
 
   messages: IMessage[] = [
     {
@@ -43,8 +48,22 @@ export class ChatComponent {
   ];
 
   constructor(
-    findStrangerNostr: FindStrangerNostr
-  ) {}
+    private findStrangerProxy: FindStrangerProxy,
+    private talkToStrangerProxy: TalkToStrangerProxy
+  ) { }
+
+  onClickStart(): void {
+    this.you = this.findStrangerProxy.connect();
+    this.findStrangerProxy
+      .searchStranger(this.you)
+      .then(stranger => this.startConversation(stranger))
+      .catch(e => console.error(e));
+  }
+
+  private startConversation(stranger: NostrUser): void {
+    this.stranger = stranger;
+    this.currentState = ChatState.CONNECTED;
+  }
 
   sendMessage(message: string): void {
 

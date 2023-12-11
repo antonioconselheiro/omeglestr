@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FindStrangerNostr } from './find-stranger.nostr';
 import { FindStrangerProxy } from './find-stranger.proxy';
 import { OmegleConverter } from './omegle.converter';
+import { TalkToStrangerProxy } from './talk-to-stranger.proxy';
 
 @NgModule({
   imports: [
@@ -11,6 +12,7 @@ import { OmegleConverter } from './omegle.converter';
   providers: [
     FindStrangerNostr,
     FindStrangerProxy,
+    TalkToStrangerProxy,
     OmegleConverter
   ]
 })
