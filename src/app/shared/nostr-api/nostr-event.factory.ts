@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { NostrEventKind } from '@domain/nostr-event-kind.enum';
 import { NostrUser } from '@domain/nostr-user';
 import { GlobalConfigService } from '@shared/global-config/global-config.service';
-import { Event, UnsignedEvent, getEventHash, getSignature, nip04 } from 'nostr-tools';
+import { Event, EventTemplate, finalizeEvent, getEventHash, nip04 } from 'nostr-tools';
 
 @Injectable({
   providedIn: 'root'
@@ -35,8 +35,7 @@ export class NostrEventFactory {
    * https://github.com/nostr-protocol/nips/blob/master/04.md
    * https://github.com/nbd-wtf/nostr-tools/blob/master/nip04.test.ts
    */
-  async createEncryptedDirectMessage(you: Required<NostrUser>, stranger: NostrUser, message: string): Promise<Event<NostrEventKind.EncryptedDirectMessage>> {
-    // TODO: validated encriptedMessage to check if it carry the iv parameter
+  async createEncryptedDirectMessage(you: Required<NostrUser>, stranger: NostrUser, message: string): Promise<Event> {
     const encriptedMessage = await nip04.encrypt(you.nostrSecret, stranger.nostrPublic, message);
 
     const unsignedEvent = {
@@ -51,17 +50,18 @@ export class NostrEventFactory {
       ]
     };
 
-    unsignedEvent.id = getEventHash(unsignedEvent);
-    const sig = getSignature(unsignedEvent, you.privateKeyHex);
+    const verifiedEvent = finalizeEvent(
+      unsignedEvent as object as EventTemplate, you.privateKeyHex
+    );
 
-    return Promise.resolve({ sig, ...unsignedEvent } as object as Event);
+    return Promise.resolve(verifiedEvent);
   }
 
   /**
    * NIP 38
    * https://github.com/nostr-protocol/nips/blob/master/38.md
    */
-  createWannaChatUserStatus(user: Required<NostrUser>): Event<NostrEventKind.UserStatuses> {
+  createWannaChatUserStatus(user: Required<NostrUser>): Event {
     return this.createUserStatus(user, 'wannachat', [
         ['d', 'general'],
         ['expiration', this.getExpirationTimestamp()],
@@ -69,25 +69,25 @@ export class NostrEventFactory {
       ]);
   }
 
-  createDisconnectedUserStatus(user: Required<NostrUser>): Event<NostrEventKind.UserStatuses> {
+  createDisconnectedUserStatus(user: Required<NostrUser>): Event {
     return this.createUserStatus(user, 'disconnected');
   }
 
-  createTypingUserStatus(user: Required<NostrUser>): Event<NostrEventKind.UserStatuses> {
+  createTypingUserStatus(user: Required<NostrUser>): Event {
     return this.createUserStatus(user, 'typing');
   }
 
-  createChatingUserStatus(you: Required<NostrUser>, strange: NostrUser): Event<NostrEventKind.UserStatuses> {
+  createChatingUserStatus(you: Required<NostrUser>, strange: NostrUser): Event {
     return this.createUserStatus(you, 'chating', [
       [ 'p', strange.publicKeyHex ]
     ]);
   }
 
-  cleanUserStatus(user: Required<NostrUser>): Event<NostrEventKind.UserStatuses> {
+  cleanUserStatus(user: Required<NostrUser>): Event {
     return this.createUserStatus(user, '');
   }
 
-  private createUserStatus(user: Required<NostrUser>, status: string, tag?: string[][]): Event<NostrEventKind.UserStatuses> {
+  private createUserStatus(user: Required<NostrUser>, status: string, tag?: string[][]): Event {
     let tags = [
       ['d', 'general']
     ];
@@ -105,9 +105,10 @@ export class NostrEventFactory {
       tags
     };
 
-    unsignedEvent.id = getEventHash(unsignedEvent);
-    const sig = getSignature(unsignedEvent, user.privateKeyHex);
+    const verifiedEvent = finalizeEvent(
+      unsignedEvent as object as EventTemplate, user.privateKeyHex
+    );
 
-    return { sig, ...unsignedEvent } as object as Event;
+    return verifiedEvent;
   }
 }

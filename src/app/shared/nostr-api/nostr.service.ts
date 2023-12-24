@@ -1,17 +1,12 @@
 import { Injectable } from '@angular/core';
-import NDK, { NDKEvent, NDKFilter, NDKKind, NDKSubscriptionCacheUsage } from '@nostr-dev-kit/ndk';
-import { Event } from 'nostr-tools';
-import { Observable, Subject, takeUntil } from 'rxjs';
-import { defaultRelays } from '../../default-relays.const';
+import { Event, Filter, SimplePool } from 'nostr-tools';
+import { Observable, Subject } from 'rxjs';
+import { defaultCacheService, defaultRelays } from '../../default-relays.const';
 
 @Injectable()
 export class NostrService {
 
   private static instance: NostrService | null = null;
-
-  ndk = new NDK({
-    explicitRelayUrls: defaultRelays
-  });
 
   constructor() {
     if (!NostrService.instance) {
@@ -21,32 +16,52 @@ export class NostrService {
     return NostrService.instance;
   }
 
-  subscribe(filters: NDKFilter<NDKKind> | NDKFilter<NDKKind>[]): Observable<NDKEvent> {
-    const subscription = this.ndk.subscribe(filters, {
-      cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST
-    });
+  request(filters: Filter[]): Promise<Array<Event>> {
+    const pool = new SimplePool();
+    const events = new Array<Event>();
+    const relays = new Array<string>()
+      .concat(defaultRelays)
+      .concat(defaultCacheService);
 
-    const subject = new Subject<NDKEvent>();
+    return new Promise(resolve => {
+      const poolSubscription = pool.subscribeMany(
+        relays, filters, {
+          onevent: event => events.push(event),
+          oneose(): void {
+            poolSubscription.close();
+            resolve(events);
+          }
+        }
+      );
+    });
+  }
+
+  subscribe(filters: Filter[]): Observable<Event> {
+    const pool = new SimplePool();
+    const relays = new Array<string>()
+      .concat(defaultRelays)
+      .concat(defaultCacheService);
+
+    const subject = new Subject<Event>();
     const onDestroy$ = new Subject<void>();
+    const poolSubscription = pool.subscribeMany(
+      relays, filters, {
+        onevent: event => subject.next(event),
+        oneose(): void { }
+      }
+    );
+
     onDestroy$.subscribe(() => {
-      subscription.stop();
+      poolSubscription.close();
       onDestroy$.unsubscribe();
     });
-    subject.asObservable().pipe(takeUntil(onDestroy$));
-    subscription.eventReceived = event => subject.next(event);
 
-    return subject.asObservable();    
-  }
-  
-  async request(filters: NDKFilter<NDKKind> | NDKFilter<NDKKind>[]): Promise<Array<NDKEvent>> {
-    const events = await this.ndk.fetchEvents(filters);
-    return Promise.resolve([...events]);
+    return subject.asObservable();
   }
 
-  async publish<T extends number>(event: Event<T>): Promise<void> {
-    const ndkEvent = new NDKEvent(this.ndk);
-    Object.assign(ndkEvent, event);
-    await ndkEvent.publish();
-    return Promise.resolve();
+  async publish(event: Event): Promise<void> {
+    return Promise.all(
+      new SimplePool().publish(defaultRelays, event)
+    ).then(() => Promise.resolve());
   }
 }

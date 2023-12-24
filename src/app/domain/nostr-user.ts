@@ -1,4 +1,4 @@
-import { getPublicKey, nip19 } from 'nostr-tools';
+import { generateSecretKey, getPublicKey, nip19 } from 'nostr-tools';
 
 export class NostrUser {
 
@@ -15,7 +15,7 @@ export class NostrUser {
   /**
    * nsec decoded
    */
-  readonly privateKeyHex?: string;
+  readonly privateKeyHex?: Uint8Array;
 
   /**
    * npub decoded
@@ -31,7 +31,7 @@ export class NostrUser {
     const { type, data } = nip19.decode(nostrString);
     if (type === 'nsec') {
       this.nostrSecret = nostrString;
-      this.privateKeyHex = data.toString();
+      this.privateKeyHex = data;
       this.publicKeyHex = getPublicKey(this.privateKeyHex);
       this.nostrPublic = nip19.npubEncode(this.publicKeyHex);
     } else if (type === 'npub') {
@@ -47,6 +47,18 @@ export class NostrUser {
 
   static fromPubkey(pubkey: string): NostrUser {
     return new NostrUser(nip19.npubEncode(pubkey));
+  }
+
+  static fromNostrSecret(nsec: string): Required<NostrUser> {
+    return new NostrUser(nsec) as Required<NostrUser>;
+  }
+
+  static fromNostrSecretHex(nsecHex: Uint8Array): Required<NostrUser> {
+    return new NostrUser(nip19.nsecEncode(nsecHex)) as Required<NostrUser>;
+  }
+
+  static create(): Required<NostrUser> {
+    return this.fromNostrSecretHex(generateSecretKey());
   }
 
   toString(): string {

@@ -1,11 +1,10 @@
 import { Injectable } from '@angular/core';
 import { NostrEventKind } from '@domain/nostr-event-kind.enum';
 import { NostrUser } from '@domain/nostr-user';
-import { NDKEvent } from '@nostr-dev-kit/ndk';
 import { GlobalConfigService } from '@shared/global-config/global-config.service';
 import { NostrEventFactory } from '@shared/nostr-api/nostr-event.factory';
 import { NostrService } from '@shared/nostr-api/nostr.service';
-import { Event, generatePrivateKey } from 'nostr-tools';
+import { Event, generateSecretKey } from 'nostr-tools';
 import { firstValueFrom } from 'rxjs';
 import { FindStrangerNostr } from './find-stranger.nostr';
 
@@ -19,7 +18,7 @@ export class FindStrangerProxy {
     private nostrService: NostrService
   ) { }
 
-  publish<T extends number>(event: Event<T>): Promise<void> {
+  publish(event: Event): Promise<void> {
     return this.nostrService.publish(event);
   }
   
@@ -79,17 +78,17 @@ export class FindStrangerProxy {
     return Promise.resolve(NostrUser.fromPubkey(event.pubkey));
   }
 
-  private inviteToChating(user: Required<NostrUser>, strangeStatus: NDKEvent): Promise<void> {
+  private inviteToChating(user: Required<NostrUser>, strangeStatus: Event): Promise<void> {
     const stranger = NostrUser.fromPubkey(strangeStatus.pubkey);
     return this.publishChatInviteStatus(user, stranger);
   }
 
-  private listenWannaChatRequest(user: Required<NostrUser>): Promise<NDKEvent> {
+  private listenWannaChatRequest(user: Required<NostrUser>): Promise<Event> {
     //  FIXME: verificar se o firstValueFrom da unsubscribe depois de receber o primeiro valor
     return firstValueFrom(this.omegleNostr.listenChatingResponse(user));
   }
 
-  private listenWannaChatConfirmation(pubkey: string, currentUser: Required<NostrUser>): Promise<NDKEvent | null> {
+  private listenWannaChatConfirmation(pubkey: string, currentUser: Required<NostrUser>): Promise<Event | null> {
     //  incluir timeout caso o evento demore pra ser encontrado
     //  nos dois casos acima devem ser respondidos por um disconnect event 
     return new Promise((resolve, reject) => {
@@ -120,7 +119,7 @@ export class FindStrangerProxy {
   }
 
   private checkEventIsWannaChatConfirmation(
-    event: NDKEvent, currentUser: Required<NostrUser>
+    event: Event, currentUser: Required<NostrUser>
   ): boolean {
     const taggedPubkey = event.tags
       .filter(([tagType]) => tagType === 'p')
@@ -136,7 +135,7 @@ export class FindStrangerProxy {
     return false;
   }
 
-  private async listenGlobalWannaChatStatus(): Promise<NDKEvent | null> {
+  private async listenGlobalWannaChatStatus(): Promise<Event | null> {
     const publishedStatus = await this.omegleNostr.getRecentOmegleStatus();
     const status = this.searchWannaChatEventStatus(publishedStatus);
 
@@ -163,8 +162,8 @@ export class FindStrangerProxy {
     });
   }
 
-  private searchWannaChatEventStatus(events: NDKEvent[]): NDKEvent | null {
-    const groupedByAuthor: { [pubkey: string]: NDKEvent[] } = {};
+  private searchWannaChatEventStatus(events: Event[]): Event | null {
+    const groupedByAuthor: { [pubkey: string]: Event[] } = {};
     events.forEach(event => {
       if (!groupedByAuthor[event.pubkey]) {
         groupedByAuthor[event.pubkey] = [];
@@ -198,8 +197,7 @@ export class FindStrangerProxy {
   }
 
   connect(): Required<NostrUser> {
-    const user = new NostrUser(generatePrivateKey());
-    return user as Required<NostrUser>;
+    return NostrUser.create();
   }
 
   disconnect(user: Required<NostrUser>): Promise<void> {

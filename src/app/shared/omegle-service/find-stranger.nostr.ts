@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { NostrEventKind } from '@domain/nostr-event-kind.enum';
 import { NostrUser } from '@domain/nostr-user';
-import { NDKEvent } from '@nostr-dev-kit/ndk';
 import { GlobalConfigService } from '@shared/global-config/global-config.service';
 import { Observable } from 'rxjs';
 import { NostrService } from '../nostr-api/nostr.service';
+import { Event } from 'nostr-tools';
 
 @Injectable()
 export class FindStrangerNostr {
@@ -14,7 +14,7 @@ export class FindStrangerNostr {
     private nostrService: NostrService
   ) { }
 
-  getProfileStatus(npubkey: string[]): Promise<NDKEvent[]> {
+  getProfileStatus(npubkey: string[]): Promise<Event[]> {
     return this.nostrService.request([
       {
         kinds: [ +NostrEventKind.UserStatuses ],
@@ -23,7 +23,7 @@ export class FindStrangerNostr {
     ]);
   }
 
-  getRecentOmegleStatus(): Promise<NDKEvent[]> {
+  getRecentOmegleStatus(): Promise<Event[]> {
     const recent = (new Date().getTime() / 1_000) - this.config.WANNACHAT_STATUS_DEFAULT_TIMEOUT_IN_MS;
     return this.nostrService.request([
       {
@@ -34,7 +34,7 @@ export class FindStrangerNostr {
     ]);
   }
 
-  listenUpdatedProfileStatus(npubkey: string): Observable<NDKEvent> {
+  listenUpdatedProfileStatus(npubkey: string): Observable<Event> {
     return this.nostrService.subscribe([
       {
         authors: [npubkey],
@@ -45,7 +45,7 @@ export class FindStrangerNostr {
     ]);
   }
 
-  listenChatingResponse(user: Required<NostrUser>): Observable<NDKEvent> {
+  listenChatingResponse(user: Required<NostrUser>): Observable<Event> {
     return this.nostrService.subscribe([
       {
         kinds: [ Number(NostrEventKind.UserStatuses) ],
@@ -56,7 +56,7 @@ export class FindStrangerNostr {
     ]);
   }
 
-  listenNewWannaChatStatus(): Observable<NDKEvent> {
+  listenNewWannaChatStatus(): Observable<Event> {
     return this.nostrService.subscribe([
       {
         kinds: [ Number(NostrEventKind.UserStatuses) ],
@@ -66,7 +66,7 @@ export class FindStrangerNostr {
     ]);
   }
 
-  listenDirectMessage(fromNostrPublic: string): Observable<NDKEvent> {
+  listenDirectMessage(fromNostrPublic: string): Observable<Event> {
     return this.nostrService.subscribe([
       {
         kinds: [ +NostrEventKind.EncryptedDirectMessage ],
@@ -75,7 +75,7 @@ export class FindStrangerNostr {
     ]);
   }
 
-  listenChatInvite(author: string): Observable<NDKEvent> {
+  listenChatInvite(author: string): Observable<Event> {
     return this.nostrService.subscribe([
       {
         kinds: [ +NostrEventKind.EncryptedDirectMessage ],
