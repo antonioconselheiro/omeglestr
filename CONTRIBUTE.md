@@ -1,7 +1,7 @@
 # Contribute
 _working from individuals to individuals_
 
-![destroy the levithan](./imgs/destroy-leviathan.jpg)
+![destroy the levithan](https://raw.githubusercontent.com/antonioconselheiro/antonioconselheiro/main/img/destroy-leviathan.jpg)
 
 _against the Beast and his Antichrist_
 
@@ -42,8 +42,7 @@ Follow the steps:
 
 # Tools
 ## Devcontainer
-I do know if this work on Windows or Mac, but surely run on linux.
-If you _suffer of_ Windows or Mac and want to contribute to the functioning of the devcontainer for these platforms, feel free to open an issue and start the task.
+Run the `.devcontainer/setup.sh` to configure .devcontainer volumes and credentials. Open devcontainer with: `devcontainer open .`
 
 ### Para os brasileiros (pt-BR)
 Veja como o instalar docker, docker-compose e devcontainer em [meu vídeo em português](https://odysee.com/@anarcanudos:5/instalacao-do-docker-docker-compose-e-devcontainer:9)
