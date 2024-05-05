@@ -1,0 +1,19 @@
+version: '3.9'
+
+services:
+  relay-strfry:
+    container_name: strfry
+    image: dockurr/strfry
+    ports:
+      - 7777:7777
+    volumes:
+      - ./strfry-db:/app/strfry-db
+      - ./strfry.conf:/etc/strfry.conf
+    tty: true
+  nostr-debug:
+    image: nostr-debug
+    container_name: nostr-debug
+    build:
+      context: ../.
+      dockerfile: ./relay-debug/Dockerfile.debug
+    tty: true

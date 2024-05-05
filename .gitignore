@@ -5,6 +5,9 @@
 /.gitconfig
 /.ssh
 
+# Dev environment
+/relay-debug/strfry-db
+
 # Compiled output
 /dist
 /tmp
