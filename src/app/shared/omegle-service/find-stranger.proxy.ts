@@ -4,7 +4,7 @@ import { NostrUser } from '@domain/nostr-user';
 import { GlobalConfigService } from '@shared/global-config/global-config.service';
 import { NostrEventFactory } from '@shared/nostr-api/nostr-event.factory';
 import { NostrService } from '@shared/nostr-api/nostr.service';
-import { Event, generateSecretKey } from 'nostr-tools';
+import { Event } from 'nostr-tools';
 import { firstValueFrom } from 'rxjs';
 import { FindStrangerNostr } from './find-stranger.nostr';
 
@@ -51,29 +51,39 @@ export class FindStrangerProxy {
    *      seja, '') typing e disconnected 
    */
   async searchStranger(user: Required<NostrUser>): Promise<NostrUser> {
+    console.log('listening wanna chat');
     const strangeStatus = await this.listenGlobalWannaChatStatus();
 
     // 1.a.
     if (strangeStatus) {
+      console.log('stranger found, strangeStatus: ', strangeStatus);
+      console.log('inviting to chat, user: ', user);
+
       // 1.a.a.
       await this.inviteToChating(user, strangeStatus);
+      console.log('invite published, listening reply');
 
       // 1.a.b.
       const event = await this.listenWannaChatConfirmation(
         strangeStatus.pubkey, user
       );
-
+      
       if (event) {
+        console.log('replied, event: ', event);
         return Promise.resolve(NostrUser.fromPubkey(event.pubkey));
       } else {
+        console.log('no reply, disconecting...');
         this.disconnect(user);
         //  disconnect and go to 1.b
       }
     }
 
     // 1.b
+    console.log('publishing wanna chat, user: ', user);
     this.publishWannaChatStatus(user);
+    console.log('listening reply');
     const event = await this.listenWannaChatRequest(user);
+    console.log('replied: ', event);
 
     return Promise.resolve(NostrUser.fromPubkey(event.pubkey));
   }
@@ -147,9 +157,9 @@ export class FindStrangerProxy {
       let timeoutId = 0;
       const subscription = this.omegleNostr
         .listenNewWannaChatStatus()
-        .subscribe(ndk => {
+        .subscribe(event => {
           clearTimeout(timeoutId);
-          resolve(ndk);
+          resolve(event);
         });
   
       timeoutId = +setTimeout(
