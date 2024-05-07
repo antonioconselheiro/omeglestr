@@ -13,6 +13,8 @@ services:
   nostr-debug:
     image: nostr-debug
     container_name: nostr-debug
+    ports:
+      - 80:8077
     build:
       context: ../.
       dockerfile: ./relay-debug/Dockerfile.debug

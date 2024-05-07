@@ -1,20 +1,25 @@
-FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
+FROM nginx AS base
 WORKDIR /app
 EXPOSE 80
-EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
 RUN git clone https://github.com/Marfusios/nostr-client
+RUN dotnet restore "nostr-client/apps/nostr-debug/NostrDebug.Web/NostrDebug.Web.csproj"
+WORKDIR "/src/nostr-client/apps/nostr-debug/NostrDebug.Web"
 
-RUN dotnet restore "nostr-client/apps/nostr-bot/NostrBot.Web/NostrBot.Web.csproj"
-WORKDIR "/src/nostr-client/apps/nostr-bot/NostrBot.Web"
-RUN dotnet build "NostrBot.Web.csproj" -c Release -o /app/build
+RUN dotnet build "NostrDebug.Web.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "NostrBot.Web.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "NostrDebug.Web.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
-WORKDIR /app
+
+WORKDIR /usr/share/nginx/build
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "NostrBot.Web.dll"]
+RUN cp -r /usr/share/nginx/build/wwwroot/** /usr/share/nginx/html
+RUN chmod 777 -R /usr/share/nginx/html
+
+WORKDIR /usr/share/nginx/html
+
+CMD nginx -g 'daemon off;'
