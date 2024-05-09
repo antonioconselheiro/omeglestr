@@ -1,47 +1,41 @@
 import { Injectable } from '@angular/core';
-import { NostrEventKind } from '@domain/nostr-event-kind.enum';
 import { NostrUser } from '@domain/nostr-user';
-import { GlobalConfigService } from '@shared/global-config/global-config.service';
 import { NostrEventFactory } from '@shared/nostr-api/nostr-event.factory';
 import { NostrService } from '@shared/nostr-api/nostr.service';
 import { Event } from 'nostr-tools';
-import { firstValueFrom } from 'rxjs';
 import { FindStrangerNostr } from './find-stranger.nostr';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class FindStrangerProxy {
 
   constructor(
     private nostrEventFactory: NostrEventFactory,
-    private globalConfigService: GlobalConfigService,
-    private omegleNostr: FindStrangerNostr,
+    private findStrangerNostr: FindStrangerNostr,
     private nostrService: NostrService
   ) { }
 
   publish(event: Event): Promise<void> {
     return this.nostrService.publish(event);
   }
-  
+
   /**
-   * 1. escutar por cinco segundos algum #wannachat disponível
-   * 1.a. #wannachat encontrado
-   *   - publicar user status 'chating' com tag p preenchida com
-   *      o pubkey do author do #wannachat
-   *   - escuta todos eventos de user status emitido pelo pubkey
-   *      do stranger escolhido
-   * 1.a.a. user status é respondido com 'chating' usando seu pubkey
+   * 1.a
+   * - publicar #wannachat e escutar respostas para seu #wannachat
+   * - escutar novas publicações de #wannachat
+   * 
+   * 1.a.a - novo #wannachat publicado é escutado
+   * - user status é respondido com 'chating' usando seu pubkey
    *      como tag p
-   *   - ir para 2;
-   * 1.a.b. user status do stranger escolhido é modificado para um
-   *      diferente do esperado
-   *   - ir para 1;
-   * 1.b. timeout atingido:
-   *   - publicar #wannachat e escutar respostas para seu #wannachat
-   *   - #wannachat é respondido com 'chating' usando seu pubkey como
-   *      tag p
-   *   - responder com user status 'chating' com o a tag p contendo o
-   *      autor do evento recebido
-   *   - ir para 2;
+   * 
+   * 1.a.a.a - evento é respondido
+   * - ir para 2
+   * 
+   * 1.a.a.b - o usuário convidado responde a outra solicitação ou ocorre timeout
+   * - voltar a escutar seu #wanna chat e novas publicações como em 1.a
+   * 
+   * 1.a.b - meu #wannachat é respondido com 'chating'
+   * - ir para 2
    * 
    * 2. Chat é iniciado
    *   - o textarea de mensagens e o enviar são habilitados
@@ -50,150 +44,79 @@ export class FindStrangerProxy {
    *   - o user status continua sendo atualizado como sem status (ou
    *      seja, '') typing e disconnected 
    */
-  async searchStranger(user: Required<NostrUser>): Promise<NostrUser> {
-    console.log('listening wanna chat');
-    const strangeStatus = await this.listenGlobalWannaChatStatus();
-
-    // 1.a.
-    if (strangeStatus) {
-      console.log('stranger found, strangeStatus: ', strangeStatus);
-      console.log('inviting to chat, user: ', user);
-
-      // 1.a.a.
-      await this.inviteToChating(user, strangeStatus);
-      console.log('invite published, listening reply');
-
-      // 1.a.b.
-      const event = await this.listenWannaChatConfirmation(
-        strangeStatus.pubkey, user
-      );
-      
-      if (event) {
-        console.log('replied, event: ', event);
-        return Promise.resolve(NostrUser.fromPubkey(event.pubkey));
-      } else {
-        console.log('no reply, disconecting...');
-        this.disconnect(user);
-        //  disconnect and go to 1.b
-      }
-    }
-
-    // 1.b
-    console.log('publishing wanna chat, user: ', user);
-    this.publishWannaChatStatus(user);
-    console.log('listening reply');
-    const event = await this.listenWannaChatRequest(user);
-    console.log('replied: ', event);
-
-    return Promise.resolve(NostrUser.fromPubkey(event.pubkey));
-  }
-
-  private inviteToChating(user: Required<NostrUser>, strangeStatus: Event): Promise<void> {
-    const stranger = NostrUser.fromPubkey(strangeStatus.pubkey);
-    return this.publishChatInviteStatus(user, stranger);
-  }
-
-  private listenWannaChatRequest(user: Required<NostrUser>): Promise<Event> {
-    //  FIXME: verificar se o firstValueFrom da unsubscribe depois de receber o primeiro valor
-    return firstValueFrom(this.omegleNostr.listenChatingResponse(user));
-  }
-
-  private listenWannaChatConfirmation(pubkey: string, currentUser: Required<NostrUser>): Promise<Event | null> {
-    //  incluir timeout caso o evento demore pra ser encontrado
-    //  nos dois casos acima devem ser respondidos por um disconnect event 
-    return new Promise((resolve, reject) => {
-      let timeoutId = 0;
-      const subscription = this.omegleNostr
-        .listenUpdatedProfileStatus(pubkey)
-        .subscribe(event => {
-          clearTimeout(timeoutId);
-          const isForMe = this.checkEventIsWannaChatConfirmation(
-            event, currentUser
-          );
-
-          if (isForMe) {
-            resolve(event);
-          } else {
-            resolve(null);
-          }
-        });
-  
-      timeoutId = +setTimeout(
-        () => {
-          subscription.unsubscribe();
-          resolve(null);
-        },
-        this.globalConfigService.SEARCH_GLOBAL_WANNACHAT_TIMEOUT_IN_MS
-      );
-    });
-  }
-
-  private checkEventIsWannaChatConfirmation(
-    event: Event, currentUser: Required<NostrUser>
-  ): boolean {
-    const taggedPubkey = event.tags
-      .filter(([tagType]) => tagType === 'p')
-      .map(([,profile]) => profile)
-      .at(0);
-
-    const strangerStatusIsForMe = taggedPubkey === currentUser.publicKeyHex;
-    
-    if (strangerStatusIsForMe) {
-      return true;
-    }
-
-    return false;
-  }
-
-  private async listenGlobalWannaChatStatus(): Promise<Event | null> {
-    const publishedStatus = await this.omegleNostr.getRecentOmegleStatus();
-    const status = this.searchWannaChatEventStatus(publishedStatus);
-
-    if (status) {
-      return Promise.resolve(status);
-    }
+  async searchStranger(me: Required<NostrUser>): Promise<NostrUser> {
+    this.publishWannaChatStatus(me);
 
     return new Promise(resolve => {
-      let timeoutId = 0;
-      const subscription = this.omegleNostr
-        .listenNewWannaChatStatus()
-        .subscribe(event => {
-          clearTimeout(timeoutId);
-          resolve(event);
+      const subscription = this.findStrangerNostr.listenChatAvailable(me)
+        .subscribe(async event => {
+          console.info('event was listen: ', event);
+          if (this.isChatingInvite(event)) {
+            console.info('it\'s a chating invitation from ', event.pubkey, ' repling invitation...');
+            await this.inviteToChating(me, event);
+            console.info('replied... resolving... ');
+            resolve(NostrUser.fromPubkey(event.pubkey));
+            subscription.unsubscribe();
+            console.info('unsubscribe');
+          } else {
+            console.info('event is current user status?');
+            const is = await this.isWannaChatCurrentStrangerStatus(event);
+            console.info(is ? 'yes' : 'no');
+
+            if (is) {
+              await this.inviteToChating(me, event);
+              const isChatingConfirmation = await this.listenChatingConfirmation(event.pubkey, me);
+
+              if (isChatingConfirmation) {
+                resolve(NostrUser.fromPubkey(event.pubkey));
+                subscription.unsubscribe();
+              } else {
+                this.publishWannaChatStatus(me);
+              }
+            }
+          }
         });
-  
-      timeoutId = +setTimeout(
-        () => {
-          subscription.unsubscribe();
-          resolve(null);
-        },
-        this.globalConfigService.SEARCH_GLOBAL_WANNACHAT_TIMEOUT_IN_MS
-      );
     });
   }
 
-  private searchWannaChatEventStatus(events: Event[]): Event | null {
-    const groupedByAuthor: { [pubkey: string]: Event[] } = {};
-    events.forEach(event => {
-      if (!groupedByAuthor[event.pubkey]) {
-        groupedByAuthor[event.pubkey] = [];
-      }
+  private isChatingInvite(event: Event): boolean {
+    return event.content === 'chating';
+  }
 
-      groupedByAuthor[event.pubkey].push(event);
+  private isChatingToMe(event: Event, me: Required<NostrUser>): boolean {
+    console.info('is wannachat reply with chating? event: ', event);
+
+    const result = event.tags
+      .filter(([type]) => type === 'p')
+      .find(([,pubkey]) => pubkey === me.publicKeyHex) || [];
+
+    console.info(!!result.length ? 'yes' : 'no');
+    return !!result.length;
+  }
+
+  private inviteToChating(me: Required<NostrUser>, strangeStatus: Event): Promise<void> {
+    const stranger = NostrUser.fromPubkey(strangeStatus.pubkey);
+    return this.publishChatInviteStatus(me, stranger);
+  }
+
+  private async listenChatingConfirmation(strangerPubKey: string, me: Required<NostrUser>): Promise<boolean> {
+    return new Promise<boolean>(resolve => {
+      this.findStrangerNostr
+        .getUserStatusUpdate(strangerPubKey)
+        .subscribe(status => {
+          if (this.isChatingToMe(status, me)) {
+            resolve(true);
+          } else if (status.content !== 'wannachat') {
+            resolve(false);
+          }
+        });
     });
+  }
 
-    Object
-      .keys(groupedByAuthor)
-      .forEach(pubkey => {
-        groupedByAuthor[pubkey] = groupedByAuthor[pubkey]
-          .sort((a, b) => (b.created_at || 0) - (a.created_at || 0))
-      });
-
-    const wannaChatEvent = Object
-      .values(groupedByAuthor)
-      .find(grouped => grouped[0].kind === NostrEventKind.UserStatuses && grouped[0].content === 'wannachat');
-
-    return wannaChatEvent && wannaChatEvent[0] || null;
+  private async isWannaChatCurrentStrangerStatus(event: Event): Promise<boolean> {
+    const [currentStatusEvent] = await this.findStrangerNostr.getUpdatedProfileStatus(event.pubkey);
+    console.info('current status: ', currentStatusEvent);
+    return currentStatusEvent.id === event.id;
   }
 
   private publishWannaChatStatus(user: Required<NostrUser>): Promise<void> {

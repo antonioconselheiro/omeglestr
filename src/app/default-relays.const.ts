@@ -1,5 +1,3 @@
 export const defaultRelays = [
-  'wss://127.0.0.1:7777'
+  'ws://umbrel.local:4848'
 ];
-
-export const defaultCacheService = [];

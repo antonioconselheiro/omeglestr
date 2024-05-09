@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Event, Filter, SimplePool } from 'nostr-tools';
 import { Observable, Subject } from 'rxjs';
-import { defaultCacheService, defaultRelays } from '../../default-relays.const';
+import { defaultRelays } from '../../default-relays.const';
 
 @Injectable()
 export class NostrService {
@@ -19,13 +19,10 @@ export class NostrService {
   request(filters: Filter[]): Promise<Array<Event>> {
     const pool = new SimplePool();
     const events = new Array<Event>();
-    const relays = new Array<string>()
-      .concat(defaultRelays)
-      .concat(defaultCacheService);
 
     return new Promise(resolve => {
       const poolSubscription = pool.subscribeMany(
-        relays, filters, {
+        defaultRelays, filters, {
           onevent: event => events.push(event),
           oneose(): void {
             poolSubscription.close();
@@ -38,14 +35,10 @@ export class NostrService {
 
   subscribe(filters: Filter[]): Observable<Event> {
     const pool = new SimplePool();
-    const relays = new Array<string>()
-      .concat(defaultRelays)
-      .concat(defaultCacheService);
-
     const subject = new Subject<Event>();
     const onDestroy$ = new Subject<void>();
     const poolSubscription = pool.subscribeMany(
-      relays, filters, {
+      defaultRelays, filters, {
         onevent: event => subject.next(event),
         oneose(): void { }
       }

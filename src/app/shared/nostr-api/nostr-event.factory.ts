@@ -11,7 +11,7 @@ export class NostrEventFactory {
 
   constructor(
     private readonly globalConfigService: GlobalConfigService
-  ) {}
+  ) { }
 
   private getCurrentTimestamp(): number {
     const oneMillisecond = 1000;

@@ -58,7 +58,7 @@ export class ChatComponent {
   }
 
   private startConversation(stranger: NostrUser): void {
-    console.log('starting conversation');
+    console.log('starting conversation, stranger: ', stranger);
     this.stranger = stranger;
     this.currentState = ChatState.CONNECTED;
   }
