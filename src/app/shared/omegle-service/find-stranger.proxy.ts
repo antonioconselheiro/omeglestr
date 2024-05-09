@@ -4,7 +4,6 @@ import { NostrEventFactory } from '@shared/nostr-api/nostr-event.factory';
 import { NostrService } from '@shared/nostr-api/nostr.service';
 import { Event } from 'nostr-tools';
 import { FindStrangerNostr } from './find-stranger.nostr';
-import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class FindStrangerProxy {

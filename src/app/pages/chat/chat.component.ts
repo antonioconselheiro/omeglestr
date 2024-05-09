@@ -5,6 +5,7 @@ import { NostrUser } from '@domain/nostr-user';
 import { FindStrangerProxy } from '@shared/omegle-service/find-stranger.proxy';
 import { TalkToStrangerProxy } from '@shared/omegle-service/talk-to-stranger.proxy';
 import { ChatState } from './chat-state.enum';
+import { Event } from 'nostr-tools';
 
 @Component({
   selector: 'omg-chat',
@@ -23,8 +24,8 @@ export class ChatComponent {
   readonly TYPING_TIMEOUT = 3_000;
 
   typingTimeoutId = 0;
-  currentState = ChatState.DISCONNECTED;
   currentOnline = 0;
+  currentState = ChatState.DISCONNECTED;
 
   you: Required<NostrUser> | null = null;
   stranger: NostrUser | null = null;
@@ -37,10 +38,10 @@ export class ChatComponent {
   ) { }
 
   findStranger(): void {
-    this.you = this.findStrangerProxy.connect();
+    const you = this.you = this.findStrangerProxy.connect();
     this.findStrangerProxy
       .searchStranger(this.you)
-      .then(stranger => this.startConversation(stranger))
+      .then(stranger => this.startConversation(you, stranger))
       .catch(e => console.error(e));
   }
 
@@ -57,27 +58,49 @@ export class ChatComponent {
     return Promise.resolve();
   }
 
-  private startConversation(stranger: NostrUser): void {
+  private startConversation(me: Required<NostrUser>, stranger: NostrUser): void {
     console.log('starting conversation, stranger: ', stranger);
     this.stranger = stranger;
     this.currentState = ChatState.CONNECTED;
+    this.talkToStrangerProxy
+      .listenMessages(me, stranger)
+      .subscribe({
+        next: event => this.addMessageFromStranger(me, stranger, event)
+      });
+  }
+
+  private addMessageFromStranger(me: Required<NostrUser>, stranger: NostrUser, event: Event): void {
+    this.talkToStrangerProxy
+      .openEncryptedDirectMessage(me, stranger, event)
+      .then(text => {
+        this.messages.push({
+          author: MessageAuthor.STRANGE, text, time: event.created_at
+        });
+      })
   }
 
   sendMessage(message: string): void {
-    const you = this.you;
+    const me = this.you;
     const stranger = this.stranger;
-    if (you && stranger) {
-      this.talkToStrangerProxy.sendMessage(you, stranger, message);
+    if (me && stranger) {
+      this.talkToStrangerProxy.sendMessage(me, stranger, message);
+      this.messages.push({
+        author: MessageAuthor.YOU, text: message, time: Math.floor(new Date().getTime() / 1000)
+      });
     }
   }
 
   onTyping(): void {
     const you = this.you;
     if (you) {
-      this.talkToStrangerProxy.isTyping(you);
+      if (!this.typingTimeoutId) {
+        this.talkToStrangerProxy.isTyping(you);
+      }
+
       clearTimeout(this.typingTimeoutId);
       this.typingTimeoutId = Number(setTimeout(() => {
         this.talkToStrangerProxy.stopTyping(you);
+        this.typingTimeoutId = 0;
       }, this.TYPING_TIMEOUT));
     }
   }

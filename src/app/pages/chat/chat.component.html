@@ -2,7 +2,7 @@
 <section class="navbar">
   <img class="logo" src="/omegle-nostr/assets/logo.png" alt="logo" />
   <h2 class="description">Talk to strangers!</h2>
-  <h2 class="online">{{currentOnline}}</h2>
+  <!--- <h2 class="online">{{currentOnline}}</h2> -->
 </section>
 
 <main class="main">
@@ -23,7 +23,6 @@
     novalidate
     class="form"
     autocomplete="off"
-    (submit)="sendMessage(messageField.value)"
   >
     <button
       type="button"
@@ -58,9 +57,10 @@
       (keydown)="onTyping()"
     ></textarea>
     <button
-      type="submit"
+      type="button"
       #send
       class="btn bottom-right-radius"
+      (click)="sendMessage(messageField.value); messageField.value = ''"
       [attr.disabled]="currentState === STATE_DISCONNECTED ? 'disabled' : null"
     >
       Send

@@ -38,11 +38,9 @@ export class NostrEventFactory {
   async createEncryptedDirectMessage(you: Required<NostrUser>, stranger: NostrUser, message: string): Promise<Event> {
     const encriptedMessage = await nip04.encrypt(you.nostrSecret, stranger.nostrPublic, message);
 
-    const unsignedEvent = {
-      id: '',
+    const unsignedEvent: EventTemplate = {
       kind: NostrEventKind.EncryptedDirectMessage,
       content: encriptedMessage,
-      pubkey: you.publicKeyHex,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       created_at: this.getCurrentTimestamp(),
       tags: [
@@ -51,7 +49,7 @@ export class NostrEventFactory {
     };
 
     const verifiedEvent = finalizeEvent(
-      unsignedEvent as object as EventTemplate, you.privateKeyHex
+      unsignedEvent, you.privateKeyHex
     );
 
     return Promise.resolve(verifiedEvent);
