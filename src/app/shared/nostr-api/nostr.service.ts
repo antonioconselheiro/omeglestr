@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Event, Filter, SimplePool } from 'nostr-tools';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, takeUntil } from 'rxjs';
 import { defaultRelays } from '../../default-relays.const';
 
 @Injectable()
@@ -47,9 +47,12 @@ export class NostrService {
     onDestroy$.subscribe(() => {
       poolSubscription.close();
       onDestroy$.unsubscribe();
+      console.info('successfully unsubscribe');
     });
 
-    return subject.asObservable();
+    return subject
+      .asObservable()
+      .pipe(takeUntil(onDestroy$));
   }
 
   async publish(event: Event): Promise<void> {

@@ -51,13 +51,17 @@ export class FindStrangerProxy {
       const subscription = this.findStrangerNostr.listenChatAvailable(me)
         .subscribe(async event => {
           console.info('event was listen: ', event);
+          if (event.pubkey === me.publicKeyHex) {
+            console.info('lol, my own event');
+            return;
+          }
           if (this.isChatingInvite(event)) {
             console.info('it\'s a chating invitation from ', event.pubkey, ' repling invitation...');
             await this.inviteToChating(me, event);
             console.info('replied... resolving... ');
             resolve(NostrUser.fromPubkey(event.pubkey));
             subscription.unsubscribe();
-            console.info('unsubscribe');
+            console.info('[searchStranger] unsubscribe');
           } else {
             console.info('event is current user status?');
             const is = await this.isWannaChatCurrentStrangerStatus(event);
@@ -70,6 +74,7 @@ export class FindStrangerProxy {
               if (isChatingConfirmation) {
                 resolve(NostrUser.fromPubkey(event.pubkey));
                 subscription.unsubscribe();
+                console.info('[searchStranger] unsubscribe');
               } else {
                 this.publishWannaChatStatus(me);
               }
@@ -101,13 +106,18 @@ export class FindStrangerProxy {
 
   private async listenChatingConfirmation(strangerPubKey: string, me: Required<NostrUser>): Promise<boolean> {
     return new Promise<boolean>(resolve => {
-      this.findStrangerNostr
+      const subscription = this.findStrangerNostr
         .getUserStatusUpdate(strangerPubKey)
         .subscribe(status => {
           if (this.isChatingToMe(status, me)) {
             resolve(true);
+            subscription.unsubscribe();
+            console.info('[listenChatingConfirmation] unsubscribe (true)');
           } else if (status.content !== 'wannachat') {
+            console.info('event status is not "chating" for me neither "wanna chat", event: ', status);
             resolve(false);
+            subscription.unsubscribe();
+            console.info('[listenChatingConfirmation] unsubscribe (false)');
           }
         });
     });

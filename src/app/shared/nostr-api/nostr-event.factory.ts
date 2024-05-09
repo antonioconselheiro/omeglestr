@@ -63,7 +63,6 @@ export class NostrEventFactory {
    */
   createWannaChatUserStatus(user: Required<NostrUser>): Event {
     return this.createUserStatus(user, 'wannachat', [
-        ['d', 'general'],
         ['expiration', this.getExpirationTimestamp()],
         ['t', 'wannachat']
       ]);
@@ -88,12 +87,11 @@ export class NostrEventFactory {
   }
 
   private createUserStatus(user: Required<NostrUser>, status: string, tag?: string[][]): Event {
-    let tags = [
-      ['d', 'general']
+    const tags = [
+      ['d', 'general'],
+      ...(tag || []),
+      ['t', 'omegle']
     ];
-
-    tags = tags.concat(tag || []);
-    tags.push(['t', 'omegle']);
 
     const unsignedEvent = {
       id: '',
