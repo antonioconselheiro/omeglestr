@@ -54,12 +54,13 @@ export class FindStrangerProxy {
             console.info('lol, my own event');
             return;
           }
+
           if (this.isChatingInvite(event)) {
+            subscription.unsubscribe();
             console.info('it\'s a chating invitation from ', event.pubkey, ' repling invitation...');
             await this.inviteToChating(me, event);
             console.info('replied... resolving... ');
             resolve(NostrUser.fromPubkey(event.pubkey));
-            subscription.unsubscribe();
             console.info('[searchStranger] unsubscribe');
           } else {
             console.info('event is current user status?');
@@ -67,13 +68,14 @@ export class FindStrangerProxy {
             console.info(is ? 'yes' : 'no');
 
             if (is) {
+              console.info('[searchStranger] unsubscribe');
+              subscription.unsubscribe();
+              console.info('inviting ', event.pubkey, ' to chat');
               await this.inviteToChating(me, event);
-              const isChatingConfirmation = await this.listenChatingConfirmation(event.pubkey, me);
+              const isChatingConfirmation = await this.listenChatingConfirmation(event, me);
 
               if (isChatingConfirmation) {
                 resolve(NostrUser.fromPubkey(event.pubkey));
-                subscription.unsubscribe();
-                console.info('[searchStranger] unsubscribe');
               } else {
                 this.publishWannaChatStatus(me);
               }
@@ -103,19 +105,24 @@ export class FindStrangerProxy {
     return this.publishChatInviteStatus(me, stranger);
   }
 
-  private async listenChatingConfirmation(strangerPubKey: string, me: Required<NostrUser>): Promise<boolean> {
+  private async listenChatingConfirmation(strangerEvent: Event, me: Required<NostrUser>): Promise<boolean> {
     return new Promise<boolean>(resolve => {
       const subscription = this.findStrangerNostr
-        .getUserStatusUpdate(strangerPubKey)
+        .getUserStatusUpdate(strangerEvent.pubkey)
         .subscribe(status => {
+          if (status.id === strangerEvent.id) {
+            console.info('stranger #wannachat status was listen, ignoring and waiting new status...');
+            return;
+          }
+
+          subscription.unsubscribe();
+          console.info('stranger ', strangerEvent.pubkey,' update status: ', status);
           if (this.isChatingToMe(status, me)) {
             resolve(true);
-            subscription.unsubscribe();
             console.info('[listenChatingConfirmation] unsubscribe (true)');
-          } else if (status.content !== 'wannachat') {
-            console.info('event status is not "chating" for me neither "wanna chat", event: ', status);
+          } else {
+            console.info('event status is not "chating", event: ', status);
             resolve(false);
-            subscription.unsubscribe();
             console.info('[listenChatingConfirmation] unsubscribe (false)');
           }
         });
@@ -134,8 +141,8 @@ export class FindStrangerProxy {
   }
 
   private publishChatInviteStatus(user: Required<NostrUser>, stranger: NostrUser): Promise<void> {
-    const wannaChatStatus = this.nostrEventFactory.createChatingUserStatus(user, stranger);
-    return this.nostrService.publish(wannaChatStatus);
+    const chatingStatus = this.nostrEventFactory.createChatingUserStatus(user, stranger);
+    return this.nostrService.publish(chatingStatus);
   }
 
   connect(): Required<NostrUser> {
@@ -143,7 +150,7 @@ export class FindStrangerProxy {
   }
 
   disconnect(user: Required<NostrUser>): Promise<void> {
-    const wannaChatStatus = this.nostrEventFactory.createDisconnectedUserStatus(user);
-    return this.nostrService.publish(wannaChatStatus);
+    const disconnectStatus = this.nostrEventFactory.createDisconnectedUserStatus(user);
+    return this.nostrService.publish(disconnectStatus);
   }
 }

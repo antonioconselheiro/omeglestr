@@ -57,8 +57,8 @@
       (keydown)="onTyping()"
     ></textarea>
     <button
-      type="button"
       #send
+      type="button"
       class="btn bottom-right-radius"
       (click)="sendMessage(messageField.value); messageField.value = ''"
       [attr.disabled]="currentState === STATE_DISCONNECTED ? 'disabled' : null"
