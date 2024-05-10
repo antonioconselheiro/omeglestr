@@ -12,32 +12,12 @@ export class FindStrangerNostr {
     private nostrService: NostrService
   ) { }
 
-  getUserStatusUpdate(pubkey: string): Observable<Event> {
-    const currentTimeInSeconds = (new Date().getTime() / 1_000) - 5;
+  listenUserStatusUpdate(pubkey: string): Observable<Event> {
     return this.nostrService.subscribe([
       {
         kinds: [ Number(NostrEventKind.UserStatuses) ],
         '#t': [ 'omegle' ],
-        authors: [ pubkey ],
-        since: currentTimeInSeconds
-      }
-    ]);
-  }
-
-  getUpdatedProfileStatus(npubkey: string): Promise<Event[]> {
-    console.info('[api] listen updated profile status, npubkey: ', npubkey);
-    console.info('[request]', [
-      {
-        authors: [npubkey],
-        kinds: [ Number(NostrEventKind.UserStatuses) ],
-        limit: 1
-      }
-    ]);
-    return this.nostrService.request([
-      {
-        authors: [npubkey],
-        kinds: [ Number(NostrEventKind.UserStatuses) ],
-        limit: 1
+        authors: [ pubkey ]
       }
     ]);
   }

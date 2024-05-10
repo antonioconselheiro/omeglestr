@@ -39,7 +39,7 @@ export class ChatComponent {
 
   findStranger(): void {
     const you = this.you = this.findStrangerProxy.connect();
-    console.info('me: ', you);
+    console.info(new Date().toLocaleString(),'me: ', you);
     this.findStrangerProxy
       .searchStranger(this.you)
       .then(stranger => this.startConversation(you, stranger))

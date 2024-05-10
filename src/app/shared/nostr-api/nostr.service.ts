@@ -39,17 +39,22 @@ export class NostrService {
     const onDestroy$ = new Subject<void>();
     const poolSubscription = pool.subscribeMany(
       defaultRelays, filters, {
-        onevent: event => subject.next(event),
-        oneose(): void { }
+        onclose: () => console.info(new Date().toLocaleString(),' >> pool closed'),
+        onevent: event => {
+          subject.next(event);
+          console.info(new Date().toLocaleString(), ' >> pool event: ', event);
+        },
+        oneose: () => console.info(new Date().toLocaleString(),' >> pool eose')
       }
     );
 
     onDestroy$.subscribe(() => {
       poolSubscription.close();
       onDestroy$.unsubscribe();
-      console.info('successfully unsubscribe');
+      console.info(new Date().toLocaleString(),'>> pool unsubscribe');
     });
 
+    console.info(new Date().toLocaleString(),'>> pool subscribe');
     return subject
       .asObservable()
       .pipe(takeUntil(onDestroy$));
