@@ -2,7 +2,7 @@
   "name": "omegle-nostr",
   "version": "0.0.0",
   "author": "António Conselheiro",
-  "license": "Unlicense",
+  "license": "Ungovernable",
   "scripts": {
     "start": "npm run dev",
     "dev": "ng serve --host=0.0.0.0",
