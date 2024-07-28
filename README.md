@@ -1,5 +1,5 @@
-> "Then saith the woman of Samaria unto him, How is it that thou, being a Jew, askest drink of me, which am a woman of Samaria? For the Jews have no dealings with the Samaritans."
-> John 4:9
+> "I am sought of them that asked not for me; I am found of them that sought me not: I said, Behold me, behold me, unto a nation that was not called by my name."
+> Isaiah 65:1
 
 # Omegle on Nostr
 _don't thread on Omegle_
