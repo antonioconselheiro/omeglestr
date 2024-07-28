@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
+import { NostrService } from '@belomonte/nostr-ngx';
 import { NostrEventKind } from '@domain/nostr-event-kind.enum';
 import { NostrUser } from '@domain/nostr-user';
 import { Event } from 'nostr-tools';
 import { Observable } from 'rxjs';
-import { NostrService } from '../nostr-api/nostr.service';
 
 @Injectable()
 export class FindStrangerNostr {
@@ -13,7 +13,7 @@ export class FindStrangerNostr {
   ) { }
 
   listenUserStatusUpdate(pubkey: string): Observable<Event> {
-    return this.nostrService.subscribe([
+    return this.nostrService.observable([
       {
         kinds: [ Number(NostrEventKind.UserStatuses) ],
         '#t': [ 'omegle' ],
@@ -25,7 +25,7 @@ export class FindStrangerNostr {
   listenChatAvailable(user: Required<NostrUser>): Observable<Event> {
     const currentTimeInSeconds = (new Date().getTime() / 1_000) - 5;
     const oneHourInSeconds = (60 * 60);
-    return this.nostrService.subscribe([
+    return this.nostrService.observable([
       {
         kinds: [ Number(NostrEventKind.UserStatuses) ],
         '#t': [ 'wannachat', 'omegle' ],

@@ -6,6 +6,7 @@ import { ChatModule } from './pages/chat/chat.module';
 import { NostrApiModule } from './shared/nostr-api/nostr-api.module';
 import { GlobalConfigModule } from '@shared/global-config/global-config.module';
 import { OmegleServiceModule } from '@shared/omegle-service/omegle-service.module';
+import { NostrModule } from '@belomonte/nostr-ngx';
 
 @NgModule({
   declarations: [
@@ -17,7 +18,8 @@ import { OmegleServiceModule } from '@shared/omegle-service/omegle-service.modul
     AppRoutingModule,
     GlobalConfigModule,
     OmegleServiceModule,
-    NostrApiModule
+    NostrApiModule,
+    NostrModule
   ],
   bootstrap: [
     AppComponent

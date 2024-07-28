@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { NostrEventKind } from '@domain/nostr-event-kind.enum';
 import { NostrUser } from '@domain/nostr-user';
 import { NostrEventFactory } from '@shared/nostr-api/nostr-event.factory';
-import { NostrService } from '@shared/nostr-api/nostr.service';
+import { NostrService } from '@belomonte/nostr-ngx';
 import { Event, nip04 } from 'nostr-tools';
 import { Observable } from 'rxjs';
 
@@ -19,7 +19,7 @@ export class TalkToStrangerProxy {
   }
 
   listenMessages(me: Required<NostrUser>, stranger: NostrUser): Observable<Event> {
-    return this.nostrService.subscribe([
+    return this.nostrService.observable([
       {
         kinds: [ Number(NostrEventKind.EncryptedDirectMessage) ],
         authors: [ stranger.publicKeyHex ],

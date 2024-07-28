@@ -31,6 +31,7 @@
     "@angular/platform-browser": "^17.3.12",
     "@angular/platform-browser-dynamic": "^17.3.12",
     "@angular/router": "^17.3.12",
+    "@belomonte/nostr-ngx": "file:belomonte-nostr-ngx-0.0.1.tgz",
     "nostr-tools": "^2.1.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
