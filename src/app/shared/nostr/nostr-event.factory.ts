@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { NostrEventKind } from '@domain/nostr-event-kind.enum';
 import { NostrUser } from '@domain/nostr-user';
 import { GlobalConfigService } from '@shared/global-config/global-config.service';
-import { Event, EventTemplate, finalizeEvent, getEventHash, nip04 } from 'nostr-tools';
+import { Event, EventTemplate, finalizeEvent, nip04 } from 'nostr-tools';
 
 @Injectable({
   providedIn: 'root'

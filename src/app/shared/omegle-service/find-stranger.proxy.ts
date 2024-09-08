@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { NostrUser } from '@domain/nostr-user';
-import { NostrEventFactory } from '@shared/nostr-api/nostr-event.factory';
+import { NostrEventFactory } from '@shared/nostr/nostr-event.factory';
 import { Event } from 'nostr-tools';
 import { FindStrangerNostr } from './find-stranger.nostr';
-import { NostrService } from '@belomonte/nostr-ngx';
+import { MainNPool } from '@shared/nostr/main.npool';
 
 @Injectable()
 export class FindStrangerProxy {
@@ -11,11 +11,11 @@ export class FindStrangerProxy {
   constructor(
     private nostrEventFactory: NostrEventFactory,
     private findStrangerNostr: FindStrangerNostr,
-    private nostrService: NostrService
+    private mainPool: MainNPool
   ) { }
 
   publish(event: Event): Promise<void> {
-    return this.nostrService.publish(event);
+    return this.mainPool.event(event);
   }
 
   /**
@@ -133,13 +133,13 @@ export class FindStrangerProxy {
   private publishWannaChatStatus(user: Required<NostrUser>): Promise<void> {
     const wannaChatStatus = this.nostrEventFactory.createWannaChatUserStatus(user);
     console.info(new Date().toLocaleString(),'updating my status to: ', wannaChatStatus);
-    return this.nostrService.publish(wannaChatStatus);
+    return this.mainPool.event(wannaChatStatus);
   }
 
   private publishChatInviteStatus(user: Required<NostrUser>, stranger: NostrUser): Promise<void> {
     const chatingStatus = this.nostrEventFactory.createChatingUserStatus(user, stranger);
     console.info(new Date().toLocaleString(),'updating my status to: ', chatingStatus);
-    return this.nostrService.publish(chatingStatus);
+    return this.mainPool.event(chatingStatus);
   }
 
   connect(): Required<NostrUser> {
@@ -149,6 +149,6 @@ export class FindStrangerProxy {
   disconnect(user: Required<NostrUser>): Promise<void> {
     const disconnectStatus = this.nostrEventFactory.createDisconnectedUserStatus(user);
     console.info(new Date().toLocaleString(),'updating my status to: ', disconnectStatus);
-    return this.nostrService.publish(disconnectStatus);
+    return this.mainPool.event(disconnectStatus);
   }
 }
