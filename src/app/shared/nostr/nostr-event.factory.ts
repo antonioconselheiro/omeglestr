@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
-import { NostrEventKind } from '@domain/nostr-event-kind.enum';
 import { NostrUser } from '@domain/nostr-user';
 import { GlobalConfigService } from '@shared/global-config/global-config.service';
-import { Event, EventTemplate, finalizeEvent, nip04 } from 'nostr-tools';
+import { Event, EventTemplate, finalizeEvent, kinds, nip04 } from 'nostr-tools';
 
 @Injectable({
   providedIn: 'root'
@@ -39,7 +38,7 @@ export class NostrEventFactory {
     const encriptedMessage = await nip04.encrypt(you.publicKeyHex, stranger.publicKeyHex, message);
 
     const unsignedEvent: EventTemplate = {
-      kind: NostrEventKind.EncryptedDirectMessage,
+      kind: kinds.EncryptedDirectMessage,
       content: encriptedMessage,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       created_at: this.getCurrentTimestamp(),
@@ -93,7 +92,7 @@ export class NostrEventFactory {
 
     const unsignedEvent = {
       id: '',
-      kind: NostrEventKind.UserStatuses,
+      kind: kinds.UserStatuses,
       content: status,
       pubkey: user.publicKeyHex,
       // eslint-disable-next-line @typescript-eslint/naming-convention

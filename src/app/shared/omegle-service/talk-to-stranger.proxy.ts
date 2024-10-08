@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
-import { NostrEventKind } from '@domain/nostr-event-kind.enum';
 import { NostrUser } from '@domain/nostr-user';
 import { MainNPool } from '@shared/nostr/main.npool';
 import { NostrEventFactory } from '@shared/nostr/nostr-event.factory';
-import { nip04, NostrEvent } from 'nostr-tools';
+import { kinds, nip04, NostrEvent } from 'nostr-tools';
 import { Observable } from 'rxjs';
 
 @Injectable()
@@ -21,7 +20,7 @@ export class TalkToStrangerProxy {
   listenMessages(me: Required<NostrUser>, stranger: NostrUser): Observable<NostrEvent> {
     return this.mainPool.observe([
       {
-        kinds: [ Number(NostrEventKind.EncryptedDirectMessage) ],
+        kinds: [ Number(kinds.EncryptedDirectMessage) ],
         authors: [ stranger.publicKeyHex ],
         '#p': [ me.publicKeyHex ]
       }

@@ -112,13 +112,13 @@ export class FindStrangerProxy {
         .listenUserStatusUpdate(strangerEvent.pubkey)
         .subscribe(status => {
           if (status.id === strangerEvent.id && status.content === 'wannachat') {
-            console.info(new Date().toLocaleString(),'stranger #wannachat status was listen, ignoring and waiting new status...');
+            console.info(new Date().toLocaleString(), 'stranger #wannachat status was listen, ignoring and waiting new status...');
             return;
           }
 
           subscription.unsubscribe();
-          console.info(new Date().toLocaleString(),'[listenUserStatusUpdate] unsubscribe');
-          console.info(new Date().toLocaleString(),'stranger ', strangerEvent.pubkey,' update status: ', status);
+          console.info(new Date().toLocaleString(), '[listenUserStatusUpdate] unsubscribe');
+          console.info(new Date().toLocaleString(), 'stranger ', strangerEvent.pubkey,' update status: ', status);
           if (this.isChatingToMe(status, me)) {
             resolve(true);
             console.info(new Date().toLocaleString(),'is "chating" status confirmed, resolved with true');

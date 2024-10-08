@@ -6,23 +6,27 @@ export class MainNPool extends NPool {
   constructor() {
     super({
       open: (url) => new NRelay1(url),
-      reqRouter: async (filters) => new Map([['wss://umbrel.local:8484', filters]]),
-      eventRouter: async () => ['wss://umbrel.local:8484']
+      reqRouter: async (filters) => new Map([['ws://umbrel.local:4848', filters]]),
+      eventRouter: async () => ['ws://umbrel.local:4848']
     });
   }
-
-    // TODO: cool, I need to centralize it in nostr-ngx  
+ 
   observe(filters: Array<NostrFilter>): Observable<NostrEvent> {
+    console.info('[[subscribe filter]] ', filters);
     const observable = from(this.req(filters));
     const closedSignal$ = observable.pipe(
       filter(([kind]) => kind === 'CLOSED'),
       takeUntil(of(undefined)) 
     );
+
+    closedSignal$.subscribe({ next: () => console.info('[[unsubscribe filter]] ', filters) });
   
-    return observable
+    const obs = observable
       .pipe(
         filter(([kind]) => kind === 'EVENT'),
         takeUntil(closedSignal$)
       ).pipe(map(([,,event]) => event as NostrEvent));
+    obs.subscribe(event => console.info('[[filter found event]]', event, filters));
+    return obs;
   }
 }

@@ -1,5 +1,6 @@
 import { generateSecretKey, getPublicKey, nip19 } from 'nostr-tools';
 
+// FIXME: change this for a signer
 export class NostrUser {
 
   /**
