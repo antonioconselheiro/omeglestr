@@ -9,8 +9,17 @@ services:
     ports:
       - "9876:9876"
       - "9229:9229"
-      - "4200:4200"
+      - "4203:4200"
     volumes:
       - ..:/omeglestr:cached
       - /var/run/docker.sock:/var/run/docker.sock
+    tty: true
+  omeglestr-relay-dev:
+    image: strfry
+    container_name: strfry
+    build:
+      context: ./.
+      dockerfile: ./Dockerfile.relay
+    ports:
+      - 7773:7777
     tty: true
