@@ -23,20 +23,20 @@ export class FindStrangerNostr {
   }
 
   listenChatAvailable(user: Required<NostrUser>): Observable<NostrEvent> {
-    const currentTimeInSeconds = (new Date().getTime() / 1_000) - 5;
-    const oneHourInSeconds = (60 * 60);
+    const currentTimeInSeconds = Math.floor(new Date().getTime() / 1_000) - 20;
+    const timeInSeconds = (60 * 10);
     return this.mainPool.observe([
       {
-        kinds: [ Number(kinds.UserStatuses) ],
+        kinds: [ kinds.UserStatuses ],
         '#t': [ 'wannachat', 'omegle' ],
-        since: currentTimeInSeconds - oneHourInSeconds
+        since: currentTimeInSeconds - timeInSeconds
       },
 
       {
-        kinds: [ Number(kinds.UserStatuses) ],
+        kinds: [ kinds.UserStatuses ],
         '#t': [ 'chating', 'omegle' ],
-        '#p': [ user.publicKeyHex ],
-        since: currentTimeInSeconds
+        '#p': [ user.pubkey ],
+       // since: currentTimeInSeconds
       }
     ]);
   }

@@ -6,22 +6,22 @@ export class NostrUser {
   /**
    * nsec
    */
-  readonly nostrSecret?: string;
+  readonly nsec?: string;
 
   /**
    * npub
    */
-  readonly nostrPublic: string;
+  readonly npub: string;
 
   /**
-   * nsec decoded
+   * private key
    */
-  readonly privateKeyHex?: Uint8Array;
+  readonly privateKey?: Uint8Array;
 
   /**
-   * npub decoded
+   * user pubkey
    */
-  readonly publicKeyHex: string;
+  readonly pubkey: string;
 
   constructor(
     /**
@@ -31,16 +31,16 @@ export class NostrUser {
   ) {
     const { type, data } = nip19.decode(nostrString);
     if (type === 'nsec') {
-      this.nostrSecret = nostrString;
-      this.privateKeyHex = data;
-      this.publicKeyHex = getPublicKey(this.privateKeyHex);
-      this.nostrPublic = nip19.npubEncode(this.publicKeyHex);
+      this.nsec = nostrString;
+      this.privateKey = data;
+      this.pubkey = getPublicKey(this.privateKey);
+      this.npub = nip19.npubEncode(this.pubkey);
     } else if (type === 'npub') {
-      this.nostrPublic = nostrString;
-      this.publicKeyHex = data.toString();
+      this.npub = nostrString;
+      this.pubkey = data.toString();
 
-      this.nostrSecret = undefined;
-      this.privateKeyHex = undefined;
+      this.nsec = undefined;
+      this.privateKey = undefined;
     } else {
       throw new Error('Invalid argument, NostrUser expect nsec or npub string');
     }
@@ -63,6 +63,6 @@ export class NostrUser {
   }
 
   toString(): string {
-    return this.publicKeyHex;
+    return this.pubkey;
   }
 }

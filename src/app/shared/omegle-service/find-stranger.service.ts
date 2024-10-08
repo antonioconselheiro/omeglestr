@@ -6,7 +6,7 @@ import { FindStrangerNostr } from './find-stranger.nostr';
 import { MainNPool } from '@shared/nostr/main.npool';
 
 @Injectable()
-export class FindStrangerProxy {
+export class FindStrangerService {
 
   constructor(
     private nostrEventFactory: NostrEventFactory,
@@ -50,12 +50,18 @@ export class FindStrangerProxy {
       const subscription = this.findStrangerNostr.listenChatAvailable(me)
         .subscribe(async event => {
           console.info(new Date().toLocaleString(),'event was listen: ', event);
-          if (event.pubkey === me.publicKeyHex) {
+          if (event.pubkey === me.pubkey) {
             console.info(new Date().toLocaleString(),'lol, my own event');
             return;
           }
 
-          if (this.isChatingInvite(event) && this.isChatingToMe(event, me)) {
+          const chatingInvite = this.isChatingInvite(event);
+          const chatingToMe = this.isChatingToMe(event, me);
+
+          console.info('event is chating invite? ', chatingInvite ? 'yes' : 'no');
+          console.info('event is chating to me? ', chatingToMe ? 'yes' : 'no');
+
+          if (chatingInvite && chatingToMe) {
             subscription.unsubscribe();
             console.info(new Date().toLocaleString(),'it\'s a chating invitation from ', event.pubkey, ' repling invitation...');
             await this.inviteToChating(me, event);
@@ -66,9 +72,10 @@ export class FindStrangerProxy {
  
               console.info(new Date().toLocaleString(),'[searchStranger] unsubscribe');
               subscription.unsubscribe();
-              console.info(new Date().toLocaleString(),'inviting ', event.pubkey, ' to chat');
+              console.info(new Date().toLocaleString(), 'inviting ', event.pubkey, ' to chat and listening confirmation');
+              const listening = this.listenChatingConfirmation(event, me);
               await this.inviteToChating(me, event);
-              const isChatingConfirmation = await this.listenChatingConfirmation(event, me);
+              const isChatingConfirmation = await listening;
 
               if (isChatingConfirmation) {
                 resolve(NostrUser.fromPubkey(event.pubkey));
@@ -90,13 +97,13 @@ export class FindStrangerProxy {
   }
 
   private isChatingToMe(event: Event, me: Required<NostrUser>): boolean {
-    console.info(new Date().toLocaleString(),'is wannachat reply with chating? event: ', event);
+    console.info(new Date().toLocaleString(), 'is wannachat reply with chating? event: ', event);
 
     const result = event.tags
       .filter(([type]) => type === 'p')
-      .find(([,pubkey]) => pubkey === me.publicKeyHex) || [];
+      .find(([,pubkey]) => pubkey === me.pubkey) || [];
 
-    console.info(new Date().toLocaleString(),!!result.length ? 'yes' : 'no');
+    console.info(new Date().toLocaleString(), 'is wannachat reply with chating?', !!result.length ? 'yes' : 'no');
     return !!result.length;
   }
 
@@ -120,10 +127,10 @@ export class FindStrangerProxy {
           console.info(new Date().toLocaleString(), '[listenUserStatusUpdate] unsubscribe');
           console.info(new Date().toLocaleString(), 'stranger ', strangerEvent.pubkey,' update status: ', status);
           if (this.isChatingToMe(status, me)) {
+            console.info(new Date().toLocaleString(), 'is "chating" status confirmed, resolved with true');
             resolve(true);
-            console.info(new Date().toLocaleString(),'is "chating" status confirmed, resolved with true');
           } else {
-            console.info(new Date().toLocaleString(),'unexpected status was given, resolved with false, event: ', status);
+            console.info(new Date().toLocaleString(), 'unexpected status was given, resolved with false, event: ', status);
             resolve(false);
           }
         });

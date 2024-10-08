@@ -1,5 +1,5 @@
 import { NostrEvent, NostrFilter, NPool, NRelay1 } from '@nostrify/nostrify';
-import { filter, from, map, Observable, of, takeUntil } from 'rxjs';
+import { filter, finalize, from, map, Observable, of, Subscription, takeUntil } from 'rxjs';
 
 export class MainNPool extends NPool {
 
@@ -10,23 +10,40 @@ export class MainNPool extends NPool {
       eventRouter: async () => ['ws://umbrel.local:4848']
     });
   }
- 
+
   observe(filters: Array<NostrFilter>): Observable<NostrEvent> {
-    console.info('[[subscribe filter]] ', filters);
-    const observable = from(this.req(filters));
-    const closedSignal$ = observable.pipe(
-      filter(([kind]) => kind === 'CLOSED'),
-      takeUntil(of(undefined)) 
+    console.info('[[subscribe filter]]', filters);
+    const abort = new AbortController();
+    const observable = from(this.req(filters, abort));
+    const relayClosed$ = observable.pipe(
+      filter(([kind]) => kind === 'CLOSED')
     );
 
-    closedSignal$.subscribe({ next: () => console.info('[[unsubscribe filter]] ', filters) });
+    relayClosed$.subscribe(() => {
+      console.info('[[unsubscribe filter]]', filters);
+      try {
+        abort.abort()
+      } finally {
+        console.info('unsubscribing filters: abort signat was send to relay');
+      }
+    });
   
-    const obs = observable
+    return observable
+      .pipe(
+        finalize(() => {
+          try {
+            abort.abort()
+          } finally {
+            console.info('unsubscribing filters: abort signat was send to relay');
+          }
+        })
+      )
       .pipe(
         filter(([kind]) => kind === 'EVENT'),
-        takeUntil(closedSignal$)
-      ).pipe(map(([,,event]) => event as NostrEvent));
-    obs.subscribe(event => console.info('[[filter found event]]', event, filters));
-    return obs;
+        takeUntil(relayClosed$),
+      ).pipe(map(([,,event]) => {
+        console.info('[[filter found event]]', event, filters)
+        return event as NostrEvent;
+      }));
   }
 }

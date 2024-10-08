@@ -14,15 +14,15 @@ export class TalkToStrangerProxy {
   ) { }
 
   async openEncryptedDirectMessage(you: Required<NostrUser>, stranger: NostrUser, event: NostrEvent): Promise<string> {
-    return nip04.decrypt(you.nostrSecret, stranger.nostrPublic, event.content);
+    return nip04.decrypt(you.nsec, stranger.npub, event.content);
   }
 
   listenMessages(me: Required<NostrUser>, stranger: NostrUser): Observable<NostrEvent> {
     return this.mainPool.observe([
       {
         kinds: [ Number(kinds.EncryptedDirectMessage) ],
-        authors: [ stranger.publicKeyHex ],
-        '#p': [ me.publicKeyHex ]
+        authors: [ stranger.pubkey ],
+        '#p': [ me.pubkey ]
       }
     ]);
   }

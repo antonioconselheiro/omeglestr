@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { MessageAuthor } from '@domain/message-author.enum';
 import { IMessage } from '@domain/message.interface';
 import { NostrUser } from '@domain/nostr-user';
-import { FindStrangerProxy } from '@shared/omegle-service/find-stranger.proxy';
+import { FindStrangerService } from '@shared/omegle-service/find-stranger.service';
 import { TalkToStrangerProxy } from '@shared/omegle-service/talk-to-stranger.proxy';
 import { ChatState } from './chat-state.enum';
 import { Event } from 'nostr-tools';
@@ -33,7 +33,7 @@ export class ChatComponent {
   messages: IMessage[] = [];
 
   constructor(
-    private findStrangerProxy: FindStrangerProxy,
+    private findStrangerProxy: FindStrangerService,
     private talkToStrangerProxy: TalkToStrangerProxy
   ) { }
 

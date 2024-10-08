@@ -35,7 +35,7 @@ export class NostrEventFactory {
    * https://github.com/nbd-wtf/nostr-tools/blob/master/nip04.test.ts
    */
   async createEncryptedDirectMessage(you: Required<NostrUser>, stranger: NostrUser, message: string): Promise<Event> {
-    const encriptedMessage = await nip04.encrypt(you.publicKeyHex, stranger.publicKeyHex, message);
+    const encriptedMessage = await nip04.encrypt(you.pubkey, stranger.pubkey, message);
 
     const unsignedEvent: EventTemplate = {
       kind: kinds.EncryptedDirectMessage,
@@ -43,12 +43,12 @@ export class NostrEventFactory {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       created_at: this.getCurrentTimestamp(),
       tags: [
-        ['p', stranger.publicKeyHex]
+        ['p', stranger.pubkey]
       ]
     };
 
     const verifiedEvent = finalizeEvent(
-      unsignedEvent, you.privateKeyHex
+      unsignedEvent, you.privateKey
     );
 
     return Promise.resolve(verifiedEvent);
@@ -75,7 +75,8 @@ export class NostrEventFactory {
 
   createChatingUserStatus(you: Required<NostrUser>, strange: NostrUser): Event {
     return this.createUserStatus(you, 'chating', [
-      [ 'p', strange.publicKeyHex ]
+      [ 'p', strange.pubkey ],
+      [ 't', 'chating' ]
     ]);
   }
 
@@ -94,14 +95,14 @@ export class NostrEventFactory {
       id: '',
       kind: kinds.UserStatuses,
       content: status,
-      pubkey: user.publicKeyHex,
+      pubkey: user.pubkey,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       created_at: this.getCurrentTimestamp(),
       tags
     };
 
     const verifiedEvent = finalizeEvent(
-      unsignedEvent as object as EventTemplate, user.privateKeyHex
+      unsignedEvent as object as EventTemplate, user.privateKey
     );
 
     return verifiedEvent;
