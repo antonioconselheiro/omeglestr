@@ -22,22 +22,40 @@ export class FindStrangerNostr {
     ]);
   }
 
-  listenChatAvailable(user: Required<NostrUser>): Observable<NostrEvent> {
-    const currentTimeInSeconds = Math.floor(new Date().getTime() / 1_000) - 20;
-    const timeInSeconds = (60 * 10);
-    return this.mainPool.observe([
-      {
-        kinds: [ kinds.UserStatuses ],
-        '#t': [ 'wannachat', 'omegle' ],
-        since: currentTimeInSeconds - timeInSeconds
-      },
-
+  queryWannachatResponse(user: Required<NostrUser>): Promise<NostrEvent[]> {
+    return this.mainPool.query([
       {
         kinds: [ kinds.UserStatuses ],
         '#t': [ 'chating', 'omegle' ],
         '#p': [ user.pubkey ],
-       // since: currentTimeInSeconds
+        limit: 1
       }
     ]);
+  }
+
+  listenWannachatResponse(user: Required<NostrUser>): Observable<NostrEvent> {
+    return this.mainPool.observe([
+      {
+        kinds: [ kinds.UserStatuses ],
+        '#t': [ 'chating', 'omegle' ],
+        '#p': [ user.pubkey ],
+        limit: 1
+      }
+    ]);
+  }
+
+  async queryChatAvailable(): Promise<NostrEvent | null> {
+    const currentTimeInSeconds = Math.floor(new Date().getTime() / 1_000);
+    const timeInSeconds = (60 * 10);
+    const [wannachat] = await this.mainPool.query([
+      {
+        kinds: [ kinds.UserStatuses ],
+        '#t': [ 'wannachat', 'omegle' ],
+        limit: 1,
+        since: currentTimeInSeconds - timeInSeconds
+      }
+    ]);
+
+    return Promise.resolve(wannachat || null);
   }
 }

@@ -1,5 +1,5 @@
 import { NostrEvent, NostrFilter, NPool, NRelay1 } from '@nostrify/nostrify';
-import { filter, finalize, from, map, Observable, of, Subscription, takeUntil } from 'rxjs';
+import { filter, finalize, from, map, Observable, takeUntil } from 'rxjs';
 
 export class MainNPool extends NPool {
 
@@ -19,23 +19,28 @@ export class MainNPool extends NPool {
       filter(([kind]) => kind === 'CLOSED')
     );
 
+    observable.subscribe({
+      next: event => {
+        console.debug('[DEBUG] something found by filters:', filters, 'event:', event);
+      },
+      error: error => {
+        console.debug('[DEBUG] ERROR received from filters:', filters, 'error:', error);
+      },
+      complete: () => {
+        console.debug('[DEBUG] Filter completed:', filters);
+      }
+    });
+
     relayClosed$.subscribe(() => {
       console.info('[[unsubscribe filter]]', filters);
-      try {
-        abort.abort()
-      } finally {
-        console.info('unsubscribing filters: abort signat was send to relay');
-      }
+      abort.abort();
     });
   
     return observable
       .pipe(
         finalize(() => {
-          try {
-            abort.abort()
-          } finally {
-            console.info('unsubscribing filters: abort signat was send to relay');
-          }
+          console.info('[[unsubscribe filter]]', filters);
+          abort.abort();
         })
       )
       .pipe(

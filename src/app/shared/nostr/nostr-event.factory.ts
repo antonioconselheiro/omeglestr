@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { NostrUser } from '@domain/nostr-user';
+import { NostrEvent } from '@nostrify/nostrify';
 import { GlobalConfigService } from '@shared/global-config/global-config.service';
 import { Event, EventTemplate, finalizeEvent, kinds, nip04 } from 'nostr-tools';
 
@@ -34,7 +35,7 @@ export class NostrEventFactory {
    * https://github.com/nostr-protocol/nips/blob/master/04.md
    * https://github.com/nbd-wtf/nostr-tools/blob/master/nip04.test.ts
    */
-  async createEncryptedDirectMessage(you: Required<NostrUser>, stranger: NostrUser, message: string): Promise<Event> {
+  async createEncryptedDirectMessage(you: Required<NostrUser>, stranger: NostrUser, message: string): Promise<NostrEvent> {
     const encriptedMessage = await nip04.encrypt(you.pubkey, stranger.pubkey, message);
 
     const unsignedEvent: EventTemplate = {
@@ -58,33 +59,50 @@ export class NostrEventFactory {
    * NIP 38
    * https://github.com/nostr-protocol/nips/blob/master/38.md
    */
-  createWannaChatUserStatus(user: Required<NostrUser>): Event {
+  createWannaChatUserStatus(user: Required<NostrUser>): NostrEvent {
     return this.createUserStatus(user, 'wannachat', [
         ['expiration', this.getExpirationTimestamp()],
         ['t', 'wannachat']
       ]);
   }
 
-  createDisconnectedUserStatus(user: Required<NostrUser>): Event {
+  createDisconnectedUserStatus(user: Required<NostrUser>): NostrEvent {
     return this.createUserStatus(user, 'disconnected');
   }
 
-  createTypingUserStatus(user: Required<NostrUser>): Event {
+  createTypingUserStatus(user: Required<NostrUser>): NostrEvent {
     return this.createUserStatus(user, 'typing');
   }
 
-  createChatingUserStatus(you: Required<NostrUser>, strange: NostrUser): Event {
+  createChatingUserStatus(you: Required<NostrUser>, strange: NostrUser): NostrEvent {
     return this.createUserStatus(you, 'chating', [
       [ 'p', strange.pubkey ],
       [ 't', 'chating' ]
     ]);
   }
 
-  cleanUserStatus(user: Required<NostrUser>): Event {
+  deleteEvent(user: Required<NostrUser>, event: NostrEvent): NostrEvent {
+    const template: EventTemplate = {
+      kind: 5,
+      tags: [
+        ["e", event.id]
+      ],
+      created_at: Math.floor(new Date().getTime() / 1000),
+      content: ""
+    }
+
+    const verifiedEvent = finalizeEvent(
+      template, user.privateKey
+    );
+
+    return verifiedEvent;
+  }
+
+  cleanUserStatus(user: Required<NostrUser>): NostrEvent {
     return this.createUserStatus(user, '');
   }
 
-  private createUserStatus(user: Required<NostrUser>, status: string, tag?: string[][]): Event {
+  private createUserStatus(user: Required<NostrUser>, status: string, tag?: string[][]): NostrEvent {
     const tags = [
       ['d', 'general'],
       ...(tag || []),

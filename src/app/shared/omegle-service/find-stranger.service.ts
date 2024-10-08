@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { NostrUser } from '@domain/nostr-user';
+import { NostrEvent } from '@nostrify/nostrify';
+import { MainNPool } from '@shared/nostr/main.npool';
 import { NostrEventFactory } from '@shared/nostr/nostr-event.factory';
 import { Event } from 'nostr-tools';
 import { FindStrangerNostr } from './find-stranger.nostr';
-import { MainNPool } from '@shared/nostr/main.npool';
 
 @Injectable()
 export class FindStrangerService {
@@ -44,56 +45,44 @@ export class FindStrangerService {
    *      seja, '') typing e disconnected 
    */
   async searchStranger(me: Required<NostrUser>): Promise<NostrUser> {
-    this.publishWannaChatStatus(me);
+    let status: NostrEvent;
+    const wannaChat = await this.findStrangerNostr.queryChatAvailable();
+    if (wannaChat) {
+      console.info(new Date().toLocaleString(), 'inviting ', wannaChat.pubkey, ' to chat and listening confirmation');
+      const listening = this.listenChatingConfirmation(wannaChat, me);
+      status = await this.inviteToChating(me, wannaChat);
+      const isChatingConfirmation = await listening;
 
+      if (isChatingConfirmation) {
+        return Promise.resolve(NostrUser.fromPubkey(wannaChat.pubkey));
+      }
+    }
+
+    status = await this.publishWannaChatStatus(me);
     return new Promise(resolve => {
-      const subscription = this.findStrangerNostr.listenChatAvailable(me)
-        .subscribe(async event => {
-          console.info(new Date().toLocaleString(), 'event was listen: ', event);
-          if (event.pubkey === me.pubkey) {
-            console.info(new Date().toLocaleString(), 'lol, my own event, ignoring...');
-            return;
-          }
-
-          const chatingInvite = this.isChatingInvite(event);
-          const chatingToMe = this.isChatingToMe(event, me);
-
-          console.info('event is chating invite? ', chatingInvite ? 'yes' : 'no');
-          console.info('event is chating to me? ', chatingToMe ? 'yes' : 'no');
-
-          if (chatingInvite && chatingToMe) {
-            subscription.unsubscribe();
-            console.info(new Date().toLocaleString(),'it\'s a chating invitation from ', event.pubkey, ' repling invitation...');
-            await this.inviteToChating(me, event);
-            console.info(new Date().toLocaleString(),'replied... resolving... ');
-            resolve(NostrUser.fromPubkey(event.pubkey));
-            console.info(new Date().toLocaleString(),'[searchStranger] unsubscribe');
-          } else if (this.isWannaChat(event)) {
- 
-              console.info(new Date().toLocaleString(),'[searchStranger] unsubscribe');
-              subscription.unsubscribe();
-              console.info(new Date().toLocaleString(), 'inviting ', event.pubkey, ' to chat and listening confirmation');
-              const listening = this.listenChatingConfirmation(event, me);
-              await this.inviteToChating(me, event);
-              const isChatingConfirmation = await listening;
-
-              if (isChatingConfirmation) {
-                resolve(NostrUser.fromPubkey(event.pubkey));
-              } else {
-                const stranger = await this.searchStranger(me);
-                resolve(stranger);
-              }
-          }
+      this.findStrangerNostr.listenWannachatResponse(me)
+        .subscribe(event => {
+          this.replyChatInvitation(event, me, status)
+            .then(user => user && resolve(user))
         });
+
+        setInterval(() => {
+          this.findStrangerNostr.queryWannachatResponse(me).then(event => console.info('::forced query result::', event))
+        }, 30 * 1000);
     });
   }
 
-  private isChatingInvite(event: Event): boolean {
-    return event.content === 'chating';
-  }
+  async replyChatInvitation(event: NostrEvent, me: Required<NostrUser>, status?: NostrEvent): Promise<NostrUser | void> {
+    console.info(new Date().toLocaleString(), 'event was listen: ', event);
+    console.info(new Date().toLocaleString(), 'it must be a chating invitation from ', event.pubkey, ', repling invitation...');
+    if (status) {
+      await this.deleteEvent(me, status);
+    }
 
-  private isWannaChat(event: Event): boolean {
-    return event.content === 'wannachat';
+    status = await this.inviteToChating(me, event);
+    console.info(new Date().toLocaleString(), 'replied... resolving... ');
+    console.info(new Date().toLocaleString(), '[searchStranger] unsubscribe');
+    return Promise.resolve(NostrUser.fromPubkey(event.pubkey));
   }
 
   private isChatingToMe(event: Event, me: Required<NostrUser>): boolean {
@@ -101,20 +90,20 @@ export class FindStrangerService {
 
     const result = event.tags
       .filter(([type]) => type === 'p')
-      .find(([,pubkey]) => pubkey === me.pubkey) || [];
+      .find(([, pubkey]) => pubkey === me.pubkey) || [];
 
     console.info(new Date().toLocaleString(), 'is wannachat reply with chating?', !!result.length ? 'yes' : 'no');
     return !!result.length;
   }
 
-  private inviteToChating(me: Required<NostrUser>, strangeStatus: Event): Promise<void> {
+  private inviteToChating(me: Required<NostrUser>, strangeStatus: Event): Promise<NostrEvent> {
     const stranger = NostrUser.fromPubkey(strangeStatus.pubkey);
     return this.publishChatInviteStatus(me, stranger);
   }
 
   private async listenChatingConfirmation(strangerEvent: Event, me: Required<NostrUser>): Promise<boolean> {
     return new Promise<boolean>(resolve => {
-      console.info(new Date().toLocaleString(),'listening status update from: ', strangerEvent.pubkey);
+      console.info(new Date().toLocaleString(), 'listening status update from: ', strangerEvent.pubkey);
       const subscription = this.findStrangerNostr
         .listenUserStatusUpdate(strangerEvent.pubkey)
         .subscribe(status => {
@@ -125,7 +114,7 @@ export class FindStrangerService {
 
           subscription.unsubscribe();
           console.info(new Date().toLocaleString(), '[listenUserStatusUpdate] unsubscribe');
-          console.info(new Date().toLocaleString(), 'stranger ', strangerEvent.pubkey,' update status: ', status);
+          console.info(new Date().toLocaleString(), 'stranger ', strangerEvent.pubkey, ' update status: ', status);
           if (this.isChatingToMe(status, me)) {
             console.info(new Date().toLocaleString(), 'is "chating" status confirmed, resolved with true');
             resolve(true);
@@ -137,25 +126,37 @@ export class FindStrangerService {
     });
   }
 
-  private publishWannaChatStatus(user: Required<NostrUser>): Promise<void> {
+  private async publishWannaChatStatus(user: Required<NostrUser>): Promise<NostrEvent> {
     const wannaChatStatus = this.nostrEventFactory.createWannaChatUserStatus(user);
-    console.info(new Date().toLocaleString(),'updating my status to: ', wannaChatStatus);
-    return this.mainPool.event(wannaChatStatus);
+    console.info(new Date().toLocaleString(), 'updating my status to: ', wannaChatStatus);
+    await this.mainPool.event(wannaChatStatus);
+
+    return Promise.resolve(wannaChatStatus);
   }
 
-  private publishChatInviteStatus(user: Required<NostrUser>, stranger: NostrUser): Promise<void> {
+  private async publishChatInviteStatus(user: Required<NostrUser>, stranger: NostrUser): Promise<NostrEvent> {
     const chatingStatus = this.nostrEventFactory.createChatingUserStatus(user, stranger);
-    console.info(new Date().toLocaleString(),'updating my status to: ', chatingStatus);
-    return this.mainPool.event(chatingStatus);
+    console.info(new Date().toLocaleString(), 'updating my status to: ', chatingStatus);
+    await this.mainPool.event(chatingStatus);
+
+    return Promise.resolve(chatingStatus);
+  }
+
+  private async deleteEvent(user: Required<NostrUser>, event: NostrEvent): Promise<void> {
+    const deleteEvent = this.nostrEventFactory.deleteEvent(user, event);
+    console.info(new Date().toLocaleString(), 'deleting event: ', event);
+    await this.mainPool.event(deleteEvent);
   }
 
   connect(): Required<NostrUser> {
     return NostrUser.create();
   }
 
-  disconnect(user: Required<NostrUser>): Promise<void> {
+  async disconnect(user: Required<NostrUser>): Promise<NostrEvent> {
     const disconnectStatus = this.nostrEventFactory.createDisconnectedUserStatus(user);
-    console.info(new Date().toLocaleString(),'updating my status to: ', disconnectStatus);
-    return this.mainPool.event(disconnectStatus);
+    console.info(new Date().toLocaleString(), 'updating my status to: ', disconnectStatus);
+    await this.mainPool.event(disconnectStatus);
+
+    return Promise.resolve(disconnectStatus);
   }
 }
