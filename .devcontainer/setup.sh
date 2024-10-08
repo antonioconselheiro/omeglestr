@@ -24,6 +24,6 @@ echo "[user]
     editor = code --wait
 
 [safe]
-    directory = /omegle-nostr" > .gitconfig
+    directory = /omeglestr" > .gitconfig
 
 echo "now paste the content of .ssh/id_ed25519.pub into https://github.com/settings/ssh/new"

@@ -1,27 +1,28 @@
 {
-  "name": "Existing Docker Compose (Extend)",
+  "name": "Omeglestr Dev Environment",
   "dockerComposeFile": [
     "docker-compose.yml"
   ],
-  "service": "omegle-nostr-dev",
-	"workspaceFolder": "/omegle-nostr",
+  "service": "omeglestr-dev",
+	"workspaceFolder": "/omeglestr",
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"Angular.ng-template",
-				"ms-vscode.vscode-typescript-next",
-				"dbaeumer.vscode-eslint",
-				"eamodio.gitlens",
-				"ms-azuretools.vscode-docker",
-				"naumovs.color-highlight",
-				"SimonSiefke.svg-preview",
-				"manishsencha.readme-preview",
-				"wix.vscode-import-cost",
-				"stylelint.vscode-stylelint",
-				"esbenp.prettier-vscode",
-				"ahmadawais.shades-of-purple",
-				"ms-vsliveshare.vsliveshare"
-			]
+        "Angular.ng-template",
+        "ms-vscode.vscode-typescript-next",
+        "dbaeumer.vscode-eslint",
+        "eamodio.gitlens",
+        "ms-azuretools.vscode-docker",
+        "naumovs.color-highlight",
+        "SimonSiefke.svg-preview",
+        "manishsencha.readme-preview",
+        "wix.vscode-import-cost",
+        "stylelint.vscode-stylelint",
+        "esbenp.prettier-vscode",
+        "ahmadawais.shades-of-purple",
+        "ms-vsliveshare.vsliveshare",
+        "ZainChen.json"
+      ]
 		}
 	}
 }

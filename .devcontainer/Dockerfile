@@ -2,8 +2,16 @@ FROM node:20
 
 # Including jq to filter json
 RUN apt update
-RUN apt install -y jq
-RUN apt-get clean
+RUN apt install -y jq gnupg
+
+# Chrome install for unit test
+RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
+RUN apt update
+RUN apt install -y google-chrome-stable
+
+# Clean
+RUN apt clean
 RUN rm -rf /var/lib/apt/lists/*
 
 # Installing nak, the nostr army knife
@@ -20,13 +28,14 @@ COPY ./.ssh /root/.ssh
 RUN chmod 600 -R /root/.ssh
 RUN ssh-add -D && ssh-add /root/.ssh/id_ed25519 || true
 
-WORKDIR /omegle-nostr
+WORKDIR /omeglestr
 
 # Brazilian time and keyboard
-ENV LANG C.UTF-8
-ENV TZ America/Sao_Paulo
+ENV LANG=C.UTF-8
+ENV TZ=America/Sao_Paulo
 
 # Exposing ports
+EXPOSE 9876
 EXPOSE 9229
 EXPOSE 4200
 

@@ -49,9 +49,9 @@ export class FindStrangerService {
     return new Promise(resolve => {
       const subscription = this.findStrangerNostr.listenChatAvailable(me)
         .subscribe(async event => {
-          console.info(new Date().toLocaleString(),'event was listen: ', event);
+          console.info(new Date().toLocaleString(), 'event was listen: ', event);
           if (event.pubkey === me.pubkey) {
-            console.info(new Date().toLocaleString(),'lol, my own event');
+            console.info(new Date().toLocaleString(), 'lol, my own event, ignoring...');
             return;
           }
 
