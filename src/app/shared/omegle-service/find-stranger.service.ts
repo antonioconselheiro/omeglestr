@@ -3,7 +3,7 @@ import { NostrUser } from '@domain/nostr-user';
 import { NostrEvent } from '@nostrify/nostrify';
 import { MainNPool } from '@shared/nostr/main.npool';
 import { NostrEventFactory } from '@shared/nostr/nostr-event.factory';
-import { Event } from 'nostr-tools';
+import { Event, kinds } from 'nostr-tools';
 import { FindStrangerNostr } from './find-stranger.nostr';
 
 @Injectable()
@@ -59,16 +59,13 @@ export class FindStrangerService {
     }
 
     status = await this.publishWannaChatStatus(me);
+
     return new Promise(resolve => {
       this.findStrangerNostr.listenWannachatResponse(me)
         .subscribe(event => {
           this.replyChatInvitation(event, me, status)
             .then(user => user && resolve(user))
         });
-
-        setInterval(() => {
-          this.findStrangerNostr.queryWannachatResponse(me).then(event => console.info('::forced query result::', event))
-        }, 30 * 1000);
     });
   }
 

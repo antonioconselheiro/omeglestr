@@ -30,7 +30,7 @@ RUN ssh-add -D && ssh-add /root/.ssh/id_ed25519 || true
 
 WORKDIR /omeglestr
 
-# Brazilian time and keyboard
+# Keyboard & Timezone
 ENV LANG=C.UTF-8
 ENV TZ=America/Sao_Paulo
 
