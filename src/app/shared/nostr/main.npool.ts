@@ -3,11 +3,13 @@ import { finalize, Observable, Subject } from 'rxjs';
 
 export class MainNPool extends NPool {
 
+  // 	TODO: wss://nostr.novacisko.cz support NIP45, maybe use in prod
+
   constructor() {
     super({
       open: (url) => new NRelay1(url),
-      reqRouter: async (filters) => new Map([['ws://localhost:7777', filters]]),
-      eventRouter: async () => ['ws://localhost:7777']
+      reqRouter: async (filters) => new Map([['ws://localhost:10000', filters]]),
+      eventRouter: async () => ['ws://localhost:10000']
     });
   }
 
@@ -37,14 +39,16 @@ export class MainNPool extends NPool {
       );
   }
 
-  async count(filters: NostrFilter[], opts?: { signal?: AbortSignal }): Promise<NostrRelayCOUNT[2]> {
+  async count(filters: NostrFilter[]): Promise<NostrRelayCOUNT[2]> {
     const routes = await this.getOpts().reqRouter(filters);
     if (routes.size < 1) {
       return Promise.reject(new Error('disconnected'));
     }
 
     const [[relay]] = Array.from(routes);
-    return (this.relay(relay) as NRelay1).count(filters, opts);
+    console.info('asking count to ', relay);
+
+    return (this.relay(relay) as NRelay1).count(filters, { signal: AbortSignal.timeout(1000) });
   }
 
   getOpts(): NPoolOpts {

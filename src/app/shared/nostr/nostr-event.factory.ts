@@ -84,7 +84,7 @@ export class NostrEventFactory {
     ]);
   }
 
-  deleteStatus(you: Required<NostrUser>): NostrEvent {
+  deleteUserHistory(you: Required<NostrUser>): NostrEvent {
     const template: EventTemplate = {
       kind: 5,
       tags: [

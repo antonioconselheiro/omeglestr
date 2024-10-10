@@ -112,9 +112,9 @@ export class FindStrangerService {
   }
 
   private async deleteUserHistory(user: Required<NostrUser>): Promise<void> {
-    const deleteEvent = this.nostrEventFactory.deleteStatus(user);
+    const deleteStatus = this.nostrEventFactory.deleteUserHistory(user);
     console.info(new Date().toLocaleString(), 'deleting user history');
-    await this.mainPool.event(deleteEvent);
+    await this.mainPool.event(deleteStatus);
   }
 
   connect(): Required<NostrUser> {

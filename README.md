@@ -2,7 +2,12 @@
 > Isaiah 65:1
 
 # Omegle on Nostr
-_don't thread on Omegle_
+_don't thread on Omegle
+
+# Relay Compatibility
+Need support to [NIP-04](https://github.com/nostr-protocol/nips/blob/master/04.md).
+
+And support to [NIP-45](https://github.com/nostr-protocol/nips/blob/master/45.md) is good too.
 
 ## Donate
 Do you want more protests in favor of free speech, freedom of software and freedom of work similar to this one?
