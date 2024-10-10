@@ -72,9 +72,6 @@ export class FindStrangerService {
   async replyChatInvitation(event: NostrEvent, me: Required<NostrUser>, status?: NostrEvent): Promise<NostrUser | void> {
     console.info(new Date().toLocaleString(), 'event was listen: ', event);
     console.info(new Date().toLocaleString(), 'it must be a chating invitation from ', event.pubkey, ', repling invitation...');
-    if (status) {
-      await this.deleteEvent(me, status);
-    }
 
     status = await this.inviteToChating(me, event);
     console.info(new Date().toLocaleString(), 'replied... resolving... ');
@@ -139,9 +136,9 @@ export class FindStrangerService {
     return Promise.resolve(chatingStatus);
   }
 
-  private async deleteEvent(user: Required<NostrUser>, event: NostrEvent): Promise<void> {
-    const deleteEvent = this.nostrEventFactory.deleteEvent(user, event);
-    console.info(new Date().toLocaleString(), 'deleting event: ', event);
+  private async deleteUserHistory(user: Required<NostrUser>): Promise<void> {
+    const deleteEvent = this.nostrEventFactory.deleteStatus(user);
+    console.info(new Date().toLocaleString(), 'deleting user history');
     await this.mainPool.event(deleteEvent);
   }
 
@@ -152,6 +149,7 @@ export class FindStrangerService {
   async disconnect(user: Required<NostrUser>): Promise<NostrEvent> {
     const disconnectStatus = this.nostrEventFactory.createDisconnectedUserStatus(user);
     console.info(new Date().toLocaleString(), 'updating my status to: ', disconnectStatus);
+    await this.deleteUserHistory(user);
     await this.mainPool.event(disconnectStatus);
 
     return Promise.resolve(disconnectStatus);

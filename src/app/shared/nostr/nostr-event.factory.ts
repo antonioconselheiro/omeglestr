@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { NostrUser } from '@domain/nostr-user';
 import { NostrEvent } from '@nostrify/nostrify';
 import { GlobalConfigService } from '@shared/global-config/global-config.service';
-import { Event, EventTemplate, finalizeEvent, kinds, nip04 } from 'nostr-tools';
+import { EventTemplate, finalizeEvent, kinds, nip04 } from 'nostr-tools';
 
 @Injectable({
   providedIn: 'root'
@@ -19,11 +19,11 @@ export class NostrEventFactory {
   }
 
   /**
-   * @param expireIn time in seconds to expire, default to 60
+   * @param expireIn time in seconds to expire, default to 10
    * @returns expiration timestamp
    */
   private getExpirationTimestamp(
-    expireIn = this.globalConfigService.WANNACHAT_STATUS_DEFAULT_TIMEOUT_IN_MS
+    expireIn = this.globalConfigService.WANNACHAT_STATUS_DEFAULT_TIMEOUT_IN_SECONDS
   ): string {
     const oneMillisecond = 1000;
     const expirationTimestamp = Math.floor(Date.now() / oneMillisecond) + expireIn;
@@ -60,14 +60,17 @@ export class NostrEventFactory {
    * https://github.com/nostr-protocol/nips/blob/master/38.md
    */
   createWannaChatUserStatus(user: Required<NostrUser>): NostrEvent {
+    const oneMinute = 60;
     return this.createUserStatus(user, 'wannachat', [
-        ['expiration', this.getExpirationTimestamp()],
+        ['expiration', this.getExpirationTimestamp(oneMinute)],
         ['t', 'wannachat']
       ]);
   }
 
   createDisconnectedUserStatus(user: Required<NostrUser>): NostrEvent {
-    return this.createUserStatus(user, 'disconnected');
+    return this.createUserStatus(user, 'disconnected', [
+      ['expiration', this.getExpirationTimestamp()]
+    ]);
   }
 
   createTypingUserStatus(user: Required<NostrUser>): NostrEvent {
@@ -81,18 +84,20 @@ export class NostrEventFactory {
     ]);
   }
 
-  deleteEvent(user: Required<NostrUser>, event: NostrEvent): NostrEvent {
+  deleteStatus(you: Required<NostrUser>): NostrEvent {
     const template: EventTemplate = {
       kind: 5,
       tags: [
-        ["e", event.id]
+        ["k", String(kinds.EncryptedDirectMessage)],
+        ["k", String(kinds.UserStatuses)],
+        ['expiration', this.getExpirationTimestamp()]
       ],
       created_at: Math.floor(new Date().getTime() / 1000),
       content: ""
     }
 
     const verifiedEvent = finalizeEvent(
-      template, user.secretKey
+      template, you.secretKey
     );
 
     return verifiedEvent;
@@ -105,8 +110,8 @@ export class NostrEventFactory {
   private createUserStatus(user: Required<NostrUser>, status: string, tag?: string[][]): NostrEvent {
     const tags = [
       ['d', 'general'],
-      ...(tag || []),
-      ['t', 'omegle']
+      ['t', 'omegle'],
+      ...(tag || [])
     ];
 
     const unsignedEvent = {

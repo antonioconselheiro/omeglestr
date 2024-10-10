@@ -10,6 +10,9 @@
     <div *ngIf="stranger" class="message">
       You're now chatting with a random stranger.
     </div>
+    <div *ngIf="!stranger && currentState === STATE_SEARCHING_STRANGER" class="message">
+      Looking for someone you can chat with.
+    </div>
     <div
       *ngFor="let message of messages"
       class="chat"
@@ -38,7 +41,8 @@
     <button
       type="button"
       (click)="findStranger()"
-      *ngIf="currentState === STATE_DISCONNECTED"
+      [attr.disabled]="currentState === STATE_SEARCHING_STRANGER ? 'disabled' : null"
+      *ngIf="currentState === STATE_DISCONNECTED || currentState === STATE_SEARCHING_STRANGER"
       class="btn start bottomLeftRadius"
     >
       Start
@@ -72,7 +76,7 @@
       type="button"
       class="btn bottomRightRadius"
       (click)="sendMessage(messageField.value); cleanMessageField(messageField)"
-      [attr.disabled]="currentState === STATE_DISCONNECTED ? 'disabled' : null"
+      [attr.disabled]="currentState === STATE_DISCONNECTED || currentState === STATE_SEARCHING_STRANGER ? 'disabled' : null"
     >
       Send
     </button>

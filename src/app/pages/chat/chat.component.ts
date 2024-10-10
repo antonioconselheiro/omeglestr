@@ -1,21 +1,23 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, OnDestroy } from '@angular/core';
 import { MessageAuthor } from '@domain/message-author.enum';
 import { ChatMessage } from '@domain/chat-message.interface';
 import { NostrUser } from '@domain/nostr-user';
 import { FindStrangerService } from '@shared/omegle-service/find-stranger.service';
 import { TalkToStrangerNostr } from '@shared/omegle-service/talk-to-stranger.nostr';
 import { ChatState } from './chat-state.enum';
-import { Event } from 'nostr-tools';
+import { NostrEvent } from '@nostrify/nostrify';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'omg-chat',
   templateUrl: './chat.component.html'
 })
-export class ChatComponent {
+export class ChatComponent implements OnDestroy {
 
   readonly STATE_CONNECTED = ChatState.CONNECTED;
   readonly STATE_UP_TO_DISCONNECT = ChatState.UP_TO_DISCONNECT;
   readonly STATE_DISCONNECTED = ChatState.DISCONNECTED;
+  readonly STATE_SEARCHING_STRANGER = ChatState.SEARCHING_STRANGER;
 
   readonly AUTHOR_STRANGE = MessageAuthor.STRANGE;
   readonly AUTHOR_YOU = MessageAuthor.YOU;
@@ -33,22 +35,27 @@ export class ChatComponent {
 
   messages: ChatMessage[] = [];
 
+  private subscriptions = new Subscription();
+
   constructor(
     private findStrangerProxy: FindStrangerService,
-    private talkToStrangerProxy: TalkToStrangerNostr
+    private talkToStrangerNostr: TalkToStrangerNostr
   ) { }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
 
   @HostListener('window:beforeunload')
   async onBeforeUnload(): Promise<true> {
-    if (this.stranger) {
-      await this.disconnect();
-    }
-
+    await this.disconnect();
     return true;
   }
 
   findStranger(): void {
     this.whoDisconnected = null;
+    this.currentState = this.STATE_SEARCHING_STRANGER;
+    this.messages = [];
     const you = this.you = this.findStrangerProxy.connect();
     console.info(new Date().toLocaleString(), 'me: ', you);
     this.findStrangerProxy
@@ -80,30 +87,32 @@ export class ChatComponent {
     console.log('starting conversation, stranger: ', stranger);
     this.stranger = stranger;
     this.currentState = ChatState.CONNECTED;
-    this.talkToStrangerProxy
+    this.subscriptions.add(this.talkToStrangerNostr
       .listenMessages(me, stranger)
       .subscribe({
         next: event => this.addMessageFromStranger(me, stranger, event)
-      });
+      }));
 
-    this.talkToStrangerProxy
+    this.subscriptions.add(this.talkToStrangerNostr
       .listenStrangerStatus(stranger)
       .subscribe({
         next: event => this.handleStrangerStatus(event)
-      });
+      }));
   }
 
-  private addMessageFromStranger(me: Required<NostrUser>, stranger: NostrUser, event: Event): void {
-    this.talkToStrangerProxy
+  private addMessageFromStranger(me: Required<NostrUser>, stranger: NostrUser, event: NostrEvent): void {
+    this.talkToStrangerNostr
       .openEncryptedDirectMessage(me, stranger, event)
       .then(text => {
         this.messages.push({
-          author: MessageAuthor.STRANGE, text, time: event.created_at
+          text,
+          author: MessageAuthor.STRANGE,
+          time: event.created_at
         });
       })
   }
 
-  private handleStrangerStatus(event: Event): void {
+  private handleStrangerStatus(event: NostrEvent): void {
     if (event.content === 'typing') {
       this.strangeIsTyping = true;
     } else if (event.content === 'disconnected') {
@@ -120,7 +129,7 @@ export class ChatComponent {
     const me = this.you;
     const stranger = this.stranger;
     if (me && stranger && message.length) {
-      this.talkToStrangerProxy.sendMessage(me, stranger, message);
+      this.talkToStrangerNostr.sendMessage(me, stranger, message);
       this.messages.push({
         author: MessageAuthor.YOU, text: message, time: Math.floor(new Date().getTime() / 1000)
       });
@@ -135,12 +144,12 @@ export class ChatComponent {
     const you = this.you;
     if (you) {
       if (!this.typingTimeoutId) {
-        this.talkToStrangerProxy.isTyping(you);
+        this.talkToStrangerNostr.isTyping(you);
       }
 
       clearTimeout(this.typingTimeoutId);
       this.typingTimeoutId = Number(setTimeout(() => {
-        this.talkToStrangerProxy.stopTyping(you);
+        this.talkToStrangerNostr.stopTyping(you);
         this.typingTimeoutId = 0;
       }, this.TYPING_TIMEOUT));
     }
