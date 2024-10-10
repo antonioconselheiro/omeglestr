@@ -8,7 +8,7 @@ import { finalize, Observable, Subject } from 'rxjs';
 @Injectable()
 export class TalkToStrangerNostr {
 
-  readonly UPDATE_COUNT_TIMEOUT = 1000 * 10;
+  readonly UPDATE_COUNT_TIMEOUT = 1000 * 60 * 2;
 
   constructor(
     private nostrEventFactory: NostrEventFactory,
@@ -62,6 +62,7 @@ export class TalkToStrangerNostr {
       .catch(e => {
         console.error('user count lauched error', e);
         requestPending = false;
+        clearInterval(id)
       });
     };
 

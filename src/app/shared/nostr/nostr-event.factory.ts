@@ -60,9 +60,8 @@ export class NostrEventFactory {
    * https://github.com/nostr-protocol/nips/blob/master/38.md
    */
   createWannaChatUserStatus(user: Required<NostrUser>): NostrEvent {
-    const oneMinute = 60;
     return this.createUserStatus(user, 'wannachat', [
-        ['expiration', this.getExpirationTimestamp(oneMinute)],
+        ['expiration', this.getExpirationTimestamp()],
         ['t', 'wannachat']
       ]);
   }

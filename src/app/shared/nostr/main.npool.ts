@@ -3,13 +3,11 @@ import { finalize, Observable, Subject } from 'rxjs';
 
 export class MainNPool extends NPool {
 
-  // 	TODO: wss://nostr.novacisko.cz support NIP45, maybe use in prod
-
   constructor() {
     super({
       open: (url) => new NRelay1(url),
-      reqRouter: async (filters) => new Map([['ws://localhost:10000', filters]]),
-      eventRouter: async () => ['ws://localhost:10000']
+      reqRouter: async (filters) => new Map([['ws://localhost:7777', filters]]),
+      eventRouter: async () => ['ws://localhost:7777']
     });
   }
 
@@ -48,7 +46,9 @@ export class MainNPool extends NPool {
     const [[relay]] = Array.from(routes);
     console.info('asking count to ', relay);
 
-    return (this.relay(relay) as NRelay1).count(filters, { signal: AbortSignal.timeout(1000) });
+    return (this.relay(relay) as NRelay1).count(filters, {
+      signal: AbortSignal.timeout(1000)
+    });
   }
 
   getOpts(): NPoolOpts {

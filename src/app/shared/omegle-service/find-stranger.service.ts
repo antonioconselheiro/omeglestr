@@ -5,6 +5,8 @@ import { MainNPool } from '@shared/nostr/main.npool';
 import { NostrEventFactory } from '@shared/nostr/nostr-event.factory';
 import { Event } from 'nostr-tools';
 import { FindStrangerNostr } from './find-stranger.nostr';
+import { catchError, throwError, timeout } from 'rxjs';
+import { GlobalConfigService } from '@shared/global-config/global-config.service';
 
 @Injectable()
 export class FindStrangerService {
@@ -12,6 +14,7 @@ export class FindStrangerService {
   constructor(
     private nostrEventFactory: NostrEventFactory,
     private findStrangerNostr: FindStrangerNostr,
+    private config: GlobalConfigService,
     private mainPool: MainNPool
   ) { }
 
@@ -20,12 +23,11 @@ export class FindStrangerService {
   }
 
   async searchStranger(me: Required<NostrUser>): Promise<NostrUser> {
-    let status: NostrEvent;
     const wannaChat = await this.findStrangerNostr.queryChatAvailable();
     if (wannaChat) {
       console.info(new Date().toLocaleString(), 'inviting ', wannaChat.pubkey, ' to chat and listening confirmation');
       const listening = this.listenChatingConfirmation(wannaChat, me);
-      status = await this.inviteToChating(me, wannaChat);
+      await this.inviteToChating(me, wannaChat);
       const isChatingConfirmation = await listening;
 
       if (isChatingConfirmation) {
@@ -33,22 +35,35 @@ export class FindStrangerService {
       }
     }
 
-    status = await this.publishWannaChatStatus(me);
-
+    await this.publishWannaChatStatus(me);
     return new Promise(resolve => {
-      this.findStrangerNostr.listenWannachatResponse(me)
-        .subscribe(event => {
-          this.replyChatInvitation(event, me, status)
-            .then(user => user && resolve(user))
+      const sub = this.findStrangerNostr
+        .listenWannachatResponse(me)
+        .pipe(
+          timeout(this.config.WANNACHAT_STATUS_DEFAULT_TIMEOUT_IN_SECONDS * 1000),
+          catchError(err => {
+            sub.unsubscribe();
+            this.searchStranger(me).then(stranger => resolve(stranger));
+            return throwError(() => new err)
+          })
+        )
+        .subscribe({
+          next: event => {
+            this.replyChatInvitation(event, me)
+              .then(user => user && resolve(user));
+
+            sub.unsubscribe();
+          },
+          error: err => console.error(err)
         });
     });
   }
 
-  async replyChatInvitation(event: NostrEvent, me: Required<NostrUser>, status?: NostrEvent): Promise<NostrUser | void> {
+  async replyChatInvitation(event: NostrEvent, me: Required<NostrUser>): Promise<NostrUser | void> {
     console.info(new Date().toLocaleString(), 'event was listen: ', event);
     console.info(new Date().toLocaleString(), 'it must be a chating invitation from ', event.pubkey, ', repling invitation...');
 
-    status = await this.inviteToChating(me, event);
+    await this.inviteToChating(me, event);
     console.info(new Date().toLocaleString(), 'replied... resolving... ');
     console.info(new Date().toLocaleString(), '[searchStranger] unsubscribe');
     return Promise.resolve(NostrUser.fromPubkey(event.pubkey));
