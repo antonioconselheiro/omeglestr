@@ -6,7 +6,7 @@ import { kinds, nip04, NostrEvent } from 'nostr-tools';
 import { Observable } from 'rxjs';
 
 @Injectable()
-export class TalkToStrangerProxy {
+export class TalkToStrangerNostr {
 
   constructor(
     private nostrEventFactory: NostrEventFactory,
@@ -14,20 +14,30 @@ export class TalkToStrangerProxy {
   ) { }
 
   async openEncryptedDirectMessage(you: Required<NostrUser>, stranger: NostrUser, event: NostrEvent): Promise<string> {
-    return nip04.decrypt(you.nsec, stranger.npub, event.content);
+    return nip04.decrypt(you.secretKey, stranger.pubkey, event.content);
   }
 
   listenMessages(me: Required<NostrUser>, stranger: NostrUser): Observable<NostrEvent> {
     return this.mainPool.observe([
       {
-        kinds: [ Number(kinds.EncryptedDirectMessage) ],
+        kinds: [ kinds.EncryptedDirectMessage ],
         authors: [ stranger.pubkey ],
         '#p': [ me.pubkey ]
       }
     ]);
   }
 
+  listenStrangerStatus(stranger: NostrUser): Observable<NostrEvent> {
+    return this.mainPool.observe([
+      {
+        kinds: [ kinds.UserStatuses ],
+        authors: [ stranger.pubkey ]
+      }
+    ]);
+  }
+
   async sendMessage(you: Required<NostrUser>, stranger: NostrUser, message: string): Promise<void> {
+    await this.stopTyping(you);
     const event = await this.nostrEventFactory.createEncryptedDirectMessage(you, stranger, message);
     return this.mainPool.event(event);
   }
@@ -37,8 +47,8 @@ export class TalkToStrangerProxy {
     return this.mainPool.event(wannaChatStatus);
   }
 
-  stopTyping(user: Required<NostrUser>): Promise<void> {
-    const wannaChatStatus = this.nostrEventFactory.cleanUserStatus(user);
+  stopTyping(you: Required<NostrUser>): Promise<void> {
+    const wannaChatStatus = this.nostrEventFactory.cleanUserStatus(you);
     return this.mainPool.event(wannaChatStatus);
   }
 }

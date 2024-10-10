@@ -2,21 +2,32 @@
 <section class="navbar">
   <img class="logo" src="/omeglestr/assets/logo.png" alt="logo" />
   <h2 class="description">Talk to strangers!</h2>
-  <!--- <h2 class="online">{{currentOnline}}</h2> -->
+  <h2 class="online">{{currentOnline}}</h2>
 </section>
 
 <main class="main">
   <section #conversation class="conversation">
+    <div *ngIf="stranger" class="message">
+      You're now chatting with a random stranger.
+    </div>
     <div
       *ngFor="let message of messages"
       class="chat"
      >
       <span
-        [class.author-stranger]="message.author === AUTHOR_STRANGE"
-        [class.author-you]="message.author === AUTHOR_YOU"
+        [class.authorStranger]="message.author === AUTHOR_STRANGE"
+        [class.authorYou]="message.author === AUTHOR_YOU"
       >{{message.author | author}}: </span>
       <span class="text">{{message.text}}</span>
-  </div>
+    </div>
+
+    <div class="message" *ngIf="strangeIsTyping">
+      Stranger is typing...
+    </div>
+    <ng-container *ngIf="currentState === STATE_DISCONNECTED">
+      <div class="message" *ngIf="whoDisconnected === AUTHOR_STRANGE">Stranger has disconnected.</div>
+      <div class="message" *ngIf="whoDisconnected === AUTHOR_YOU">You have disconnected.</div>
+    </ng-container>
   </section>
 
   <form
@@ -28,13 +39,13 @@
       type="button"
       (click)="findStranger()"
       *ngIf="currentState === STATE_DISCONNECTED"
-      class="btn start bottom-left-radius"
+      class="btn start bottomLeftRadius"
     >
       Start
     </button>
     <button
       type="button"
-      class="btn bottom-left-radius"
+      class="btn bottomLeftRadius"
       *ngIf="currentState === STATE_CONNECTED"
       (click)="currentState = STATE_UP_TO_DISCONNECT"
     >
@@ -42,7 +53,7 @@
     </button>
     <button
       type="button"
-      class="btn bottom-left-radius bold"
+      class="btn bottomLeftRadius bold"
       (click)="disconnect()"
       *ngIf="currentState === STATE_UP_TO_DISCONNECT"
     >
@@ -53,14 +64,14 @@
       #messageField
       class="textarea"
       [attr.disabled]="currentState === STATE_DISCONNECTED ? 'disabled' : null"
-      (keydown.enter)="sendMessage(messageField.value)"
+      (keydown.enter)="sendMessage(messageField.value); cleanMessageField(messageField)"
       (keydown)="onTyping()"
     ></textarea>
     <button
       #send
       type="button"
-      class="btn bottom-right-radius"
-      (click)="sendMessage(messageField.value); messageField.value = ''"
+      class="btn bottomRightRadius"
+      (click)="sendMessage(messageField.value); cleanMessageField(messageField)"
       [attr.disabled]="currentState === STATE_DISCONNECTED ? 'disabled' : null"
     >
       Send

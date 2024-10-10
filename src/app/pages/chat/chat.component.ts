@@ -1,16 +1,15 @@
 import { Component } from '@angular/core';
 import { MessageAuthor } from '@domain/message-author.enum';
-import { IMessage } from '@domain/message.interface';
+import { ChatMessage } from '@domain/chat-message.interface';
 import { NostrUser } from '@domain/nostr-user';
 import { FindStrangerService } from '@shared/omegle-service/find-stranger.service';
-import { TalkToStrangerProxy } from '@shared/omegle-service/talk-to-stranger.proxy';
+import { TalkToStrangerNostr } from '@shared/omegle-service/talk-to-stranger.nostr';
 import { ChatState } from './chat-state.enum';
 import { Event } from 'nostr-tools';
 
 @Component({
   selector: 'omg-chat',
-  templateUrl: './chat.component.html',
-  styleUrls: ['./chat.component.scss']
+  templateUrl: './chat.component.html'
 })
 export class ChatComponent {
 
@@ -26,20 +25,22 @@ export class ChatComponent {
   typingTimeoutId = 0;
   currentOnline = 0;
   currentState = ChatState.DISCONNECTED;
+  strangeIsTyping = false;
+  whoDisconnected: MessageAuthor | null = null;
 
   you: Required<NostrUser> | null = null;
   stranger: NostrUser | null = null;
 
-  messages: IMessage[] = [];
+  messages: ChatMessage[] = [];
 
   constructor(
     private findStrangerProxy: FindStrangerService,
-    private talkToStrangerProxy: TalkToStrangerProxy
+    private talkToStrangerProxy: TalkToStrangerNostr
   ) { }
 
   findStranger(): void {
     const you = this.you = this.findStrangerProxy.connect();
-    console.info(new Date().toLocaleString(),'me: ', you);
+    console.info(new Date().toLocaleString(), 'me: ', you);
     this.findStrangerProxy
       .searchStranger(this.you)
       .then(stranger => this.startConversation(you, stranger))
@@ -49,8 +50,9 @@ export class ChatComponent {
   disconnect(): Promise<void> {
     if (this.you) {
       return this.findStrangerProxy
-        .disconnect(this.you)
-        .then(() => {
+      .disconnect(this.you)
+      .then(() => {
+          this.whoDisconnected = MessageAuthor.YOU;
           this.currentState = ChatState.DISCONNECTED;
           return Promise.resolve();
         });
@@ -68,6 +70,12 @@ export class ChatComponent {
       .subscribe({
         next: event => this.addMessageFromStranger(me, stranger, event)
       });
+
+    this.talkToStrangerProxy
+      .listenStrangerStatus(stranger)
+      .subscribe({
+        next: event => this.handleStrangerStatus(event)
+      });
   }
 
   private addMessageFromStranger(me: Required<NostrUser>, stranger: NostrUser, event: Event): void {
@@ -80,6 +88,19 @@ export class ChatComponent {
       })
   }
 
+  private handleStrangerStatus(event: Event): void {
+    if (event.content === 'typing') {
+      this.strangeIsTyping = true;
+    } else if (event.content === 'disconnected') {
+      this.strangeIsTyping = false;
+      this.whoDisconnected = MessageAuthor.STRANGE;
+      this.currentState = ChatState.DISCONNECTED;
+      this.disconnect();
+    } else {
+      this.strangeIsTyping = false;
+    }
+  }
+
   sendMessage(message: string): void {
     const me = this.you;
     const stranger = this.stranger;
@@ -89,6 +110,10 @@ export class ChatComponent {
         author: MessageAuthor.YOU, text: message, time: Math.floor(new Date().getTime() / 1000)
       });
     }
+  }
+
+  cleanMessageField(el: { value: string }): void {
+    setTimeout(() => el.value = '');
   }
 
   onTyping(): void {

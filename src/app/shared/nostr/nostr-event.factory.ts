@@ -36,7 +36,7 @@ export class NostrEventFactory {
    * https://github.com/nbd-wtf/nostr-tools/blob/master/nip04.test.ts
    */
   async createEncryptedDirectMessage(you: Required<NostrUser>, stranger: NostrUser, message: string): Promise<NostrEvent> {
-    const encriptedMessage = await nip04.encrypt(you.pubkey, stranger.pubkey, message);
+    const encriptedMessage = await nip04.encrypt(you.secretKey, stranger.pubkey, message);
 
     const unsignedEvent: EventTemplate = {
       kind: kinds.EncryptedDirectMessage,
@@ -49,7 +49,7 @@ export class NostrEventFactory {
     };
 
     const verifiedEvent = finalizeEvent(
-      unsignedEvent, you.privateKey
+      unsignedEvent, you.secretKey
     );
 
     return Promise.resolve(verifiedEvent);
@@ -92,7 +92,7 @@ export class NostrEventFactory {
     }
 
     const verifiedEvent = finalizeEvent(
-      template, user.privateKey
+      template, user.secretKey
     );
 
     return verifiedEvent;
@@ -120,7 +120,7 @@ export class NostrEventFactory {
     };
 
     const verifiedEvent = finalizeEvent(
-      unsignedEvent as object as EventTemplate, user.privateKey
+      unsignedEvent as object as EventTemplate, user.secretKey
     );
 
     return verifiedEvent;

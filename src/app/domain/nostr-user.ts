@@ -16,7 +16,7 @@ export class NostrUser {
   /**
    * private key
    */
-  readonly privateKey?: Uint8Array;
+  readonly secretKey?: Uint8Array;
 
   /**
    * user pubkey
@@ -32,15 +32,15 @@ export class NostrUser {
     const { type, data } = nip19.decode(nostrString);
     if (type === 'nsec') {
       this.nsec = nostrString;
-      this.privateKey = data;
-      this.pubkey = getPublicKey(this.privateKey);
+      this.secretKey = data;
+      this.pubkey = getPublicKey(this.secretKey);
       this.npub = nip19.npubEncode(this.pubkey);
     } else if (type === 'npub') {
       this.npub = nostrString;
       this.pubkey = data.toString();
 
       this.nsec = undefined;
-      this.privateKey = undefined;
+      this.secretKey = undefined;
     } else {
       throw new Error('Invalid argument, NostrUser expect nsec or npub string');
     }
