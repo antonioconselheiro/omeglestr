@@ -43,7 +43,10 @@ export class FindStrangerService {
           timeout(this.config.WANNACHAT_STATUS_DEFAULT_TIMEOUT_IN_SECONDS * 1000),
           catchError(err => {
             sub.unsubscribe();
-            this.searchStranger(me).then(stranger => resolve(stranger));
+            this.deleteUserHistory(me).then(
+              () => this.searchStranger(me).then(stranger => resolve(stranger))
+            );
+
             return throwError(() => new err)
           })
         )
