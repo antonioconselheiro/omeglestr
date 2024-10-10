@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { MessageAuthor } from '@domain/message-author.enum';
 import { ChatMessage } from '@domain/chat-message.interface';
 import { NostrUser } from '@domain/nostr-user';
@@ -20,7 +20,7 @@ export class ChatComponent {
   readonly AUTHOR_STRANGE = MessageAuthor.STRANGE;
   readonly AUTHOR_YOU = MessageAuthor.YOU;
 
-  readonly TYPING_TIMEOUT = 3_000;
+  readonly TYPING_TIMEOUT = 2_000;
 
   typingTimeoutId = 0;
   currentOnline = 0;
@@ -38,7 +38,17 @@ export class ChatComponent {
     private talkToStrangerProxy: TalkToStrangerNostr
   ) { }
 
+  @HostListener('window:beforeunload')
+  async onBeforeUnload(): Promise<true> {
+    if (this.stranger) {
+      await this.disconnect();
+    }
+
+    return true;
+  }
+
   findStranger(): void {
+    this.whoDisconnected = null;
     const you = this.you = this.findStrangerProxy.connect();
     console.info(new Date().toLocaleString(), 'me: ', you);
     this.findStrangerProxy
@@ -52,10 +62,15 @@ export class ChatComponent {
       return this.findStrangerProxy
       .disconnect(this.you)
       .then(() => {
+        this.currentState = ChatState.DISCONNECTED;
+        this.strangeIsTyping = false;
+
+        if (!this.whoDisconnected) {
           this.whoDisconnected = MessageAuthor.YOU;
-          this.currentState = ChatState.DISCONNECTED;
-          return Promise.resolve();
-        });
+        }
+
+        return Promise.resolve();
+      });
     }
 
     return Promise.resolve();
@@ -104,7 +119,7 @@ export class ChatComponent {
   sendMessage(message: string): void {
     const me = this.you;
     const stranger = this.stranger;
-    if (me && stranger) {
+    if (me && stranger && message.length) {
       this.talkToStrangerProxy.sendMessage(me, stranger, message);
       this.messages.push({
         author: MessageAuthor.YOU, text: message, time: Math.floor(new Date().getTime() / 1000)

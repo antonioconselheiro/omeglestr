@@ -54,7 +54,7 @@
     <button
       type="button"
       class="btn bottomLeftRadius bold"
-      (click)="disconnect()"
+      (click)="disconnect(); cleanMessageField(messageField)"
       *ngIf="currentState === STATE_UP_TO_DISCONNECT"
     >
       Really?
