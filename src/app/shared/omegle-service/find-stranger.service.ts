@@ -3,7 +3,7 @@ import { NostrUser } from '@domain/nostr-user';
 import { NostrEvent } from '@nostrify/nostrify';
 import { MainNPool } from '@shared/nostr/main.npool';
 import { NostrEventFactory } from '@shared/nostr/nostr-event.factory';
-import { Event, kinds } from 'nostr-tools';
+import { Event } from 'nostr-tools';
 import { FindStrangerNostr } from './find-stranger.nostr';
 
 @Injectable()
@@ -19,31 +19,6 @@ export class FindStrangerService {
     return this.mainPool.event(event);
   }
 
-  /**
-   * 1.a
-   * - publicar #wannachat e escutar respostas para seu #wannachat
-   * - escutar novas publicações de #wannachat
-   * 
-   * 1.a.a - novo #wannachat publicado é escutado
-   * - user status é respondido com 'chating' usando seu pubkey
-   *      como tag p
-   * 
-   * 1.a.a.a - evento é respondido
-   * - ir para 2
-   * 
-   * 1.a.a.b - o usuário convidado responde a outra solicitação ou ocorre timeout
-   * - voltar a escutar seu #wanna chat e novas publicações como em 1.a
-   * 
-   * 1.a.b - meu #wannachat é respondido com 'chating'
-   * - ir para 2
-   * 
-   * 2. Chat é iniciado
-   *   - o textarea de mensagens e o enviar são habilitados
-   *   - a escuta de eventos do tipo encrypted direct message devem
-   *      ser escutados e propagados
-   *   - o user status continua sendo atualizado como sem status (ou
-   *      seja, '') typing e disconnected 
-   */
   async searchStranger(me: Required<NostrUser>): Promise<NostrUser> {
     let status: NostrEvent;
     const wannaChat = await this.findStrangerNostr.queryChatAvailable();

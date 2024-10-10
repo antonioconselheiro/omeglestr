@@ -1,4 +1,4 @@
-import { Component, HostListener, OnDestroy } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { MessageAuthor } from '@domain/message-author.enum';
 import { ChatMessage } from '@domain/chat-message.interface';
 import { NostrUser } from '@domain/nostr-user';
@@ -12,7 +12,7 @@ import { Subscription } from 'rxjs';
   selector: 'omg-chat',
   templateUrl: './chat.component.html'
 })
-export class ChatComponent implements OnDestroy {
+export class ChatComponent implements OnDestroy, OnInit {
 
   readonly STATE_CONNECTED = ChatState.CONNECTED;
   readonly STATE_UP_TO_DISCONNECT = ChatState.UP_TO_DISCONNECT;
@@ -41,6 +41,12 @@ export class ChatComponent implements OnDestroy {
     private findStrangerProxy: FindStrangerService,
     private talkToStrangerNostr: TalkToStrangerNostr
   ) { }
+
+  ngOnInit(): void {
+    this.subscriptions.add(this.talkToStrangerNostr
+      .listenCurrenOnlineUsers()
+      .subscribe(currentOnline => this.currentOnline = currentOnline));
+  }
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();

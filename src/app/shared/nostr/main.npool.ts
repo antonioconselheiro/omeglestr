@@ -1,5 +1,5 @@
-import { NostrEvent, NostrFilter, NPool, NRelay1 } from '@nostrify/nostrify';
-import { filter, finalize, from, map, Observable, Subject, takeUntil } from 'rxjs';
+import { NostrEvent, NostrFilter, NostrRelayCOUNT, NPool, NPoolOpts, NRelay1 } from '@nostrify/nostrify';
+import { finalize, Observable, Subject } from 'rxjs';
 
 export class MainNPool extends NPool {
 
@@ -35,5 +35,20 @@ export class MainNPool extends NPool {
           abort.abort();
         })
       );
+  }
+
+  async count(filters: NostrFilter[], opts?: { signal?: AbortSignal }): Promise<NostrRelayCOUNT[2]> {
+    const routes = await this.getOpts().reqRouter(filters);
+    if (routes.size < 1) {
+      return Promise.reject(new Error('disconnected'));
+    }
+
+    const [[relay]] = Array.from(routes);
+    return (this.relay(relay) as NRelay1).count(filters, opts);
+  }
+
+  getOpts(): NPoolOpts {
+    //  FIXME: open PR in nostrify asking to opts become protected
+    return (this as any as { opts: NPoolOpts }).opts;
   }
 }
