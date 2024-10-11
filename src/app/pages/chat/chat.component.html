@@ -67,7 +67,7 @@
       name="text"
       #messageField
       class="textarea"
-      [attr.disabled]="currentState === STATE_DISCONNECTED ? 'disabled' : null"
+      [attr.disabled]="currentState === STATE_DISCONNECTED || currentState === STATE_SEARCHING_STRANGER ? 'disabled' : null"
       (keydown.enter)="sendMessage(messageField.value); cleanMessageField(messageField)"
       (keydown)="onTyping()"
     ></textarea>

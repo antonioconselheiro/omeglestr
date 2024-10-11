@@ -25,7 +25,7 @@ export class ChatComponent implements OnDestroy, OnInit {
   readonly TYPING_TIMEOUT = 2_000;
 
   typingTimeoutId = 0;
-  currentOnline = 0;
+  currentOnline = 1;
   currentState = ChatState.DISCONNECTED;
   strangeIsTyping = false;
   whoDisconnected: MessageAuthor | null = null;
