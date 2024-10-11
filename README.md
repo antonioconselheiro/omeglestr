@@ -2,11 +2,11 @@
 > Isaiah 65:1
 
 # Omegle on Nostr
-_don't thread on Omegle
+*don't thread on Omegle*
 
-NOT RELEASED YET
+## NOT RELEASED YET
 
-Not the phoenix we want, the phonix we need.
+## Not the phoenix we want, the phonix we need.
 ![ostrich](phoenix.jpg)
 
 ## Implementation
