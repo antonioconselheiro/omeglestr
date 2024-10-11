@@ -6,14 +6,20 @@ _don't thread on Omegle
 
 NOT RELEASED YET
 
-# TODO
+Not the phoenix we want, the phonix we need.
+![ostrich](phoenix.jpg)
+
+## Implementation
+It'll not need you `nsec` or connect to your signer, this will generate one nsec to each talk and in the end of each talk will clean all events emitted from your session.
+This also have a hardcoded relay included, no custom relays are need, if you want change it and find stranger to talk in other relays you must [fork](https://guides.github.com/activities/forking/) this repository by [clicking here](https://github.com/antonioconselheiro/omeglestr/fork).
+
+## Relay Compatibility
+Need support to [NIP-04](https://github.com/nostr-protocol/nips/blob/master/04.md), [NIP-38](https://github.com/nostr-protocol/nips/blob/master/38.md) and [NIP-40](https://github.com/nostr-protocol/nips/blob/master/40.md).
+
+## TODO
 [ ] include "great talk?" button to export talk as html
 [ ] if relay has an onion url, in onion context the app should preper that
 [ ] user must be able to stop app from searching
-
-
-# Relay Compatibility
-Need support to [NIP-04](https://github.com/nostr-protocol/nips/blob/master/04.md), [NIP-38](https://github.com/nostr-protocol/nips/blob/master/38.md) and [NIP-40](https://github.com/nostr-protocol/nips/blob/master/40.md).
 
 ## Donate
 Do you want more protests in favor of free speech, freedom of software and freedom of work similar to this one?
