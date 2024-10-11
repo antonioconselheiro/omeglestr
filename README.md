@@ -4,6 +4,9 @@
 # Omegle on Nostr
 _don't thread on Omegle
 
+# TODO
+[ ] include "great talk?" button to export talk as html
+
 # Relay Compatibility
 Need support to [NIP-04](https://github.com/nostr-protocol/nips/blob/master/04.md).
 
