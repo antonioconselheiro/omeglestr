@@ -7,7 +7,7 @@
 ## NOT RELEASED YET
 
 ## Not the phoenix we want, the phonix we need.
-![ostrich](phoenix.jpg)
+![ostrich](./phoenix.jpg)
 
 ## Implementation
 It'll not need you `nsec` or connect to your signer, this will generate one nsec to each talk and in the end of each talk will clean all events emitted from your session.
