@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { NostrUser } from '@domain/nostr-user';
+import { OmeglestrUser } from '@domain/omeglestr-user';
 import { NostrEvent } from '@nostrify/nostrify';
 import { GlobalConfigService } from '@shared/global-config/global-config.service';
 import { EventTemplate, finalizeEvent, kinds, nip04 } from 'nostr-tools';
@@ -35,7 +35,7 @@ export class NostrEventFactory {
    * https://github.com/nostr-protocol/nips/blob/master/04.md
    * https://github.com/nbd-wtf/nostr-tools/blob/master/nip04.test.ts
    */
-  async createEncryptedDirectMessage(you: Required<NostrUser>, stranger: NostrUser, message: string): Promise<NostrEvent> {
+  async createEncryptedDirectMessage(you: Required<OmeglestrUser>, stranger: OmeglestrUser, message: string): Promise<NostrEvent> {
     const encriptedMessage = await nip04.encrypt(you.secretKey, stranger.pubkey, message);
 
     const unsignedEvent: EventTemplate = {
@@ -59,31 +59,31 @@ export class NostrEventFactory {
    * NIP 38
    * https://github.com/nostr-protocol/nips/blob/master/38.md
    */
-  createWannaChatUserStatus(user: Required<NostrUser>): NostrEvent {
+  createWannaChatUserStatus(user: Required<OmeglestrUser>): NostrEvent {
     return this.createUserStatus(user, 'wannachat', [
         ['expiration', this.getExpirationTimestamp()],
         ['t', 'wannachat']
       ]);
   }
 
-  createDisconnectedUserStatus(user: Required<NostrUser>): NostrEvent {
+  createDisconnectedUserStatus(user: Required<OmeglestrUser>): NostrEvent {
     return this.createUserStatus(user, 'disconnected', [
       ['expiration', this.getExpirationTimestamp()]
     ]);
   }
 
-  createTypingUserStatus(user: Required<NostrUser>): NostrEvent {
+  createTypingUserStatus(user: Required<OmeglestrUser>): NostrEvent {
     return this.createUserStatus(user, 'typing');
   }
 
-  createChatingUserStatus(you: Required<NostrUser>, strange: NostrUser): NostrEvent {
+  createChatingUserStatus(you: Required<OmeglestrUser>, strange: OmeglestrUser): NostrEvent {
     return this.createUserStatus(you, 'chating', [
       [ 'p', strange.pubkey ],
       [ 't', 'chating' ]
     ]);
   }
 
-  deleteUserHistory(you: Required<NostrUser>): NostrEvent {
+  deleteUserHistory(you: Required<OmeglestrUser>): NostrEvent {
     const template: EventTemplate = {
       kind: 5,
       tags: [
@@ -102,11 +102,11 @@ export class NostrEventFactory {
     return verifiedEvent;
   }
 
-  cleanUserStatus(user: Required<NostrUser>): NostrEvent {
+  cleanUserStatus(user: Required<OmeglestrUser>): NostrEvent {
     return this.createUserStatus(user, '');
   }
 
-  private createUserStatus(user: Required<NostrUser>, status: string, tag?: string[][]): NostrEvent {
+  private createUserStatus(user: Required<OmeglestrUser>, status: string, tag?: string[][]): NostrEvent {
     const tags = [
       ['d', 'general'],
       ['t', 'omegle'],

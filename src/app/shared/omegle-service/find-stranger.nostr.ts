@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { NostrUser } from '@domain/nostr-user';
+import { OmeglestrUser } from '@domain/omeglestr-user';
 import { NostrEvent } from '@nostrify/nostrify';
 import { MainNPool } from '@shared/nostr/main.npool';
 import { kinds } from 'nostr-tools';
@@ -29,7 +29,7 @@ export class FindStrangerNostr {
     ]);
   }
 
-  queryWannachatResponse(user: Required<NostrUser>): Promise<NostrEvent[]> {
+  queryWannachatResponse(user: Required<OmeglestrUser>): Promise<NostrEvent[]> {
     console.info('quering filter:', [
       {
         kinds: [ kinds.UserStatuses ],
@@ -48,7 +48,7 @@ export class FindStrangerNostr {
     ]);
   }
 
-  listenWannachatResponse(user: Required<NostrUser>): Observable<NostrEvent> {
+  listenWannachatResponse(user: Required<OmeglestrUser>): Observable<NostrEvent> {
     console.info('observing filter:', [
       {
         kinds: [ kinds.UserStatuses ],

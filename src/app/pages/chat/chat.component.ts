@@ -1,7 +1,7 @@
 import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { MessageAuthor } from '@domain/message-author.enum';
 import { ChatMessage } from '@domain/chat-message.interface';
-import { NostrUser } from '@domain/nostr-user';
+import { OmeglestrUser } from '@domain/omeglestr-user';
 import { FindStrangerService } from '@shared/omegle-service/find-stranger.service';
 import { TalkToStrangerNostr } from '@shared/omegle-service/talk-to-stranger.nostr';
 import { ChatState } from './chat-state.enum';
@@ -30,8 +30,8 @@ export class ChatComponent implements OnDestroy, OnInit {
   strangeIsTyping = false;
   whoDisconnected: MessageAuthor | null = null;
 
-  you: Required<NostrUser> | null = null;
-  stranger: NostrUser | null = null;
+  you: Required<OmeglestrUser> | null = null;
+  stranger: OmeglestrUser | null = null;
 
   messages: ChatMessage[] = [];
 
@@ -89,7 +89,7 @@ export class ChatComponent implements OnDestroy, OnInit {
     return Promise.resolve();
   }
 
-  private startConversation(me: Required<NostrUser>, stranger: NostrUser): void {
+  private startConversation(me: Required<OmeglestrUser>, stranger: OmeglestrUser): void {
     console.log('starting conversation, stranger: ', stranger);
     this.stranger = stranger;
     this.currentState = ChatState.CONNECTED;
@@ -106,7 +106,7 @@ export class ChatComponent implements OnDestroy, OnInit {
       }));
   }
 
-  private addMessageFromStranger(me: Required<NostrUser>, stranger: NostrUser, event: NostrEvent): void {
+  private addMessageFromStranger(me: Required<OmeglestrUser>, stranger: OmeglestrUser, event: NostrEvent): void {
     this.talkToStrangerNostr
       .openEncryptedDirectMessage(me, stranger, event)
       .then(text => {

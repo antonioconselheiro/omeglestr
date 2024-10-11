@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { NostrUser } from '@domain/nostr-user';
+import { OmeglestrUser } from '@domain/omeglestr-user';
 import { MainNPool } from '@shared/nostr/main.npool';
 import { NostrEventFactory } from '@shared/nostr/nostr-event.factory';
 import { kinds, nip04, NostrEvent } from 'nostr-tools';
@@ -15,11 +15,11 @@ export class TalkToStrangerNostr {
     private mainPool: MainNPool
   ) { }
 
-  async openEncryptedDirectMessage(you: Required<NostrUser>, stranger: NostrUser, event: NostrEvent): Promise<string> {
+  async openEncryptedDirectMessage(you: Required<OmeglestrUser>, stranger: OmeglestrUser, event: NostrEvent): Promise<string> {
     return nip04.decrypt(you.secretKey, stranger.pubkey, event.content);
   }
 
-  listenMessages(me: Required<NostrUser>, stranger: NostrUser): Observable<NostrEvent> {
+  listenMessages(me: Required<OmeglestrUser>, stranger: OmeglestrUser): Observable<NostrEvent> {
     return this.mainPool.observe([
       {
         kinds: [ kinds.EncryptedDirectMessage ],
@@ -29,7 +29,7 @@ export class TalkToStrangerNostr {
     ]);
   }
 
-  listenStrangerStatus(stranger: NostrUser): Observable<NostrEvent> {
+  listenStrangerStatus(stranger: OmeglestrUser): Observable<NostrEvent> {
     return this.mainPool.observe([
       {
         kinds: [ kinds.UserStatuses ],
@@ -74,18 +74,18 @@ export class TalkToStrangerNostr {
       .pipe(finalize(() => clearInterval(id)));
   }
 
-  async sendMessage(you: Required<NostrUser>, stranger: NostrUser, message: string): Promise<void> {
+  async sendMessage(you: Required<OmeglestrUser>, stranger: OmeglestrUser, message: string): Promise<void> {
     await this.stopTyping(you);
     const event = await this.nostrEventFactory.createEncryptedDirectMessage(you, stranger, message);
     return this.mainPool.event(event);
   }
 
-  isTyping(user: Required<NostrUser>): Promise<void> {
+  isTyping(user: Required<OmeglestrUser>): Promise<void> {
     const wannaChatStatus = this.nostrEventFactory.createTypingUserStatus(user);
     return this.mainPool.event(wannaChatStatus);
   }
 
-  stopTyping(you: Required<NostrUser>): Promise<void> {
+  stopTyping(you: Required<OmeglestrUser>): Promise<void> {
     const wannaChatStatus = this.nostrEventFactory.cleanUserStatus(you);
     return this.mainPool.event(wannaChatStatus);
   }

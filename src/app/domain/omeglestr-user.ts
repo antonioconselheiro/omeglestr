@@ -1,7 +1,6 @@
 import { generateSecretKey, getPublicKey, nip19 } from 'nostr-tools';
 
-// FIXME: change this for a signer
-export class NostrUser {
+export class OmeglestrUser {
 
   /**
    * nsec
@@ -58,19 +57,19 @@ export class NostrUser {
     } catch { }
   }
 
-  static fromPubkey(pubkey: string): NostrUser {
-    return new NostrUser(nip19.npubEncode(pubkey));
+  static fromPubkey(pubkey: string): OmeglestrUser {
+    return new OmeglestrUser(nip19.npubEncode(pubkey));
   }
 
-  static fromNostrSecret(nsec: string): Required<NostrUser> {
-    return new NostrUser(nsec) as Required<NostrUser>;
+  static fromNostrSecret(nsec: string): Required<OmeglestrUser> {
+    return new OmeglestrUser(nsec) as Required<OmeglestrUser>;
   }
 
-  static fromNostrSecretHex(nsecHex: Uint8Array): Required<NostrUser> {
-    return new NostrUser(nip19.nsecEncode(nsecHex)) as Required<NostrUser>;
+  static fromNostrSecretHex(nsecHex: Uint8Array): Required<OmeglestrUser> {
+    return new OmeglestrUser(nip19.nsecEncode(nsecHex)) as Required<OmeglestrUser>;
   }
 
-  static create(): Required<NostrUser> {
+  static create(): Required<OmeglestrUser> {
     return this.fromNostrSecretHex(generateSecretKey());
   }
 
