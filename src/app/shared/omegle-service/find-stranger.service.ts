@@ -31,6 +31,21 @@ export class FindStrangerService {
 
       if (isChatingConfirmation) {
         return Promise.resolve(OmeglestrUser.fromPubkey(wannaChat.pubkey));
+      } else {
+        //  TODO: centralize this into a service
+        let ignoreList = sessionStorage.getItem('alwaysIgnoreWannachat');
+        if (!ignoreList) {
+          ignoreList = '[]';
+        }
+    
+        try {
+          const updatedIgnoreList = JSON.parse(ignoreList);
+          updatedIgnoreList.push(wannaChat.pubkey);
+          sessionStorage.setItem('alwaysIgnoreWannachat', JSON.stringify(updatedIgnoreList));
+        } catch { }
+
+        await this.deleteUserHistory(me);
+        return this.searchStranger(me);
       }
     }
 

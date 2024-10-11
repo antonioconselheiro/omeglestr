@@ -52,7 +52,6 @@ export class OmeglestrUser {
     try {
       const updatedIgnoreList = JSON.parse(ignoreList);
       updatedIgnoreList.push(this.pubkey);
-
       sessionStorage.setItem('alwaysIgnoreWannachat', JSON.stringify(updatedIgnoreList));
     } catch { }
   }
