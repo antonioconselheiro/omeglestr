@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { OmeglestrUser } from '@domain/omeglestr-user';
 import { NostrEvent } from '@nostrify/nostrify';
-import { MainNPool } from '@shared/nostr/main.npool';
+import { NPoolService } from '@shared/nostr/main.npool';
 import { kinds } from 'nostr-tools';
 import { Observable } from 'rxjs';
 
@@ -9,7 +9,7 @@ import { Observable } from 'rxjs';
 export class FindStrangerNostr {
 
   constructor(
-    private mainPool: MainNPool
+    private npool: NPoolService
   ) { }
 
   listenUserStatusUpdate(pubkey: string): Observable<NostrEvent> {
@@ -20,7 +20,7 @@ export class FindStrangerNostr {
         authors: [ pubkey ]
       }
     ]);
-    return this.mainPool.observe([
+    return this.npool.observe([
       {
         kinds: [ kinds.UserStatuses ],
         '#t': [ 'omegle' ],
@@ -38,7 +38,7 @@ export class FindStrangerNostr {
         limit: 1
       }
     ]);
-    return this.mainPool.query([
+    return this.npool.query([
       {
         kinds: [ kinds.UserStatuses ],
         '#t': [ 'chating', 'omegle' ],
@@ -57,7 +57,7 @@ export class FindStrangerNostr {
         limit: 1
       }
     ]);
-    return this.mainPool.observe([
+    return this.npool.observe([
       {
         kinds: [ kinds.UserStatuses ],
         '#t': [ 'chating', 'omegle' ],
@@ -78,7 +78,7 @@ export class FindStrangerNostr {
         since: currentTimeInSeconds - timeInSeconds
       }
     ]);
-    const wannachats = await this.mainPool.query([
+    const wannachats = await this.npool.query([
       {
         kinds: [ kinds.UserStatuses ],
         '#t': [ 'wannachat', 'omegle' ],

@@ -6,9 +6,10 @@ _don't thread on Omegle
 
 # TODO
 [ ] include "great talk?" button to export talk as html
+[ ] if relay has an onion url, in onion context the app should preper that
 
 # Relay Compatibility
-Need support to [NIP-04](https://github.com/nostr-protocol/nips/blob/master/04.md).
+Need support to [NIP-04](https://github.com/nostr-protocol/nips/blob/master/04.md), [NIP-38](https://github.com/nostr-protocol/nips/blob/master/38.md) and [NIP-40](https://github.com/nostr-protocol/nips/blob/master/40.md).
 
 ## Donate
 Do you want more protests in favor of free speech, freedom of software and freedom of work similar to this one?

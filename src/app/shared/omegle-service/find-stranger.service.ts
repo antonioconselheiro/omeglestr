@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { OmeglestrUser } from '@domain/omeglestr-user';
 import { NostrEvent } from '@nostrify/nostrify';
 import { GlobalConfigService } from '@shared/global-config/global-config.service';
-import { MainNPool } from '@shared/nostr/main.npool';
+import { NPoolService } from '@shared/nostr/main.npool';
 import { NostrEventFactory } from '@shared/nostr/nostr-event.factory';
 import { catchError, throwError, timeout } from 'rxjs';
 import { FindStrangerNostr } from './find-stranger.nostr';
@@ -14,11 +14,11 @@ export class FindStrangerService {
     private nostrEventFactory: NostrEventFactory,
     private findStrangerNostr: FindStrangerNostr,
     private config: GlobalConfigService,
-    private mainPool: MainNPool
+    private npool: NPoolService
   ) { }
 
   publish(event: NostrEvent): Promise<void> {
-    return this.mainPool.event(event);
+    return this.npool.event(event);
   }
 
   async searchStranger(me: Required<OmeglestrUser>): Promise<OmeglestrUser> {
@@ -130,7 +130,7 @@ export class FindStrangerService {
   private async publishWannaChatStatus(user: Required<OmeglestrUser>): Promise<NostrEvent> {
     const wannaChatStatus = this.nostrEventFactory.createWannaChatUserStatus(user);
     console.info(new Date().toLocaleString(), 'updating my status to: ', wannaChatStatus);
-    await this.mainPool.event(wannaChatStatus);
+    await this.npool.event(wannaChatStatus);
 
     return Promise.resolve(wannaChatStatus);
   }
@@ -138,7 +138,7 @@ export class FindStrangerService {
   private async publishChatInviteStatus(user: Required<OmeglestrUser>, stranger: OmeglestrUser): Promise<NostrEvent> {
     const chatingStatus = this.nostrEventFactory.createChatingUserStatus(user, stranger);
     console.info(new Date().toLocaleString(), 'updating my status to: ', chatingStatus);
-    await this.mainPool.event(chatingStatus);
+    await this.npool.event(chatingStatus);
 
     return Promise.resolve(chatingStatus);
   }
@@ -146,7 +146,7 @@ export class FindStrangerService {
   private async deleteUserHistory(user: Required<OmeglestrUser>): Promise<void> {
     const deleteStatus = this.nostrEventFactory.deleteUserHistory(user);
     console.info(new Date().toLocaleString(), 'deleting user history');
-    await this.mainPool.event(deleteStatus);
+    await this.npool.event(deleteStatus);
   }
 
   connect(): Required<OmeglestrUser> {
@@ -157,7 +157,7 @@ export class FindStrangerService {
     const disconnectStatus = this.nostrEventFactory.createDisconnectedUserStatus(user);
     console.info(new Date().toLocaleString(), 'updating my status to: ', disconnectStatus);
     await this.deleteUserHistory(user);
-    await this.mainPool.event(disconnectStatus);
+    await this.npool.event(disconnectStatus);
 
     return Promise.resolve(disconnectStatus);
   }

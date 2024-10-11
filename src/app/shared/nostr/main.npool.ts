@@ -1,7 +1,7 @@
 import { NostrEvent, NostrFilter, NostrRelayCOUNT, NPool, NPoolOpts, NRelay1 } from '@nostrify/nostrify';
 import { finalize, Observable, Subject } from 'rxjs';
 
-export class MainNPool extends NPool {
+export class NPoolService extends NPool {
 
   constructor() {
     super({
