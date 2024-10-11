@@ -15,10 +15,11 @@ When logging a bug, please be sure to include the following:
  * The library version;
  * If at all possible, an *isolated* way to reproduce the behavior;
  * The behavior you expect to see, and the actual behavior;
+ * By pressing F12 you can find some usefull logs that can be attached to the issue;
  * You can include images and gif in the issue.
 
 #### Do not create a duplicate issue
-[Search the existing issues](https://github.com/antonioconselheiro/omegle-nostr/search?type=Issues) before logging a new one.
+[Search the existing issues](https://github.com/antonioconselheiro/omeglestr/search?type=Issues) before logging a new one.
 
 Some search tips:
  * *Don't* restrict your search to only open issues. An issue with a title similar to yours may have been closed as a duplicate of one with a less-findable title.
@@ -33,7 +34,7 @@ So you can contribute by proposing features through issues or assigning yourself
 
 Follow the steps:
 
- * Create a [fork](https://guides.github.com/activities/forking/) from our repository by [clicking here](https://github.com/antonioconselheiro/omegle-nostr/fork), do a `git clone` of your forked repository and run `devcontainer open .` in the application folder;
+ * Create a [fork](https://guides.github.com/activities/forking/) from our repository by [clicking here](https://github.com/antonioconselheiro/omeglestr/fork), do a `git clone` of your forked repository and run `devcontainer open .` in the application folder;
  * Create a branch in your forked repository, then code the feature or fix the bug;
  * Run `npm run lint` and `npm run build` in the repository;
  * Create a Pull Request from your repository to this one, with the issue in the body and some information you think could be usefull to the reviewer (print or a gif of it working will be appreciated (tools: [windows](https://www.screentogif.com/), [linux](https://linuxhint.com/install-peek-animated-gif-recorder-linux/)));
@@ -43,9 +44,6 @@ Follow the steps:
 # Tools
 ## Devcontainer
 Run the `.devcontainer/setup.sh` to configure .devcontainer volumes and credentials. Open devcontainer with: `devcontainer open .`
-
-### Para os brasileiros (pt-BR)
-Veja como o instalar docker, docker-compose e devcontainer em [meu vídeo em português](https://odysee.com/@anarcanudos:5/instalacao-do-docker-docker-compose-e-devcontainer:9)
 
 ### Environment descriptions
 There is a development environment set up in this repository that can be pulled up with docker-compose.

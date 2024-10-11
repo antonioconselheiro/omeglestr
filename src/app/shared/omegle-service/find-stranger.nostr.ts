@@ -75,24 +75,32 @@ export class FindStrangerNostr {
       {
         kinds: [ kinds.UserStatuses ],
         '#t': [ 'wannachat', 'omegle' ],
-        limit: 1,
         since: currentTimeInSeconds - timeInSeconds
       }
     ]);
-    const [wannachat] = await this.mainPool.query([
+    const wannachats = await this.mainPool.query([
       {
         kinds: [ kinds.UserStatuses ],
         '#t': [ 'wannachat', 'omegle' ],
-        limit: 1,
         since: currentTimeInSeconds - timeInSeconds
       }
     ]);
 
+    let ignoreList: string[] = [];
+    try {
+      const serialized = sessionStorage.getItem('alwaysIgnoreWannachat');
+      if (serialized) {
+        ignoreList = JSON.parse(serialized);
+      }
+    } catch { }
+
+    const wannachat = wannachats.find(wannachat =>  !ignoreList.includes(wannachat.pubkey));
     if (wannachat) {
       console.info('wanna chat found:', wannachat);
     } else {
       console.info('wanna chat NOT found...');
     }
+
     return Promise.resolve(wannachat || null);
   }
 }

@@ -1,12 +1,11 @@
 import { Injectable } from '@angular/core';
 import { NostrUser } from '@domain/nostr-user';
 import { NostrEvent } from '@nostrify/nostrify';
+import { GlobalConfigService } from '@shared/global-config/global-config.service';
 import { MainNPool } from '@shared/nostr/main.npool';
 import { NostrEventFactory } from '@shared/nostr/nostr-event.factory';
-import { Event } from 'nostr-tools';
-import { FindStrangerNostr } from './find-stranger.nostr';
 import { catchError, throwError, timeout } from 'rxjs';
-import { GlobalConfigService } from '@shared/global-config/global-config.service';
+import { FindStrangerNostr } from './find-stranger.nostr';
 
 @Injectable()
 export class FindStrangerService {
@@ -18,7 +17,7 @@ export class FindStrangerService {
     private mainPool: MainNPool
   ) { }
 
-  publish(event: Event): Promise<void> {
+  publish(event: NostrEvent): Promise<void> {
     return this.mainPool.event(event);
   }
 
@@ -72,7 +71,7 @@ export class FindStrangerService {
     return Promise.resolve(NostrUser.fromPubkey(event.pubkey));
   }
 
-  private isChatingToMe(event: Event, me: Required<NostrUser>): boolean {
+  private isChatingToMe(event: NostrEvent, me: Required<NostrUser>): boolean {
     console.info(new Date().toLocaleString(), 'is wannachat reply with chating? event: ', event);
 
     const result = event.tags
@@ -83,12 +82,12 @@ export class FindStrangerService {
     return !!result.length;
   }
 
-  private inviteToChating(me: Required<NostrUser>, strangeStatus: Event): Promise<NostrEvent> {
+  private inviteToChating(me: Required<NostrUser>, strangeStatus: NostrEvent): Promise<NostrEvent> {
     const stranger = NostrUser.fromPubkey(strangeStatus.pubkey);
     return this.publishChatInviteStatus(me, stranger);
   }
 
-  private async listenChatingConfirmation(strangerEvent: Event, me: Required<NostrUser>): Promise<boolean> {
+  private async listenChatingConfirmation(strangerEvent: NostrEvent, me: Required<NostrUser>): Promise<boolean> {
     return new Promise<boolean>(resolve => {
       console.info(new Date().toLocaleString(), 'listening status update from: ', strangerEvent.pubkey);
       const subscription = this.findStrangerNostr

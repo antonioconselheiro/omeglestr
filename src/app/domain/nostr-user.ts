@@ -44,6 +44,18 @@ export class NostrUser {
     } else {
       throw new Error('Invalid argument, NostrUser expect nsec or npub string');
     }
+
+    let ignoreList = sessionStorage.getItem('alwaysIgnoreWannachat');
+    if (!ignoreList) {
+      ignoreList = '[]';
+    }
+
+    try {
+      const updatedIgnoreList = JSON.parse(ignoreList);
+      updatedIgnoreList.push(this.pubkey);
+
+      sessionStorage.setItem('alwaysIgnoreWannachat', JSON.stringify(updatedIgnoreList));
+    } catch { }
   }
 
   static fromPubkey(pubkey: string): NostrUser {
