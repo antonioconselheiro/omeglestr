@@ -37,20 +37,6 @@ export class MainNPool extends NPool {
       );
   }
 
-  async count(filters: NostrFilter[]): Promise<NostrRelayCOUNT[2]> {
-    const routes = await this.getOpts().reqRouter(filters);
-    if (routes.size < 1) {
-      return Promise.reject(new Error('disconnected'));
-    }
-
-    const [[relay]] = Array.from(routes);
-    console.info('asking count to ', relay);
-
-    return (this.relay(relay) as NRelay1).count(filters, {
-      signal: AbortSignal.timeout(1000)
-    });
-  }
-
   getOpts(): NPoolOpts {
     //  FIXME: open PR in nostrify asking to opts become protected
     return (this as any as { opts: NPoolOpts }).opts;

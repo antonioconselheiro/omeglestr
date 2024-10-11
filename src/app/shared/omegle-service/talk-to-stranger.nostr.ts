@@ -48,15 +48,20 @@ export class TalkToStrangerNostr {
 
       requestPending = true;
       console.info('user count requested');
-      this.mainPool.count([
+      this.mainPool.query([
         {
           kinds: [ kinds.UserStatuses ],
           '#t': [ 'omegle' ]
         }
       ])
-      .then(count => {
+      .then(events => {
+
+        const users = new Set<string>();
+        events.forEach(event => users.add(event.pubkey));
+        const count = [...users].length;
+
         console.info('active users counted: ', count);
-        subject.next(count.count);
+        subject.next(count);
         requestPending = false;
       })
       .catch(e => {
