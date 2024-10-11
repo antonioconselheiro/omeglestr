@@ -1,6 +1,5 @@
 [X] block textarea while searching stranger
 [ ] check app behaviour after some talks and connections
-[ ] user must be able to stop app from searching
 [ ] number of online users must never show 0, must show 1 if you're disconnected and 2 if you connected
 [ ] treat relay error handling like nostr_server maxevent error
 [ ] ensure that all emitted event has expiration timestamp

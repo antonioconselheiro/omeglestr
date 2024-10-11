@@ -9,6 +9,7 @@ NOT RELEASED YET
 # TODO
 [ ] include "great talk?" button to export talk as html
 [ ] if relay has an onion url, in onion context the app should preper that
+[ ] user must be able to stop app from searching
 
 
 # Relay Compatibility
