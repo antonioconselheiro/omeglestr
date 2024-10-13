@@ -6,7 +6,7 @@
 
 ## Fully Open Source Omegle
 - [hosted in github pages](https://antonioconselheiro.github.io/omeglestr),
-- [tor prod address](http://omegleau2uz72h5rmzm2vik5tgkcazsl5tfg7oafp4h3agbqomyvicqd.onion)
+- [tor address](http://omegleau2uz72h5rmzm2vik5tgkcazsl5tfg7oafp4h3agbqomyvicqd.onion)
 
 ## Not the phoenix we want, the phonix we need.
 ![ostrich](./phoenix.jpg)
