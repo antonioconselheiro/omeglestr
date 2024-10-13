@@ -1,12 +1,12 @@
 import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
-import { MessageAuthor } from '@domain/message-author.enum';
 import { ChatMessage } from '@domain/chat-message.interface';
+import { MessageAuthor } from '@domain/message-author.enum';
 import { OmeglestrUser } from '@domain/omeglestr-user';
+import { NostrEvent } from '@nostrify/nostrify';
 import { FindStrangerService } from '@shared/omegle-service/find-stranger.service';
 import { TalkToStrangerNostr } from '@shared/omegle-service/talk-to-stranger.nostr';
-import { ChatState } from './chat-state.enum';
-import { NostrEvent } from '@nostrify/nostrify';
 import { Subscription } from 'rxjs';
+import { ChatState } from './chat-state.enum';
 
 @Component({
   selector: 'omg-chat',
@@ -26,8 +26,8 @@ export class ChatComponent implements OnDestroy, OnInit {
 
   typingTimeoutId = 0;
   currentOnline = 1;
-  currentState = ChatState.DISCONNECTED;
   strangeIsTyping = false;
+  currentState = ChatState.DISCONNECTED;
   whoDisconnected: MessageAuthor | null = null;
 
   you: Required<OmeglestrUser> | null = null;
@@ -93,6 +93,10 @@ export class ChatComponent implements OnDestroy, OnInit {
     console.log('starting conversation, stranger: ', stranger);
     this.stranger = stranger;
     this.currentState = ChatState.CONNECTED;
+    if (this.currentOnline === 1) {
+      this.currentOnline = 2;
+    }
+
     this.subscriptions.add(this.talkToStrangerNostr
       .listenMessages(me, stranger)
       .subscribe({

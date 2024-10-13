@@ -9,6 +9,8 @@ import { EventTemplate, finalizeEvent, kinds, nip04 } from 'nostr-tools';
 })
 export class NostrEventFactory {
 
+  readonly oneHourInSeconds = 60 * 60;
+
   constructor(
     private readonly globalConfigService: GlobalConfigService
   ) { }
@@ -23,7 +25,7 @@ export class NostrEventFactory {
    * @returns expiration timestamp
    */
   private getExpirationTimestamp(
-    expireIn = this.globalConfigService.WANNACHAT_STATUS_DEFAULT_TIMEOUT_IN_SECONDS
+    expireIn = this.globalConfigService.wannachatStatusDefaultTimeoutInSeconds
   ): string {
     const oneMillisecond = 1000;
     const expirationTimestamp = Math.floor(Date.now() / oneMillisecond) + expireIn;
@@ -44,7 +46,8 @@ export class NostrEventFactory {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       created_at: this.getCurrentTimestamp(),
       tags: [
-        ['p', stranger.pubkey]
+        ['p', stranger.pubkey],
+        ['expiration', this.getExpirationTimestamp(this.oneHourInSeconds)]
       ]
     };
 
@@ -73,11 +76,14 @@ export class NostrEventFactory {
   }
 
   createTypingUserStatus(user: Required<OmeglestrUser>): NostrEvent {
-    return this.createUserStatus(user, 'typing');
+    return this.createUserStatus(user, 'typing', [
+      ['expiration', this.getExpirationTimestamp(this.oneHourInSeconds)]
+    ]);
   }
 
   createChatingUserStatus(you: Required<OmeglestrUser>, strange: OmeglestrUser): NostrEvent {
     return this.createUserStatus(you, 'chating', [
+      ['expiration', this.getExpirationTimestamp(this.oneHourInSeconds)],
       [ 'p', strange.pubkey ],
       [ 't', 'chating' ]
     ]);
@@ -106,11 +112,11 @@ export class NostrEventFactory {
     return this.createUserStatus(user, '');
   }
 
-  private createUserStatus(user: Required<OmeglestrUser>, status: string, tag?: string[][]): NostrEvent {
+  private createUserStatus(user: Required<OmeglestrUser>, status: string, customTags?: string[][]): NostrEvent {
     const tags = [
       ['d', 'general'],
       ['t', 'omegle'],
-      ...(tag || [])
+      ...(customTags || [])
     ];
 
     const unsignedEvent = {

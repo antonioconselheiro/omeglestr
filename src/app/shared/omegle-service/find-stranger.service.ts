@@ -45,7 +45,7 @@ export class FindStrangerService {
       const sub = this.findStrangerNostr
         .listenWannachatResponse(me)
         .pipe(
-          timeout(this.config.WANNACHAT_STATUS_DEFAULT_TIMEOUT_IN_SECONDS * 1000),
+          timeout(this.config.wannachatStatusDefaultTimeoutInSeconds * 1000),
           catchError(err => {
             sub.unsubscribe();
             this.deleteUserHistory(me).then(
