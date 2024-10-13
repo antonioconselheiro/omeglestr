@@ -129,6 +129,7 @@ export class ChatComponent implements OnDestroy, OnInit {
   private handleStrangerStatus(event: NostrEvent): void {
     if (event.content === 'typing') {
       this.strangeIsTyping = true;
+      this.scrollConversationToTheEnd();
     } else if (event.content === 'disconnected') {
       this.strangeIsTyping = false;
       this.whoDisconnected = MessageAuthor.STRANGE;
