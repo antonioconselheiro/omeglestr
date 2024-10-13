@@ -4,7 +4,7 @@
 # Omegle on Nostr
 *don't thread on Omegle*
 
-## NOT RELEASED YET
+## Fully Open Source Omegle
 - [hosted in github pages](https://antonioconselheiro.github.io/omeglestr),
 - [tor prod address](http://omegleau2uz72h5rmzm2vik5tgkcazsl5tfg7oafp4h3agbqomyvicqd.onion)
 
@@ -20,7 +20,6 @@ Need support to [NIP-04](https://github.com/nostr-protocol/nips/blob/master/04.m
 
 ## TODO
 - [ ] include "great talk?" button to export talk as html
-- [ ] if relay has an onion url, in onion context the app should prefer that
 - [ ] include button to app stop searching
 
 ## Donate

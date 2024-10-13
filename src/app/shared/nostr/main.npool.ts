@@ -6,8 +6,15 @@ export class NPoolService extends NPool {
   constructor() {
     super({
       open: (url) => new NRelay1(url),
-      reqRouter: async (filters) => new Map([['ws://localhost:7777', filters]]),
-      eventRouter: async () => ['ws://localhost:7777']
+      reqRouter: async (filters) => {
+        const toupleList: Array<[string, NostrFilter[]]> = [];
+        import.meta.env.NG_APP_RELAYS.split(',').forEach(relay => {
+          toupleList.push([relay, filters]);
+        });
+
+        return new Map(toupleList);
+      },
+      eventRouter: async () => import.meta.env.NG_APP_RELAYS.split(',')
     });
   }
 

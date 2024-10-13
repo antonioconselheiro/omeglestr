@@ -37,7 +37,7 @@ Follow the steps:
  * Create a [fork](https://guides.github.com/activities/forking/) from our repository by [clicking here](https://github.com/antonioconselheiro/omeglestr/fork), do a `git clone` of your forked repository and run `devcontainer open .` in the application folder;
  * Create a branch in your forked repository, then code the feature or fix the bug;
  * Run `npm run lint` and `npm run build` in the repository;
- * Create a Pull Request from your repository to this one, with the issue in the body and some information you think could be usefull to the reviewer (print or a gif of it working will be appreciated (tools: [windows](https://www.screentogif.com/), [linux](https://linuxhint.com/install-peek-animated-gif-recorder-linux/)));
+ * Create a Pull Request from your repository to this one, with the issue in the body and some information you think could be usefull to the reviewer (with print or a gif of it working);
  * The reviewer can ask some changes, always expect for this and don't be mad when ask changes, this is the process;
  * When you get approved your branch can be merged, if you don't merge it, we will do.
 
@@ -70,27 +70,6 @@ Build the Docker containers with no caching:
 Start the Docker containers:
 `docker-compose -f .devcontainer/docker-compose.yml up`
 
-## Angular Instructions
-
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.2.1.
-
-### Development server
-
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
-
-### Code scaffolding
-
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
-
-### Build
-
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
-
-### Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
-
-
 ## More related documentations
 and interesting technologies to master to enhance your ability to contribute:
 
@@ -106,3 +85,4 @@ and interesting technologies to master to enhance your ability to contribute:
 - https://nostrtool.com/
 - https://nostr.how/en/the-protocol
 - https://nostrdebug.com/
+- https://nostrify.dev/
