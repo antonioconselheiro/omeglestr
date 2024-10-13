@@ -9,7 +9,7 @@ import { EventTemplate, finalizeEvent, kinds, nip04 } from 'nostr-tools';
 })
 export class NostrEventFactory {
 
-  readonly oneHourInSeconds = 60 * 60;
+  readonly largeExpirationTime = 30 * 60;
 
   constructor(
     private readonly globalConfigService: GlobalConfigService
@@ -47,7 +47,7 @@ export class NostrEventFactory {
       created_at: this.getCurrentTimestamp(),
       tags: [
         [ 'p', stranger.pubkey],
-        [ 'expiration', this.getExpirationTimestamp(this.oneHourInSeconds) ]
+        [ 'expiration', this.getExpirationTimestamp(this.largeExpirationTime) ]
       ]
     };
 
@@ -77,13 +77,13 @@ export class NostrEventFactory {
 
   createTypingUserStatus(user: Required<OmeglestrUser>): NostrEvent {
     return this.createUserStatus(user, 'typing', [
-      [ 'expiration', this.getExpirationTimestamp(this.oneHourInSeconds) ]
+      [ 'expiration', this.getExpirationTimestamp(this.largeExpirationTime) ]
     ]);
   }
 
   createChatingUserStatus(you: Required<OmeglestrUser>, strange: OmeglestrUser): NostrEvent {
     return this.createUserStatus(you, 'chating', [
-      [ 'expiration', this.getExpirationTimestamp(this.oneHourInSeconds) ],
+      [ 'expiration', this.getExpirationTimestamp(this.largeExpirationTime) ],
       [ 'p', strange.pubkey ],
       [ 't', 'chating' ]
     ]);
@@ -119,20 +119,16 @@ export class NostrEventFactory {
       ...(customTags || [])
     ];
 
-    const unsignedEvent = {
-      id: '',
+    const eventTemplate: EventTemplate = {
       kind: kinds.UserStatuses,
       content: status,
-      pubkey: user.pubkey,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       created_at: this.getCurrentTimestamp(),
       tags
     };
 
-    const verifiedEvent = finalizeEvent(
-      unsignedEvent as object as EventTemplate, user.secretKey
+    return finalizeEvent(
+      eventTemplate, user.secretKey
     );
-
-    return verifiedEvent;
   }
 }

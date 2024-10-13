@@ -5,7 +5,7 @@ import { GlobalConfigService } from '@shared/global-config/global-config.service
 import { IgnoreListService } from '@shared/ignore-list/ignore-list.service';
 import { NPoolService } from '@shared/nostr/main.npool';
 import { NostrEventFactory } from '@shared/nostr/nostr-event.factory';
-import { catchError, throwError, timeout } from 'rxjs';
+import { catchError, Subscription, throwError, timeout } from 'rxjs';
 import { FindStrangerNostr } from './find-stranger.nostr';
 
 @Injectable()
@@ -95,29 +95,42 @@ export class FindStrangerService {
     return this.publishChatInviteStatus(me, stranger);
   }
 
-  private async listenChatingConfirmation(strangerEvent: NostrEvent, me: Required<OmeglestrUser>): Promise<boolean> {
+  private async listenChatingConfirmation(strangerWannachatEvent: NostrEvent, me: Required<OmeglestrUser>): Promise<boolean> {
     return new Promise<boolean>(resolve => {
-      console.info(new Date().toLocaleString(), 'listening status update from: ', strangerEvent.pubkey);
+      console.info(new Date().toLocaleString(), 'listening status update from: ', strangerWannachatEvent.pubkey);
       const subscription = this.findStrangerNostr
-        .listenUserStatusUpdate(strangerEvent.pubkey)
-        .subscribe(status => {
-          if (status.id === strangerEvent.id && status.content === 'wannachat') {
-            console.info(new Date().toLocaleString(), 'stranger #wannachat status was listen, ignoring and waiting new status...');
-            return;
-          }
-
-          subscription.unsubscribe();
-          console.info(new Date().toLocaleString(), '[listenUserStatusUpdate] unsubscribe');
-          console.info(new Date().toLocaleString(), 'stranger ', strangerEvent.pubkey, ' update status: ', status);
-          if (this.isChatingToMe(status, me)) {
-            console.info(new Date().toLocaleString(), 'is "chating" status confirmed, resolved with true');
-            resolve(true);
-          } else {
-            console.info(new Date().toLocaleString(), 'unexpected status was given, resolved with false, event: ', status);
-            resolve(false);
-          }
+        .listenUserStatusUpdate(strangerWannachatEvent.pubkey)
+        .pipe(
+          timeout(5000),
+          catchError(err => throwError(() => new Error('chat confirmation timeout after 5s waiting, there is no stranger connected to this session')))
+        )
+        .subscribe({
+          next: status => this.receiveChatingConfirmation(subscription, status, strangerWannachatEvent, me).then(is => {
+            if (typeof is === 'boolean') {
+              resolve(is)
+            }
+          }),
+          error: () => resolve(false)
         });
     });
+  }
+
+  private receiveChatingConfirmation(sub: Subscription, status: NostrEvent, strangerWannachatEvent: NostrEvent, me: Required<OmeglestrUser>): Promise<boolean | undefined> {
+    if (status.id === strangerWannachatEvent.id && status.content === 'wannachat') {
+      console.info(new Date().toLocaleString(), 'stranger #wannachat status was listen, ignoring and waiting new status...');
+      return Promise.resolve(undefined);
+    }
+
+    sub.unsubscribe();
+    console.info(new Date().toLocaleString(), '[listenUserStatusUpdate] unsubscribe');
+    console.info(new Date().toLocaleString(), 'stranger ', strangerWannachatEvent.pubkey, ' update status: ', status);
+    if (this.isChatingToMe(status, me)) {
+      console.info(new Date().toLocaleString(), 'is "chating" status confirmed, resolved with true');
+      return Promise.resolve(true);
+    } else {
+      console.info(new Date().toLocaleString(), 'unexpected status was given, resolved with false, event: ', status);
+      return Promise.resolve(false);
+    }
   }
 
   private async publishWannaChatStatus(user: Required<OmeglestrUser>): Promise<NostrEvent> {
