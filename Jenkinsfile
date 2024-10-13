@@ -7,47 +7,11 @@ pipeline {
     nodejs 'NpxNodeJS'
   }
 
-  stages {
-    stage('Clean Workspace') {
-      steps {
-        script {
-          ws("workspace") {
-            cleanWs()
-          }
-        }
-      }
-    }
-
-    stage('Checkout') {
-      steps {
-        script {
-          ws("workspace") {
-            git branch: 'master',
-            url: 'https://github.com/antonioconselheiro/omeglestr'
-          }
-        }
-      }
-    }
-
-    stage('Install') {
-      steps {
-        script {
-          ws("workspace") {
-            nodejs(nodeJSInstallationName: 'NpxNodeJS') {
-              sh 'npm install'
-            }
-          }
-        }
-      }
-    }
-
     stage('Build Dockerfile') {
       steps {
         script {
-          ws("workspace") {
-            nodejs(nodeJSInstallationName: 'NpxNodeJS') {
-              docker.build('omeglestr:latest')
-            }
+          nodejs(nodeJSInstallationName: 'NpxNodeJS') {
+            docker.build('omeglestr:latest')
           }
         }
       }

@@ -1,12 +1,12 @@
 {
   "name": "omeglestr",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "author": "António Conselheiro",
   "license": "Ungovernable",
   "scripts": {
     "start": "npm run dev",
     "dev": "ng serve --configuration development --host=0.0.0.0",
-    "build": "NG_APP_RELAYS=wss://nos.lol,wss://nostr.mom NG_APP_USE_HASH=1 ng build --production",
+    "build": "NG_APP_RELAYS=wss://nos.lol,wss://nostr.mom NG_APP_USE_HASH=1 ng build --configuration production",
     "build:docker": "docker build -t omeglestr:latest .",
     "watch": "ng build --watch --configuration development",
     "test": "ng test --no-watch --browsers=ChromeHeadlessCI",
