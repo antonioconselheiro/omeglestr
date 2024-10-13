@@ -1,6 +1,6 @@
 FROM node:22 AS build
 
-ENV NG_APP_RELAYS=wss://nos.lol,wss://nostr.mom
+ENV NG_APP_RELAYS=wss://nos.lol
 ENV NG_APP_USE_HASH=0
 
 WORKDIR /build

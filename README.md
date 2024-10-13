@@ -43,7 +43,7 @@ Bitcoin onchain donate: <a href="bitcoin:bc1qrm99lmmpwk7zsh7njpgthw87yvdm38j2lzp
 - See [CONTRIBUTE.md](./CONTRIBUTE.md)
 
 ## References
-- https://angular.dev/style-guide#rule-of-one
+- https://angular.dev/style-guide
 - https://github.com/nostr-protocol/nips
 - https://nostrify.dev/
 - https://www.omegle.com/
