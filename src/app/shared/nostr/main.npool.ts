@@ -1,4 +1,4 @@
-import { NostrEvent, NostrFilter, NostrRelayCOUNT, NPool, NPoolOpts, NRelay1 } from '@nostrify/nostrify';
+import { NostrEvent, NostrFilter, NPool, NRelay1 } from '@nostrify/nostrify';
 import { finalize, Observable, Subject } from 'rxjs';
 
 export class NPoolService extends NPool {
@@ -35,10 +35,5 @@ export class NPoolService extends NPool {
           abort.abort();
         })
       );
-  }
-
-  getOpts(): NPoolOpts {
-    //  FIXME: open PR in nostrify asking to opts become protected
-    return (this as any as { opts: NPoolOpts }).opts;
   }
 }

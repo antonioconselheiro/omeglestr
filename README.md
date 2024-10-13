@@ -17,9 +17,9 @@ This also have a hardcoded relay included, no custom relays are need, if you wan
 Need support to [NIP-04](https://github.com/nostr-protocol/nips/blob/master/04.md), [NIP-38](https://github.com/nostr-protocol/nips/blob/master/38.md) and [NIP-40](https://github.com/nostr-protocol/nips/blob/master/40.md).
 
 ## TODO
-[ ] include "great talk?" button to export talk as html
-[ ] if relay has an onion url, in onion context the app should preper that
-[ ] user must be able to stop app from searching
+- [ ] include "great talk?" button to export talk as html
+- [ ] if relay has an onion url, in onion context the app should preper that
+- [ ] user must be able to stop app from searching
 
 ## Donate
 Do you want more protests in favor of free speech, freedom of software and freedom of work similar to this one?

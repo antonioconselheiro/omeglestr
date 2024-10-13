@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { OmeglestrUser } from '@domain/omeglestr-user';
 import { NostrEvent } from '@nostrify/nostrify';
 import { GlobalConfigService } from '@shared/global-config/global-config.service';
+import { IgnoreListService } from '@shared/ignore-list/ignore-list.service';
 import { NPoolService } from '@shared/nostr/main.npool';
 import { NostrEventFactory } from '@shared/nostr/nostr-event.factory';
 import { catchError, throwError, timeout } from 'rxjs';
@@ -13,6 +14,7 @@ export class FindStrangerService {
   constructor(
     private nostrEventFactory: NostrEventFactory,
     private findStrangerNostr: FindStrangerNostr,
+    private ignoreListService: IgnoreListService,
     private config: GlobalConfigService,
     private npool: NPoolService
   ) { }
@@ -32,18 +34,7 @@ export class FindStrangerService {
       if (isChatingConfirmation) {
         return Promise.resolve(OmeglestrUser.fromPubkey(wannaChat.pubkey));
       } else {
-        //  TODO: centralize this into a service
-        let ignoreList = sessionStorage.getItem('alwaysIgnoreWannachat');
-        if (!ignoreList) {
-          ignoreList = '[]';
-        }
-    
-        try {
-          const updatedIgnoreList = JSON.parse(ignoreList);
-          updatedIgnoreList.push(wannaChat.pubkey);
-          sessionStorage.setItem('alwaysIgnoreWannachat', JSON.stringify(updatedIgnoreList));
-        } catch { }
-
+        this.ignoreListService.saveInList(wannaChat.pubkey);
         await this.deleteUserHistory(me);
         return this.searchStranger(me);
       }

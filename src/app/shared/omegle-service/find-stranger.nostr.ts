@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { OmeglestrUser } from '@domain/omeglestr-user';
 import { NostrEvent } from '@nostrify/nostrify';
+import { IgnoreListService } from '@shared/ignore-list/ignore-list.service';
 import { NPoolService } from '@shared/nostr/main.npool';
 import { kinds } from 'nostr-tools';
 import { Observable } from 'rxjs';
@@ -9,7 +10,8 @@ import { Observable } from 'rxjs';
 export class FindStrangerNostr {
 
   constructor(
-    private npool: NPoolService
+    private npool: NPoolService,
+    private ignoreListService: IgnoreListService
   ) { }
 
   listenUserStatusUpdate(pubkey: string): Observable<NostrEvent> {
@@ -86,15 +88,7 @@ export class FindStrangerNostr {
       }
     ]);
 
-    let ignoreList: string[] = [];
-    try {
-      const serialized = sessionStorage.getItem('alwaysIgnoreWannachat');
-      if (serialized) {
-        ignoreList = JSON.parse(serialized);
-      }
-    } catch { }
-
-    const wannachat = wannachats.find(wannachat =>  !ignoreList.includes(wannachat.pubkey));
+    const wannachat = wannachats.find(wannachat =>  !this.ignoreListService.isInList(wannachat.pubkey));
     if (wannachat) {
       console.info('wanna chat found:', wannachat);
     } else {
