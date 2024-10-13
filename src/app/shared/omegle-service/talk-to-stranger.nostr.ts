@@ -47,7 +47,7 @@ export class TalkToStrangerNostr {
       }
 
       requestPending = true;
-      console.info('user count requested');
+      console.info(new Date().toLocaleString(),'user count requested');
       this.npool.query([
         {
           kinds: [ kinds.UserStatuses ],
@@ -57,16 +57,16 @@ export class TalkToStrangerNostr {
       .then(events => {
 
         const users = new Set<string>();
-        console.info('count events', events);
+        console.info(new Date().toLocaleString(),'count events', events);
         events.forEach(event => users.add(event.pubkey));
         const count = [...users].length;
 
-        console.info('active users counted: ', count);
+        console.info(new Date().toLocaleString(),'active users counted: ', count);
         subject.next(count);
         requestPending = false;
       })
       .catch(e => {
-        console.error('user count lauched error', e);
+        console.error(new Date().toLocaleString(),'user count lauched error', e);
         requestPending = false;
         clearInterval(id)
       });

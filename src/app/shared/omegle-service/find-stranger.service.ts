@@ -63,7 +63,7 @@ export class FindStrangerService {
 
             sub.unsubscribe();
           },
-          error: err => console.error(err)
+          error: err => console.error(new Date().toLocaleString(),err)
         });
     });
   }

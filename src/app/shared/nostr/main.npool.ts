@@ -6,13 +6,13 @@ export class NPoolService extends NPool {
   constructor() {
     super({
       open: (url) => new NRelay1(url),
-      reqRouter: async (filters) => new Map([['ws://localhost:10000', filters]]),
-      eventRouter: async () => ['ws://localhost:10000']
+      reqRouter: async (filters) => new Map([['ws://localhost:7777', filters]]),
+      eventRouter: async () => ['ws://localhost:7777']
     });
   }
 
   observe(filters: Array<NostrFilter>): Observable<NostrEvent> {
-    console.info('[[subscribe filter]]', filters);
+    console.info(new Date().toLocaleString(),'[[subscribe filter]]', filters);
     const abort = new AbortController();
     const subject = new Subject<NostrEvent>();
 
@@ -31,7 +31,7 @@ export class NPoolService extends NPool {
       .asObservable()
       .pipe(
         finalize(() => {
-          console.info('[[unsubscribe filter]]', filters);
+          console.info(new Date().toLocaleString(),'[[unsubscribe filter]]', filters);
           abort.abort();
         })
       );

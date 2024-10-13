@@ -1,4 +1,4 @@
-import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ChatMessage } from '@domain/chat-message.interface';
 import { MessageAuthor } from '@domain/message-author.enum';
 import { OmeglestrUser } from '@domain/omeglestr-user';
@@ -23,6 +23,8 @@ export class ChatComponent implements OnDestroy, OnInit {
   readonly authorYou = MessageAuthor.YOU;
 
   readonly typingTimeoutAmount = 2_000;
+
+  @ViewChild('conversation') conversationEl!: ElementRef;
 
   typingTimeoutId = 0;
   currentOnline = 1;
@@ -63,11 +65,11 @@ export class ChatComponent implements OnDestroy, OnInit {
     this.currentState = this.stateSearchingStranger;
     this.messages = [];
     const you = this.you = this.findStrangerProxy.connect();
-    console.info(new Date().toLocaleString(), 'me: ', you);
+    console.info(new Date().toLocaleString(), 'me: ', you.pubkey);
     this.findStrangerProxy
       .searchStranger(this.you)
       .then(stranger => this.startConversation(you, stranger))
-      .catch(e => console.error(e));
+      .catch(e => console.error(new Date().toLocaleString(), e));
   }
 
   disconnect(): Promise<void> {
@@ -91,7 +93,7 @@ export class ChatComponent implements OnDestroy, OnInit {
   }
 
   private startConversation(me: Required<OmeglestrUser>, stranger: OmeglestrUser): void {
-    console.log('starting conversation, stranger: ', stranger);
+    console.log(new Date().toLocaleString(), 'starting conversation, stranger: ', stranger);
     this.stranger = stranger;
     this.currentState = ChatState.CONNECTED;
     if (this.currentOnline === 1) {
@@ -120,6 +122,7 @@ export class ChatComponent implements OnDestroy, OnInit {
           author: MessageAuthor.STRANGE,
           time: event.created_at
         });
+        this.scrollConversationToTheEnd();
       })
   }
 
@@ -144,7 +147,15 @@ export class ChatComponent implements OnDestroy, OnInit {
       this.messages.push({
         author: MessageAuthor.YOU, text: message, time: Math.floor(new Date().getTime() / 1000)
       });
+      this.scrollConversationToTheEnd();
     }
+  }
+
+  scrollConversationToTheEnd(): void {
+    setTimeout(() => {
+      const el = this.conversationEl.nativeElement;
+      el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+    });
   }
 
   cleanMessageField(el: { value: string }): void {
