@@ -1,6 +1,6 @@
 FROM node:22 AS build
 
-ENV NG_APP_RELAYS=wss://offchain.pub
+ENV NG_APP_RELAYS=wss://nostrnetl6yd5whkldj3vqsxyyaq3tkuspy23a3qgx7cdepb4564qgqd.onion
 ENV NG_APP_USE_HASH=0
 
 WORKDIR /build

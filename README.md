@@ -21,6 +21,7 @@ Need support to [NIP-04](https://github.com/nostr-protocol/nips/blob/master/04.m
 ## TODO
 - [ ] include "great talk?" button to export talk as html
 - [ ] include button to app stop searching
+- [ ] allow user change configured relays
 
 ## Donate
 Do you want more protests in favor of free speech, freedom of software and freedom of work similar to this one?
