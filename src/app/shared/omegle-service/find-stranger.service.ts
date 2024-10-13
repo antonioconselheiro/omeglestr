@@ -98,7 +98,7 @@ export class FindStrangerService {
   private async listenChatingConfirmation(strangerWannachatEvent: NostrEvent, me: Required<OmeglestrUser>): Promise<boolean> {
     return new Promise<boolean>(resolve => {
       console.info(new Date().toLocaleString(), 'listening status update from: ', strangerWannachatEvent.pubkey);
-      const subscription = this.findStrangerNostr
+      const subscription: Subscription = this.findStrangerNostr
         .listenUserStatusUpdate(strangerWannachatEvent.pubkey)
         .pipe(
           timeout(5000),

@@ -80,7 +80,7 @@ export class FindStrangerNostr {
         since: currentTimeInSeconds - timeInSeconds
       }
     ]);
-    const wannachats = await this.npool.query([
+    let wannachats = await this.npool.query([
       {
         kinds: [ kinds.UserStatuses ],
         '#t': [ 'wannachat', 'omegle' ],
@@ -88,7 +88,9 @@ export class FindStrangerNostr {
       }
     ]);
 
-    const wannachat = wannachats.find(wannachat =>  !this.ignoreListService.isInList(wannachat.pubkey));
+    wannachats = wannachats.filter(wannachat => !this.ignoreListService.isInList(wannachat.pubkey));
+    const wannachat = wannachats[Math.floor(Math.random() * wannachats.length)];
+
     if (wannachat) {
       console.info('wanna chat found:', wannachat);
     } else {
