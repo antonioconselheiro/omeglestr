@@ -1,5 +1,5 @@
 secrets:
-  onionAddress:
+  onion_address:
     file: ./hs_ed25519_secret_key
 
 services:
@@ -8,12 +8,12 @@ services:
     links:
       - omeglestr
     environment:
-      OMEGLESTR_TOR_SERVICE_HOSTS: '80:omeglestr:80'
-      OMEGLESTR_TOR_SERVICE_VERSION: '3'
+      ONION_ADDRESS_TOR_SERVICE_HOSTS: '80:omeglestr:80'
+      ONION_ADDRESS_TOR_SERVICE_VERSION: '3'
 
     secrets:
-      - source: onionAddress
-        target: onionAddress
+      - source: onion_address
+        target: onion_address
         mode: 400
 
   omeglestr:
