@@ -6,7 +6,7 @@ services:
   tor:
     image: goldy/tor-hidden-service
     links:
-      - onionAddress
+      - omeglestr
     environment:
       OMEGLESTR_TOR_SERVICE_HOSTS: '80:omeglestr:80'
       OMEGLESTR_TOR_SERVICE_VERSION: '3'
