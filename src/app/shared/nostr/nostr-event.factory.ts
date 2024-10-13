@@ -46,8 +46,8 @@ export class NostrEventFactory {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       created_at: this.getCurrentTimestamp(),
       tags: [
-        ['p', stranger.pubkey],
-        ['expiration', this.getExpirationTimestamp(this.oneHourInSeconds)]
+        [ 'p', stranger.pubkey],
+        [ 'expiration', this.getExpirationTimestamp(this.oneHourInSeconds) ]
       ]
     };
 
@@ -64,26 +64,26 @@ export class NostrEventFactory {
    */
   createWannaChatUserStatus(user: Required<OmeglestrUser>): NostrEvent {
     return this.createUserStatus(user, 'wannachat', [
-        ['expiration', this.getExpirationTimestamp()],
-        ['t', 'wannachat']
+        [ 'expiration', this.getExpirationTimestamp() ],
+        [ 't', 'wannachat']
       ]);
   }
 
   createDisconnectedUserStatus(user: Required<OmeglestrUser>): NostrEvent {
     return this.createUserStatus(user, 'disconnected', [
-      ['expiration', this.getExpirationTimestamp()]
+      [ 'expiration', this.getExpirationTimestamp() ]
     ]);
   }
 
   createTypingUserStatus(user: Required<OmeglestrUser>): NostrEvent {
     return this.createUserStatus(user, 'typing', [
-      ['expiration', this.getExpirationTimestamp(this.oneHourInSeconds)]
+      [ 'expiration', this.getExpirationTimestamp(this.oneHourInSeconds) ]
     ]);
   }
 
   createChatingUserStatus(you: Required<OmeglestrUser>, strange: OmeglestrUser): NostrEvent {
     return this.createUserStatus(you, 'chating', [
-      ['expiration', this.getExpirationTimestamp(this.oneHourInSeconds)],
+      [ 'expiration', this.getExpirationTimestamp(this.oneHourInSeconds) ],
       [ 'p', strange.pubkey ],
       [ 't', 'chating' ]
     ]);
@@ -93,12 +93,12 @@ export class NostrEventFactory {
     const template: EventTemplate = {
       kind: 5,
       tags: [
-        ["k", String(kinds.EncryptedDirectMessage)],
-        ["k", String(kinds.UserStatuses)],
-        ['expiration', this.getExpirationTimestamp()]
+        [ 'k', String(kinds.EncryptedDirectMessage) ],
+        [ 'k', String(kinds.UserStatuses) ],
+        [ 'expiration', this.getExpirationTimestamp() ]
       ],
       created_at: Math.floor(new Date().getTime() / 1000),
-      content: ""
+      content: ''
     }
 
     const verifiedEvent = finalizeEvent(

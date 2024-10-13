@@ -10,7 +10,7 @@
     <div *ngIf="stranger" class="message">
       You're now chatting with a random stranger.
     </div>
-    <div *ngIf="!stranger && currentState === STATE_SEARCHING_STRANGER" class="message">
+    <div *ngIf="!stranger && currentState === stateSearchingStranger" class="message">
       Looking for someone you can chat with.
     </div>
     <div
@@ -18,8 +18,8 @@
       class="chat"
      >
       <span
-        [class.authorStranger]="message.author === AUTHOR_STRANGE"
-        [class.authorYou]="message.author === AUTHOR_YOU"
+        [class.authorStranger]="message.author === authorStrange"
+        [class.authorYou]="message.author === authorYou"
       >{{message.author | author}}: </span>
       <span class="text">{{message.text}}</span>
     </div>
@@ -27,9 +27,9 @@
     <div class="message" *ngIf="strangeIsTyping">
       Stranger is typing...
     </div>
-    <ng-container *ngIf="currentState === STATE_DISCONNECTED">
-      <div class="message" *ngIf="whoDisconnected === AUTHOR_STRANGE">Stranger has disconnected.</div>
-      <div class="message" *ngIf="whoDisconnected === AUTHOR_YOU">You have disconnected.</div>
+    <ng-container *ngIf="currentState === stateDisconnected">
+      <div class="message" *ngIf="whoDisconnected === authorStrange">Stranger has disconnected.</div>
+      <div class="message" *ngIf="whoDisconnected === authorYou">You have disconnected.</div>
     </ng-container>
   </section>
 
@@ -41,8 +41,8 @@
     <button
       type="button"
       (click)="findStranger()"
-      [attr.disabled]="currentState === STATE_SEARCHING_STRANGER ? 'disabled' : null"
-      *ngIf="currentState === STATE_DISCONNECTED || currentState === STATE_SEARCHING_STRANGER"
+      [attr.disabled]="currentState === stateSearchingStranger ? 'disabled' : null"
+      *ngIf="currentState === stateDisconnected || currentState === stateSearchingStranger"
       class="btn start bottomLeftRadius"
     >
       Start
@@ -50,8 +50,8 @@
     <button
       type="button"
       class="btn bottomLeftRadius"
-      *ngIf="currentState === STATE_CONNECTED"
-      (click)="currentState = STATE_UP_TO_DISCONNECT"
+      *ngIf="currentState === stateConnected"
+      (click)="currentState = stateUpToDisconnect"
     >
       Stop
     </button>
@@ -59,7 +59,7 @@
       type="button"
       class="btn bottomLeftRadius bold"
       (click)="disconnect(); cleanMessageField(messageField)"
-      *ngIf="currentState === STATE_UP_TO_DISCONNECT"
+      *ngIf="currentState === stateUpToDisconnect"
     >
       Really?
     </button>
@@ -67,7 +67,7 @@
       name="text"
       #messageField
       class="textarea"
-      [attr.disabled]="currentState === STATE_DISCONNECTED || currentState === STATE_SEARCHING_STRANGER ? 'disabled' : null"
+      [attr.disabled]="currentState === stateDisconnected || currentState === stateSearchingStranger ? 'disabled' : null"
       (keydown.enter)="sendMessage(messageField.value); cleanMessageField(messageField)"
       (keydown)="onTyping()"
     ></textarea>
@@ -76,7 +76,7 @@
       type="button"
       class="btn bottomRightRadius"
       (click)="sendMessage(messageField.value); cleanMessageField(messageField)"
-      [attr.disabled]="currentState === STATE_DISCONNECTED || currentState === STATE_SEARCHING_STRANGER ? 'disabled' : null"
+      [attr.disabled]="currentState === stateDisconnected || currentState === stateSearchingStranger ? 'disabled' : null"
     >
       Send
     </button>

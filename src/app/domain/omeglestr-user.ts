@@ -22,7 +22,7 @@ export class OmeglestrUser {
    */
   readonly pubkey: string;
 
-  constructor(
+  private constructor(
     /**
      * npub or nsec
      */
@@ -43,33 +43,18 @@ export class OmeglestrUser {
     } else {
       throw new Error('Invalid argument, NostrUser expect nsec or npub string');
     }
-
-    let ignoreList = sessionStorage.getItem('alwaysIgnoreWannachat');
-    if (!ignoreList) {
-      ignoreList = '[]';
-    }
-
-    try {
-      const updatedIgnoreList = JSON.parse(ignoreList);
-      updatedIgnoreList.push(this.pubkey);
-      sessionStorage.setItem('alwaysIgnoreWannachat', JSON.stringify(updatedIgnoreList));
-    } catch { }
   }
 
   static fromPubkey(pubkey: string): OmeglestrUser {
     return new OmeglestrUser(nip19.npubEncode(pubkey));
   }
 
-  static fromNostrSecret(nsec: string): Required<OmeglestrUser> {
-    return new OmeglestrUser(nsec) as Required<OmeglestrUser>;
-  }
-
-  static fromNostrSecretHex(nsecHex: Uint8Array): Required<OmeglestrUser> {
+  static fromSecretKeyBytes(nsecHex: Uint8Array): Required<OmeglestrUser> {
     return new OmeglestrUser(nip19.nsecEncode(nsecHex)) as Required<OmeglestrUser>;
   }
 
   static create(): Required<OmeglestrUser> {
-    return this.fromNostrSecretHex(generateSecretKey());
+    return this.fromSecretKeyBytes(generateSecretKey());
   }
 
   toString(): string {

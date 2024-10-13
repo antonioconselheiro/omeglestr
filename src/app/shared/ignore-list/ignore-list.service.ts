@@ -5,7 +5,7 @@ import { Injectable } from '@angular/core';
 })
 export class IgnoreListService {
 
-  private list: string[] = [];
+  private pubkeySet = new Set<string>();
 
   constructor() {
     this.loadList();
@@ -17,7 +17,7 @@ export class IgnoreListService {
       if (serialized) {
         let ignoreList = JSON.parse(serialized);
         if (ignoreList instanceof Array) {
-          this.list = [];
+          this.pubkeySet = new Set(ignoreList);
         } else {
           sessionStorage.setItem('alwaysIgnoreWannachat', '[]');
         }
@@ -28,11 +28,11 @@ export class IgnoreListService {
   }
 
   saveInList(pubkey: string): void {
-    this.list.push(pubkey);
-    sessionStorage.setItem('alwaysIgnoreWannachat', JSON.stringify(this.list));
+    this.pubkeySet.add(pubkey);
+    sessionStorage.setItem('alwaysIgnoreWannachat', JSON.stringify([...this.pubkeySet]));
   }
 
   isInList(pubkey: string): boolean {
-    return this.list.includes(pubkey);
+    return this.pubkeySet.has(pubkey);
   }
 }

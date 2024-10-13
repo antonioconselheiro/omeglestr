@@ -30,11 +30,12 @@ export class FindStrangerService {
       const listening = this.listenChatingConfirmation(wannaChat, me);
       await this.inviteToChating(me, wannaChat);
       const isChatingConfirmation = await listening;
+      this.ignoreListService.saveInList(wannaChat.pubkey);
 
       if (isChatingConfirmation) {
         return Promise.resolve(OmeglestrUser.fromPubkey(wannaChat.pubkey));
       } else {
-        this.ignoreListService.saveInList(wannaChat.pubkey);
+        await this.disconnect(me);
         await this.deleteUserHistory(me);
         return this.searchStranger(me);
       }
@@ -57,6 +58,7 @@ export class FindStrangerService {
         )
         .subscribe({
           next: event => {
+            this.ignoreListService.saveInList(event.pubkey);
             this.replyChatInvitation(event, me)
               .then(user => user && resolve(user));
 
@@ -141,7 +143,9 @@ export class FindStrangerService {
   }
 
   connect(): Required<OmeglestrUser> {
-    return OmeglestrUser.create();
+    const session = OmeglestrUser.create();
+    this.ignoreListService.saveInList(session.pubkey);
+    return session;
   }
 
   async disconnect(user: Required<OmeglestrUser>): Promise<NostrEvent> {

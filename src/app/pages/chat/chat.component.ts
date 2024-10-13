@@ -14,15 +14,15 @@ import { ChatState } from './chat-state.enum';
 })
 export class ChatComponent implements OnDestroy, OnInit {
 
-  readonly STATE_CONNECTED = ChatState.CONNECTED;
-  readonly STATE_UP_TO_DISCONNECT = ChatState.UP_TO_DISCONNECT;
-  readonly STATE_DISCONNECTED = ChatState.DISCONNECTED;
-  readonly STATE_SEARCHING_STRANGER = ChatState.SEARCHING_STRANGER;
+  readonly stateConnected = ChatState.CONNECTED;
+  readonly stateUpToDisconnect = ChatState.UP_TO_DISCONNECT;
+  readonly stateDisconnected = ChatState.DISCONNECTED;
+  readonly stateSearchingStranger = ChatState.SEARCHING_STRANGER;
 
-  readonly AUTHOR_STRANGE = MessageAuthor.STRANGE;
-  readonly AUTHOR_YOU = MessageAuthor.YOU;
+  readonly authorStrange = MessageAuthor.STRANGE;
+  readonly authorYou = MessageAuthor.YOU;
 
-  readonly TYPING_TIMEOUT = 2_000;
+  readonly typingTimeoutAmount = 2_000;
 
   typingTimeoutId = 0;
   currentOnline = 1;
@@ -45,7 +45,7 @@ export class ChatComponent implements OnDestroy, OnInit {
   ngOnInit(): void {
     this.subscriptions.add(this.talkToStrangerNostr
       .listenCurrenOnlineUsers()
-      .subscribe(currentOnline => this.currentOnline = currentOnline));
+      .subscribe(currentOnline => this.currentOnline = currentOnline || 1));
   }
 
   ngOnDestroy(): void {
@@ -60,7 +60,7 @@ export class ChatComponent implements OnDestroy, OnInit {
 
   findStranger(): void {
     this.whoDisconnected = null;
-    this.currentState = this.STATE_SEARCHING_STRANGER;
+    this.currentState = this.stateSearchingStranger;
     this.messages = [];
     const you = this.you = this.findStrangerProxy.connect();
     console.info(new Date().toLocaleString(), 'me: ', you);
@@ -161,7 +161,7 @@ export class ChatComponent implements OnDestroy, OnInit {
       this.typingTimeoutId = Number(setTimeout(() => {
         this.talkToStrangerNostr.stopTyping(you);
         this.typingTimeoutId = 0;
-      }, this.TYPING_TIMEOUT));
+      }, this.typingTimeoutAmount));
     }
   }
 }

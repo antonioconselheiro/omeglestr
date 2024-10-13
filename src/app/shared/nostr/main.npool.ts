@@ -6,8 +6,8 @@ export class NPoolService extends NPool {
   constructor() {
     super({
       open: (url) => new NRelay1(url),
-      reqRouter: async (filters) => new Map([['ws://localhost:7777', filters]]),
-      eventRouter: async () => ['ws://localhost:7777']
+      reqRouter: async (filters) => new Map([['ws://localhost:10000', filters]]),
+      eventRouter: async () => ['ws://localhost:10000']
     });
   }
 
