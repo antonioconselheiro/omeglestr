@@ -20,8 +20,8 @@ Need support to [NIP-04](https://github.com/nostr-protocol/nips/blob/master/04.m
 
 ## TODO
 - [ ] include "great talk?" button to export talk as html
-- [ ] if relay has an onion url, in onion context the app should preper that
-- [ ] user must be able to stop app from searching
+- [ ] if relay has an onion url, in onion context the app should prefer that
+- [ ] include button to app stop searching
 
 ## Donate
 Do you want more protests in favor of free speech, freedom of software and freedom of work similar to this one?
@@ -42,3 +42,9 @@ Bitcoin onchain donate: <a href="bitcoin:bc1qrm99lmmpwk7zsh7njpgthw87yvdm38j2lzp
 
 ## Contribute
 - See [CONTRIBUTE.md](./CONTRIBUTE.md)
+
+## References
+- https://angular.dev/style-guide#rule-of-one
+- https://github.com/nostr-protocol/nips
+- https://nostrify.dev/
+- https://www.omegle.com/

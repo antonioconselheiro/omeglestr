@@ -1,3 +1,3 @@
-[ ] treat relay error handling like nostr_server maxevent error
 [ ] check app behaviour after some talks and connections
+[ ] remove nsecs from log
 [ ] deploy into onion domain

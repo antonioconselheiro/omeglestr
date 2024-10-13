@@ -36,7 +36,6 @@ export class FindStrangerService {
         return Promise.resolve(OmeglestrUser.fromPubkey(wannaChat.pubkey));
       } else {
         await this.disconnect(me);
-        await this.deleteUserHistory(me);
         return this.searchStranger(me);
       }
     }
