@@ -65,7 +65,8 @@ export class NostrEventFactory {
   createWannaChatUserStatus(user: Required<OmeglestrUser>): NostrEvent {
     return this.createUserStatus(user, 'wannachat', [
         [ 'expiration', this.getExpirationTimestamp() ],
-        [ 't', 'wannachat']
+        [ 't', 'omegle' ],
+        [ 't', 'wannachat' ]
       ]);
   }
 
@@ -77,6 +78,7 @@ export class NostrEventFactory {
 
   createTypingUserStatus(user: Required<OmeglestrUser>): NostrEvent {
     return this.createUserStatus(user, 'typing', [
+      [ 't', 'omegle' ],
       [ 'expiration', this.getExpirationTimestamp(this.largeExpirationTime) ]
     ]);
   }
@@ -85,6 +87,7 @@ export class NostrEventFactory {
     return this.createUserStatus(you, 'chating', [
       [ 'expiration', this.getExpirationTimestamp(this.largeExpirationTime) ],
       [ 'p', strange.pubkey ],
+      [ 't', 'omegle' ],
       [ 't', 'chating' ]
     ]);
   }
@@ -109,13 +112,14 @@ export class NostrEventFactory {
   }
 
   cleanUserStatus(user: Required<OmeglestrUser>): NostrEvent {
-    return this.createUserStatus(user, '');
+    return this.createUserStatus(user, '', [
+      [ 't', 'omegle' ]
+    ]);
   }
 
   private createUserStatus(user: Required<OmeglestrUser>, status: string, customTags?: string[][]): NostrEvent {
     const tags = [
       ['d', 'general'],
-      ['t', 'omegle'],
       ...(customTags || [])
     ];
 

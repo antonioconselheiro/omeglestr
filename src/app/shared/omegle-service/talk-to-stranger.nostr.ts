@@ -57,6 +57,7 @@ export class TalkToStrangerNostr {
       .then(events => {
 
         const users = new Set<string>();
+        console.info('count events', events);
         events.forEach(event => users.add(event.pubkey));
         const count = [...users].length;
 

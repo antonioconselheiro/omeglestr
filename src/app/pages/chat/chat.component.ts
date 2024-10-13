@@ -72,6 +72,7 @@ export class ChatComponent implements OnDestroy, OnInit {
 
   disconnect(): Promise<void> {
     if (this.you) {
+      this.stranger = null;
       return this.findStrangerProxy
       .disconnect(this.you)
       .then(() => {
