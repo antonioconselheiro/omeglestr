@@ -12,7 +12,7 @@
 ![ostrich](./phoenix.jpg)
 
 ## Implementation
-It'll not need you `nsec` or connect to your signer, this will generate one nsec to each talk and in the end of each talk will clean all events emitted from your session. If the events are not deleted at the end, it'll expire into relay and be deleted anyway.
+It'll not need your `nsec` or connect to your signer, this will generate one nsec to each talk and in the end of each talk will clean all events emitted from your session. If the events are not deleted at the end, it'll expire into relay and be deleted anyway.
 This also have a hardcoded relay included, no custom relays are need, if you want change it and find stranger to talk in other relays you must [fork](https://guides.github.com/activities/forking/) this repository by [clicking here](https://github.com/antonioconselheiro/omeglestr/fork). But this will be configurable in the future.
 
 ## Relay Compatibility
