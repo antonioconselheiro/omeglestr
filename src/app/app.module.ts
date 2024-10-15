@@ -8,6 +8,7 @@ import { ChatModule } from './pages/chat/chat.module';
 import { NostrModule } from './shared/nostr/nostr.module';
 import { ErrorHandlingModule } from '@shared/error-handling/error-handling.module';
 import { ToastrModule } from 'ngx-toastr';
+import { AsyncModalModule } from '@belomonte/async-modal-ngx';
 
 @NgModule({
   declarations: [
@@ -19,6 +20,7 @@ import { ToastrModule } from 'ngx-toastr';
     AppRoutingModule,
     GlobalConfigModule,
     OmegleServiceModule,
+    AsyncModalModule,
     NostrModule,
     ToastrModule.forRoot({
       timeOut: 10_000,

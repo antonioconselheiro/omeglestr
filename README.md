@@ -18,11 +18,6 @@ This also have a hardcoded relay included, no custom relays are need, if you wan
 ## Relay Compatibility
 Need support to [NIP-04](https://github.com/nostr-protocol/nips/blob/master/04.md), [NIP-38](https://github.com/nostr-protocol/nips/blob/master/38.md) and [NIP-40](https://github.com/nostr-protocol/nips/blob/master/40.md).
 
-## TODO
-- [ ] include "great talk?" button to export talk as html
-- [ ] include button to app stop searching
-- [ ] allow user change configured relays
-
 ## Donate
 Do you want more protests in favor of free speech, freedom of software and freedom of work similar to this one?
 

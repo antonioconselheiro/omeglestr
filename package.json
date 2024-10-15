@@ -25,6 +25,7 @@
     "@angular/platform-browser": "^18.2.8",
     "@angular/platform-browser-dynamic": "^18.2.8",
     "@angular/router": "^18.2.8",
+    "@belomonte/async-modal-ngx": "^1.0.0",
     "@nostrify/nostrify": "npm:@jsr/nostrify__nostrify@^0.36.1",
     "ngx-toastr": "^19.0.0",
     "nostr-tools": "^2.7.2",

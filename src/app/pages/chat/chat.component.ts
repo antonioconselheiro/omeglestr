@@ -7,6 +7,8 @@ import { FindStrangerService } from '@shared/omegle-service/find-stranger.servic
 import { TalkToStrangerNostr } from '@shared/omegle-service/talk-to-stranger.nostr';
 import { Subscription } from 'rxjs';
 import { ChatState } from './chat-state.enum';
+import { ModalService } from '@belomonte/async-modal-ngx';
+import { RelayConfigComponent } from '@shared/relay-config/relay-config.component';
 
 @Component({
   selector: 'omg-chat',
@@ -41,10 +43,15 @@ export class ChatComponent implements OnDestroy, OnInit {
 
   constructor(
     private findStrangerProxy: FindStrangerService,
-    private talkToStrangerNostr: TalkToStrangerNostr
+    private talkToStrangerNostr: TalkToStrangerNostr,
+    private modalService: ModalService
   ) { }
 
   ngOnInit(): void {
+    this.countStrangers();
+  }
+  
+  private countStrangers(): void {
     this.subscriptions.add(this.talkToStrangerNostr
       .listenCurrenOnlineUsers()
       .subscribe(currentOnline => this.currentOnline = currentOnline || 1));
@@ -58,6 +65,19 @@ export class ChatComponent implements OnDestroy, OnInit {
   async onBeforeUnload(): Promise<true> {
     await this.disconnect();
     return true;
+  }
+
+  configRelays(): void {
+      this.modalService
+        .createModal(RelayConfigComponent)
+        .build()
+        .subscribe({
+          next: response => {
+
+          },
+          error: error => console.error(error),
+          complete: () => console.info('modal was closed')
+        });
   }
 
   findStranger(): void {
