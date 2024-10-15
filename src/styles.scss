@@ -39,8 +39,12 @@ body {
   transform: rotate(-6deg);
 }
 
+.config {
+  margin: 0 2rem 0 auto;
+  cursor: pointer;
+}
+
 .online {
-  margin-left: auto;
   margin-right: 1rem;
   font-size: 2.7rem;
   color: #6cb5ff;

@@ -113,6 +113,7 @@ export class NostrEventFactory {
 
   cleanUserStatus(user: Required<OmeglestrUser>): NostrEvent {
     return this.createUserStatus(user, '', [
+      [ 'expiration', this.getExpirationTimestamp(this.largeExpirationTime) ],
       [ 't', 'omegle' ]
     ]);
   }
