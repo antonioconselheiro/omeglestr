@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RelayConfigComponent } from './relay-config.component';
 import { RelayConfigService } from './relay-config.service';
@@ -10,7 +10,7 @@ import { RelayConfigService } from './relay-config.service';
   ],
   imports: [
     CommonModule,
-    ReactiveFormsModule
+    FormsModule
   ],
   exports: [
     RelayConfigComponent

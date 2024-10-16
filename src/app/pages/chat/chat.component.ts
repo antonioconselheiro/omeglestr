@@ -68,13 +68,12 @@ export class ChatComponent implements OnDestroy, OnInit {
   }
 
   configRelays(): void {
-    debugger;
     this.modalService
       .createModal(RelayConfigComponent)
       .build()
       .subscribe({
         next: response => {
-          debugger;
+
         },
         error: error => console.error(error),
         complete: () => console.info('modal was closed')

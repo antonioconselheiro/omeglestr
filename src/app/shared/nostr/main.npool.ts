@@ -1,7 +1,9 @@
+import { Injectable } from '@angular/core';
 import { NostrEvent, NostrFilter, NPool, NRelay1 } from '@nostrify/nostrify';
 import { RelayConfigService } from '@shared/relay-config/relay-config.service';
 import { finalize, Observable, Subject } from 'rxjs';
 
+@Injectable()
 export class NPoolService extends NPool<NRelay1> {
 
   constructor(
