@@ -47,21 +47,21 @@ export class TalkToStrangerNostr {
       }
 
       requestPending = true;
-      console.info(new Date().toLocaleString(),'user count requested');
+      console.info(new Date().toLocaleString(), 'user count requested');
       this.npool.query([
         {
           kinds: [ kinds.UserStatuses ],
-          '#t': [ 'omegle' ]
+          '#t': [ 'omegle' ],
+          since: Math.floor(Date.now() / 1000) - (24 * 60 * 60)
         }
       ])
       .then(events => {
-
         const users = new Set<string>();
         console.info(new Date().toLocaleString(),'count events', events);
         events.forEach(event => users.add(event.pubkey));
         const count = [...users].length;
 
-        console.info(new Date().toLocaleString(),'active users counted: ', count);
+        console.info(new Date().toLocaleString(), 'active users counted: ', count);
         subject.next(count);
         requestPending = false;
       })

@@ -1,20 +1,23 @@
 import { NostrEvent, NostrFilter, NPool, NRelay1 } from '@nostrify/nostrify';
+import { RelayConfigService } from '@shared/relay-config/relay-config.service';
 import { finalize, Observable, Subject } from 'rxjs';
 
 export class NPoolService extends NPool<NRelay1> {
 
-  constructor() {
+  constructor(
+    private relayConfigService: RelayConfigService
+  ) {
     super({
       open: (url) => new NRelay1(url),
       reqRouter: async (filters) => {
         const toupleList: Array<[string, NostrFilter[]]> = [];
-        import.meta.env.NG_APP_RELAYS.split(',').forEach(relay => {
+        this.relayConfigService.getConfig().forEach(relay => {
           toupleList.push([relay, filters]);
         });
 
         return new Map(toupleList);
       },
-      eventRouter: async () => import.meta.env.NG_APP_RELAYS.split(',')
+      eventRouter: async () => this.relayConfigService.getConfig()
     });
   }
 
@@ -38,7 +41,7 @@ export class NPoolService extends NPool<NRelay1> {
       .asObservable()
       .pipe(
         finalize(() => {
-          console.info(new Date().toLocaleString(),'[[unsubscribe filter]]', filters);
+          console.info(new Date().toLocaleString(), '[[unsubscribe filter]]', filters);
           abort.abort();
         })
       );

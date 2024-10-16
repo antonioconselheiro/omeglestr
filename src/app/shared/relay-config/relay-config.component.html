@@ -1,11 +1,14 @@
 <form>
+  <ul class="relayList">
+    <li *ngFor="let relay of relays">{{relay}}</li>
+  </ul>
+
   <div>
     <label>Relay</label>
     <input type="text" autocomplete="off">
   </div>
 
   <div>
-    <button>add</button>
+    <button type="button">add</button>
   </div>
-  
 </form>
