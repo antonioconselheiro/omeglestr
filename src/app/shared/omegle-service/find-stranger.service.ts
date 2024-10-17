@@ -25,10 +25,11 @@ export class FindStrangerService {
 
   async searchStranger(me: Required<OmeglestrUser>): Promise<OmeglestrUser> {
     const wannaChat = await this.findStrangerNostr.queryChatAvailable();
+    const includePow = true;
     if (wannaChat) {
       console.info(new Date().toLocaleString(), 'inviting ', wannaChat.pubkey, ' to chat and listening confirmation');
       const listening = this.listenChatingConfirmation(wannaChat, me);
-      await this.inviteToChating(me, wannaChat);
+      await this.inviteToChating(me, wannaChat, includePow);
       const isChatingConfirmation = await listening;
       this.ignoreListService.saveInList(wannaChat.pubkey);
 
@@ -40,7 +41,7 @@ export class FindStrangerService {
       }
     }
 
-    await this.publishWannaChatStatus(me);
+    await this.publishWannaChatStatus(me, includePow);
     return new Promise(resolve => {
       const sub = this.findStrangerNostr
         .listenWannachatResponse(me)
@@ -93,9 +94,9 @@ export class FindStrangerService {
     return !!result.length;
   }
 
-  private inviteToChating(me: Required<OmeglestrUser>, strangeStatus: NostrEvent): Promise<NostrEvent> {
+  private inviteToChating(me: Required<OmeglestrUser>, strangeStatus: NostrEvent, includePow = false): Promise<NostrEvent> {
     const stranger = OmeglestrUser.fromPubkey(strangeStatus.pubkey);
-    return this.publishChatInviteStatus(me, stranger);
+    return this.publishChatInviteStatus(me, stranger, includePow);
   }
 
   private async listenChatingConfirmation(strangerWannachatEvent: NostrEvent, me: Required<OmeglestrUser>): Promise<boolean> {
@@ -140,16 +141,16 @@ export class FindStrangerService {
     }
   }
 
-  private async publishWannaChatStatus(user: Required<OmeglestrUser>): Promise<NostrEvent> {
-    const wannaChatStatus = this.nostrEventFactory.createWannaChatUserStatus(user);
+  private async publishWannaChatStatus(user: Required<OmeglestrUser>, includePow = false): Promise<NostrEvent> {
+    const wannaChatStatus = await this.nostrEventFactory.createWannaChatUserStatus(user, includePow);
     console.info(new Date().toLocaleString(), 'updating my status to: ', wannaChatStatus);
     await this.npool.event(wannaChatStatus);
 
     return Promise.resolve(wannaChatStatus);
   }
 
-  private async publishChatInviteStatus(user: Required<OmeglestrUser>, stranger: OmeglestrUser): Promise<NostrEvent> {
-    const chatingStatus = this.nostrEventFactory.createChatingUserStatus(user, stranger);
+  private async publishChatInviteStatus(user: Required<OmeglestrUser>, stranger: OmeglestrUser, includePow = false): Promise<NostrEvent> {
+    const chatingStatus = await this.nostrEventFactory.createChatingUserStatus(user, stranger, includePow);
     console.info(new Date().toLocaleString(), 'updating my status to: ', chatingStatus);
     await this.npool.event(chatingStatus);
 
@@ -169,7 +170,7 @@ export class FindStrangerService {
   }
 
   async disconnect(user: Required<OmeglestrUser>): Promise<NostrEvent> {
-    const disconnectStatus = this.nostrEventFactory.createDisconnectedUserStatus(user);
+    const disconnectStatus = await this.nostrEventFactory.createDisconnectedUserStatus(user);
     console.info(new Date().toLocaleString(), 'updating my status to: ', disconnectStatus);
     await this.deleteUserHistory(user);
     await this.npool.event(disconnectStatus);

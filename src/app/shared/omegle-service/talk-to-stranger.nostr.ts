@@ -86,13 +86,13 @@ export class TalkToStrangerNostr {
     return this.npool.event(event);
   }
 
-  isTyping(user: Required<OmeglestrUser>): Promise<void> {
-    const wannaChatStatus = this.nostrEventFactory.createTypingUserStatus(user);
+  async isTyping(user: Required<OmeglestrUser>): Promise<void> {
+    const wannaChatStatus = await this.nostrEventFactory.createTypingUserStatus(user);
     return this.npool.event(wannaChatStatus);
   }
 
-  stopTyping(you: Required<OmeglestrUser>): Promise<void> {
-    const wannaChatStatus = this.nostrEventFactory.cleanUserStatus(you);
+  async stopTyping(you: Required<OmeglestrUser>): Promise<void> {
+    const wannaChatStatus = await this.nostrEventFactory.cleanUserStatus(you);
     return this.npool.event(wannaChatStatus);
   }
 }
