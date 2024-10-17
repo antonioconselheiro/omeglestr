@@ -39,8 +39,13 @@ body {
   transform: rotate(-6deg);
 }
 
+.config {
+  margin: 0 2rem 0 auto;
+  cursor: pointer;
+  color: #a5a5a5;
+}
+
 .online {
-  margin-left: auto;
   margin-right: 1rem;
   font-size: 2.7rem;
   color: #6cb5ff;
@@ -73,7 +78,57 @@ body {
   margin-bottom: 0.7rem;
 }
 
+.errorWrap {
+  position: relative;
+
+  .messageNotSent {
+    color: #ff8100;
+    margin: -.5rem 1rem;
+    cursor: pointer;
+    
+    &:hover ~ .errorMessage {
+      display: block;
+    }
+  }
+
+  .errorMessage {
+    border: 1px solid;
+    border-radius: 5px;
+    padding: .5rem 1rem;
+    background-color: #ffdebd;
+    position: absolute;
+    display: none;
+    top: -1rem;
+    left: 100%;
+    white-space: nowrap;
+
+    &:before,
+    &:after {
+      content: "";
+      display: block;
+      border: 10px solid transparent;
+      width: 0px;
+      height: 0px;
+      z-index: 1;
+      position: absolute;
+      border-right-color: black;
+      white-space: nowrap;
+      left: -20px;
+      top: 10px;
+    }
+
+    &:after {
+      z-index: 2;
+      border: 8px solid transparent;
+      border-right-color: #ffdebd;
+      left: -16px;
+      top: 12px;
+    }
+  }
+}
+
 .chat {
+  position: relative;
   margin-bottom: 0.7rem;
 }
 
@@ -147,6 +202,34 @@ body {
   font-weight: 700;
 }
 
+ul.relayList {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  max-height: 150px;
+  margin-bottom: 1rem;
+
+  >li {
+    margin: .5rem;
+
+    .removeButton {
+      color: white;
+      background-color: transparent;
+    }
+    
+    &:before {
+      content: '';
+      display: inline-block;
+      background-color: rgb(0, 204, 0);
+      border-radius: 2px;
+      width: 6px;
+      height: 6px;
+      margin-right: 8px;
+    }
+  }
+}
+
 @media only screen and (max-width: 56.25em) {
   .description {
     margin-left: 6rem;
@@ -198,5 +281,30 @@ body {
 @media only screen and (max-width: 28.125em) {
   .logo {
     height: 12rem;
+  }
+}
+
+modal-outlet {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0,0,0,.1);
+  border: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 500;
+  
+  > * {
+    margin: 4rem auto;
+    display: block;
+    min-width: 200px;
+    max-width: 250px;
+    background-color: white;
+    border-radius: 15px;
+    padding: 1rem;
+    box-sizing: border-box;
   }
 }

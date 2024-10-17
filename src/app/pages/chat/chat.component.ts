@@ -7,6 +7,9 @@ import { FindStrangerService } from '@shared/omegle-service/find-stranger.servic
 import { TalkToStrangerNostr } from '@shared/omegle-service/talk-to-stranger.nostr';
 import { Subscription } from 'rxjs';
 import { ChatState } from './chat-state.enum';
+import { ModalService } from '@belomonte/async-modal-ngx';
+import { RelayConfigComponent } from '@shared/relay-config/relay-config.component';
+import { GlobalErrorHandler } from '@shared/error-handling/global.error-handler';
 
 @Component({
   selector: 'omg-chat',
@@ -35,16 +38,22 @@ export class ChatComponent implements OnDestroy, OnInit {
   you: Required<OmeglestrUser> | null = null;
   stranger: OmeglestrUser | null = null;
 
-  messages: ChatMessage[] = [];
+  messages: Array<[ChatMessage, string | null]> = [];
 
   private subscriptions = new Subscription();
 
   constructor(
+    private globalErrorHandler: GlobalErrorHandler,
     private findStrangerProxy: FindStrangerService,
-    private talkToStrangerNostr: TalkToStrangerNostr
+    private talkToStrangerNostr: TalkToStrangerNostr,
+    private modalService: ModalService
   ) { }
 
   ngOnInit(): void {
+    this.countStrangers();
+  }
+  
+  private countStrangers(): void {
     this.subscriptions.add(this.talkToStrangerNostr
       .listenCurrenOnlineUsers()
       .subscribe(currentOnline => this.currentOnline = currentOnline || 1));
@@ -60,6 +69,12 @@ export class ChatComponent implements OnDestroy, OnInit {
     return true;
   }
 
+  configRelays(): void {
+    this.modalService
+      .createModal(RelayConfigComponent)
+      .build();
+  }
+
   findStranger(): void {
     this.whoDisconnected = null;
     this.currentState = this.stateSearchingStranger;
@@ -69,7 +84,15 @@ export class ChatComponent implements OnDestroy, OnInit {
     this.findStrangerProxy
       .searchStranger(this.you)
       .then(stranger => this.startConversation(you, stranger))
-      .catch(e => console.error(new Date().toLocaleString(), e));
+      .catch(e => {
+        console.error(new Date().toLocaleString(), e);
+        this.strangeIsTyping = false;
+        this.currentState = ChatState.DISCONNECTED;
+        this.whoDisconnected = null;
+        this.stranger = null;
+
+        throw e;
+      });
   }
 
   disconnect(): Promise<void> {
@@ -117,11 +140,11 @@ export class ChatComponent implements OnDestroy, OnInit {
     this.talkToStrangerNostr
       .openEncryptedDirectMessage(me, stranger, event)
       .then(text => {
-        this.messages.push({
+        this.messages.push([{
           text,
           author: MessageAuthor.STRANGE,
           time: event.created_at
-        });
+        }, null]);
         this.scrollConversationToTheEnd();
       })
   }
@@ -140,15 +163,24 @@ export class ChatComponent implements OnDestroy, OnInit {
     }
   }
 
-  sendMessage(message: string): void {
+  async sendMessage(message: string): Promise<void> {
     const me = this.you;
     const stranger = this.stranger;
     if (me && stranger && message.length) {
-      this.talkToStrangerNostr.sendMessage(me, stranger, message);
-      this.messages.push({
-        author: MessageAuthor.YOU, text: message, time: Math.floor(new Date().getTime() / 1000)
-      });
+      const touple: [ChatMessage, string | null] = [{
+        author: MessageAuthor.YOU,
+        text: message,
+        time: Math.floor(new Date().getTime() / 1000)
+      }, null];
+
+      this.messages.push(touple);
       this.scrollConversationToTheEnd();
+
+      try {
+        await this.talkToStrangerNostr.sendMessage(me, stranger, message);
+      } catch (e) {
+        touple[1] = this.globalErrorHandler.getErrorMessage(e as Error).join('; ');
+      }
     }
   }
 

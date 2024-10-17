@@ -1,0 +1,59 @@
+.closeButton {
+  border: 0;
+  cursor: pointer;
+  appearance: none;
+  background-color: transparent;
+  font-size: 10px;
+  margin-left: 1rem;
+
+  &.exitButton {
+    float: right;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+}
+
+h1 {
+  font-size: 14px;
+  margin-bottom: 1rem;
+}
+
+.fieldWithButton {
+  display: flex;
+  
+  input {
+    padding: 3px 1rem;
+    border-radius: 5px 0 0 5px;
+    border: 1px solid black;
+  }
+  
+  button {
+    border-left: 0;
+    border-radius: 0 5px 5px 0;
+  }
+}
+
+button {
+  background-color: white;
+  border: 1px solid black;
+  padding: .25rem .5rem;
+  border-radius: 5px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: rgb(241, 241, 241);
+  }
+
+  &:active {
+    background-color: rgb(230, 230, 230);
+  }
+}
+
+.button-group {
+  display: flex;
+  margin: 1rem 0 0;
+  justify-content: space-between;
+}

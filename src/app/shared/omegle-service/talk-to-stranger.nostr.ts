@@ -8,7 +8,7 @@ import { finalize, Observable, Subject } from 'rxjs';
 @Injectable()
 export class TalkToStrangerNostr {
 
-  readonly updateUserCountTimeout = 1000 * 60 * 2;
+  readonly updateUserCountTimeout = 1000 * 60 * 5;
 
   constructor(
     private nostrEventFactory: NostrEventFactory,
@@ -47,21 +47,21 @@ export class TalkToStrangerNostr {
       }
 
       requestPending = true;
-      console.info(new Date().toLocaleString(),'user count requested');
+      console.info(new Date().toLocaleString(), 'user count requested');
       this.npool.query([
         {
           kinds: [ kinds.UserStatuses ],
-          '#t': [ 'omegle' ]
+          '#t': [ 'omegle' ],
+          since: Math.floor(Date.now() / 1000) - (24 * 60 * 60)
         }
       ])
       .then(events => {
-
         const users = new Set<string>();
         console.info(new Date().toLocaleString(),'count events', events);
         events.forEach(event => users.add(event.pubkey));
         const count = [...users].length;
 
-        console.info(new Date().toLocaleString(),'active users counted: ', count);
+        console.info(new Date().toLocaleString(), 'active users counted: ', count);
         subject.next(count);
         requestPending = false;
       })
@@ -86,13 +86,13 @@ export class TalkToStrangerNostr {
     return this.npool.event(event);
   }
 
-  isTyping(user: Required<OmeglestrUser>): Promise<void> {
-    const wannaChatStatus = this.nostrEventFactory.createTypingUserStatus(user);
+  async isTyping(user: Required<OmeglestrUser>): Promise<void> {
+    const wannaChatStatus = await this.nostrEventFactory.createTypingUserStatus(user);
     return this.npool.event(wannaChatStatus);
   }
 
-  stopTyping(you: Required<OmeglestrUser>): Promise<void> {
-    const wannaChatStatus = this.nostrEventFactory.cleanUserStatus(you);
+  async stopTyping(you: Required<OmeglestrUser>): Promise<void> {
+    const wannaChatStatus = await this.nostrEventFactory.cleanUserStatus(you);
     return this.npool.event(wannaChatStatus);
   }
 }

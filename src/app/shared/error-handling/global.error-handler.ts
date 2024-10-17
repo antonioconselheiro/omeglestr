@@ -1,5 +1,4 @@
-import { ErrorHandler, Inject, Injectable, Injector } from '@angular/core';
-import { ToastrService } from 'ngx-toastr';
+import { ErrorHandler, Injectable } from '@angular/core';
 import { ErrorMessagesObservable } from './error-messages.observable';
 
 @Injectable({
@@ -28,5 +27,17 @@ export class GlobalErrorHandler extends ErrorHandler {
         this.error$.next('application throw unkown error');
       }
     }
+  }
+
+  getErrorMessage(error: Error & { errors?: Array<Error> }): string[] {
+    if (!(/^AbortError/.test(String(error)))) {
+      if (error.errors && error.errors.length) {
+        return error.errors.map(err => err.message);
+      } else if (error.message) {
+        return [error.message];
+      }
+    }
+
+    return [];
   }
 }

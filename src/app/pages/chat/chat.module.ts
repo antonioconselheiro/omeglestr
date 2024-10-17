@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChatComponent } from './chat.component';
 import { AuthorPipe } from './author.pipe';
+import { RelayConfigModule } from '@shared/relay-config/relay-config.module';
 
 @NgModule({
   declarations: [
@@ -9,7 +10,8 @@ import { AuthorPipe } from './author.pipe';
     AuthorPipe
   ],
   imports: [
-    CommonModule
+    CommonModule,
+    RelayConfigModule
   ],
   exports: [
     ChatComponent

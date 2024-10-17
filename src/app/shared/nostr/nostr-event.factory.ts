@@ -62,34 +62,34 @@ export class NostrEventFactory {
    * NIP 38
    * https://github.com/nostr-protocol/nips/blob/master/38.md
    */
-  createWannaChatUserStatus(user: Required<OmeglestrUser>): NostrEvent {
+  createWannaChatUserStatus(user: Required<OmeglestrUser>, includePow = false): Promise<NostrEvent> {
     return this.createUserStatus(user, 'wannachat', [
         [ 'expiration', this.getExpirationTimestamp() ],
         [ 't', 'omegle' ],
         [ 't', 'wannachat' ]
-      ]);
+      ], includePow);
   }
 
-  createDisconnectedUserStatus(user: Required<OmeglestrUser>): NostrEvent {
+  createDisconnectedUserStatus(user: Required<OmeglestrUser>): Promise<NostrEvent> {
     return this.createUserStatus(user, 'disconnected', [
       [ 'expiration', this.getExpirationTimestamp() ]
     ]);
   }
 
-  createTypingUserStatus(user: Required<OmeglestrUser>): NostrEvent {
+  createTypingUserStatus(user: Required<OmeglestrUser>): Promise<NostrEvent> {
     return this.createUserStatus(user, 'typing', [
       [ 't', 'omegle' ],
       [ 'expiration', this.getExpirationTimestamp(this.largeExpirationTime) ]
     ]);
   }
 
-  createChatingUserStatus(you: Required<OmeglestrUser>, strange: OmeglestrUser): NostrEvent {
+  createChatingUserStatus(you: Required<OmeglestrUser>, strange: OmeglestrUser, includePow = false): Promise<NostrEvent> {
     return this.createUserStatus(you, 'chating', [
       [ 'expiration', this.getExpirationTimestamp(this.largeExpirationTime) ],
       [ 'p', strange.pubkey ],
       [ 't', 'omegle' ],
       [ 't', 'chating' ]
-    ]);
+    ], includePow);
   }
 
   deleteUserHistory(you: Required<OmeglestrUser>): NostrEvent {
@@ -111,25 +111,36 @@ export class NostrEventFactory {
     return verifiedEvent;
   }
 
-  cleanUserStatus(user: Required<OmeglestrUser>): NostrEvent {
+  cleanUserStatus(user: Required<OmeglestrUser>): Promise<NostrEvent> {
     return this.createUserStatus(user, '', [
+      [ 'expiration', this.getExpirationTimestamp(this.largeExpirationTime) ],
       [ 't', 'omegle' ]
     ]);
   }
 
-  private createUserStatus(user: Required<OmeglestrUser>, status: string, customTags?: string[][]): NostrEvent {
+  private async createUserStatus(user: Required<OmeglestrUser>, status: string, customTags?: string[][], includePow = false): Promise<NostrEvent> {
     const tags = [
       ['d', 'general'],
       ...(customTags || [])
     ];
 
-    const eventTemplate: EventTemplate = {
+    let eventTemplate: EventTemplate = {
       kind: kinds.UserStatuses,
       content: status,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       created_at: this.getCurrentTimestamp(),
       tags
     };
+
+    if (includePow) {
+      const { data: eventSigner } = await new Promise<{ data: EventTemplate }>(resolve => {
+        const worker = new Worker(new URL('../../workers/nostr-event-pow.worker', import.meta.url));
+        worker.onmessage = ({ data }) => resolve(data);
+        worker.postMessage({ ...eventTemplate, pubkey: user.pubkey });
+      });
+
+      eventTemplate = eventSigner;
+    }
 
     return finalizeEvent(
       eventTemplate, user.secretKey
