@@ -98,7 +98,9 @@ body {
     background-color: #ffdebd;
     position: absolute;
     display: none;
-    top: -.5rem;
+    top: -1rem;
+    left: 100%;
+    white-space: nowrap;
 
     &:before,
     &:after {
