@@ -15,17 +15,15 @@ export class FindStrangerNostr {
   ) { }
 
   listenUserStatusUpdate(pubkey: string): Observable<NostrEvent> {
-    console.info(new Date().toLocaleString(),'observing filter:', [
+    console.info(new Date().toLocaleString(), 'observing filter:', [
       {
         kinds: [ kinds.UserStatuses ],
-        '#t': [ 'omegle' ],
         authors: [ pubkey ]
       }
     ]);
     return this.npool.observe([
       {
         kinds: [ kinds.UserStatuses ],
-        '#t': [ 'omegle' ],
         authors: [ pubkey ]
       }
     ]);

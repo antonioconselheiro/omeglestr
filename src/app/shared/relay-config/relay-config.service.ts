@@ -14,7 +14,7 @@ export class RelayConfigService {
     const localConfig = localStorage.getItem('omeglestr');
     try {
       if (localConfig) {
-        return JSON.parse(localConfig).map(normalizeURL);
+        return JSON.parse(localConfig).relays.map(normalizeURL);
       }
     } catch { }
 

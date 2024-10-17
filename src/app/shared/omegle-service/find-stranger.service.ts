@@ -59,7 +59,11 @@ export class FindStrangerService {
           next: event => {
             this.ignoreListService.saveInList(event.pubkey);
             this.replyChatInvitation(event, me)
-              .then(user => user && resolve(user));
+              .then(user => user && resolve(user))
+              .catch(e => {
+                console.error(e);
+                debugger;
+              });
 
             sub.unsubscribe();
           },
@@ -97,6 +101,7 @@ export class FindStrangerService {
   private async listenChatingConfirmation(strangerWannachatEvent: NostrEvent, me: Required<OmeglestrUser>): Promise<boolean> {
     return new Promise<boolean>(resolve => {
       console.info(new Date().toLocaleString(), 'listening status update from: ', strangerWannachatEvent.pubkey);
+      // FIXME: ensure that the error will make the unsubscription trigger the abort signal sending, to clean filters in relay
       const subscription: Subscription = this.findStrangerNostr
         .listenUserStatusUpdate(strangerWannachatEvent.pubkey)
         .pipe(
@@ -106,10 +111,13 @@ export class FindStrangerService {
         .subscribe({
           next: status => this.receiveChatingConfirmation(subscription, status, strangerWannachatEvent, me).then(is => {
             if (typeof is === 'boolean') {
-              resolve(is)
+              resolve(is);
             }
           }),
-          error: () => resolve(false)
+          error: (e) => {
+            console.error(e);
+            resolve(false);
+          }
         });
     });
   }
