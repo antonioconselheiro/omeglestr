@@ -63,7 +63,7 @@ export class FindStrangerService {
               .then(user => user && resolve(user))
               .catch(e => {
                 console.error(e);
-                debugger;
+                throw e;
               });
 
             sub.unsubscribe();

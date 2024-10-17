@@ -84,7 +84,15 @@ export class ChatComponent implements OnDestroy, OnInit {
     this.findStrangerProxy
       .searchStranger(this.you)
       .then(stranger => this.startConversation(you, stranger))
-      .catch(e => console.error(new Date().toLocaleString(), e));
+      .catch(e => {
+        console.error(new Date().toLocaleString(), e);
+        this.strangeIsTyping = false;
+        this.currentState = ChatState.DISCONNECTED;
+        this.whoDisconnected = null;
+        this.stranger = null;
+
+        throw e;
+      });
   }
 
   disconnect(): Promise<void> {

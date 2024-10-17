@@ -133,13 +133,13 @@ export class NostrEventFactory {
     };
 
     if (includePow) {
-      eventTemplate = await new Promise<EventTemplate>(resolve => {
+      const { data: eventSigner } = await new Promise<{ data: EventTemplate }>(resolve => {
         const worker = new Worker(new URL('../../workers/nostr-event-pow.worker', import.meta.url));
-        const channel = new MessageChannel();
-        channel.port1.onmessage = event => resolve(event.data)
-        worker.postMessage({ ...eventTemplate, pubkey: user.pubkey }, [channel.port2]);
+        worker.onmessage = ({ data }) => resolve(data);
+        worker.postMessage({ ...eventTemplate, pubkey: user.pubkey });
       });
-      debugger;
+
+      eventTemplate = eventSigner;
     }
 
     return finalizeEvent(
