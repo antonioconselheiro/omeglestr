@@ -78,12 +78,55 @@ body {
   margin-bottom: 0.7rem;
 }
 
-.messageNotSent {
-  color: #ff8100;
-  margin: -.5rem 1rem;
+.errorWrap {
+  position: relative;
+
+  .messageNotSent {
+    color: #ff8100;
+    margin: -.5rem 1rem;
+    cursor: pointer;
+    
+    &:hover ~ .errorMessage {
+      display: block;
+    }
+  }
+
+  .errorMessage {
+    border: 1px solid;
+    border-radius: 5px;
+    padding: .5rem 1rem;
+    background-color: #ffdebd;
+    position: absolute;
+    display: none;
+    top: -.5rem;
+
+    &:before,
+    &:after {
+      content: "";
+      display: block;
+      border: 10px solid transparent;
+      width: 0px;
+      height: 0px;
+      z-index: 1;
+      position: absolute;
+      border-right-color: black;
+      white-space: nowrap;
+      left: -20px;
+      top: 10px;
+    }
+
+    &:after {
+      z-index: 2;
+      border: 8px solid transparent;
+      border-right-color: #ffdebd;
+      left: -16px;
+      top: 12px;
+    }
+  }
 }
 
 .chat {
+  position: relative;
   margin-bottom: 0.7rem;
 }
 

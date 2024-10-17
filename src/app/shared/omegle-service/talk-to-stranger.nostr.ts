@@ -8,7 +8,7 @@ import { finalize, Observable, Subject } from 'rxjs';
 @Injectable()
 export class TalkToStrangerNostr {
 
-  readonly updateUserCountTimeout = 1000 * 60 * 2;
+  readonly updateUserCountTimeout = 1000 * 60 * 5;
 
   constructor(
     private nostrEventFactory: NostrEventFactory,
