@@ -29,7 +29,12 @@
             "assets": [
               "src/manifest.webmanifest",
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              {
+                "glob": "**/*",
+                "input": "src/app/workers",
+                "output": "/workers"
+              }
             ],
             "styles": [
               "src/styles.scss",
