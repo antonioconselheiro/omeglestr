@@ -34,7 +34,7 @@ export class RelayConfigComponent extends ModalableDirective<void, boolean> impl
     }
   }
 
-  addRelay(el: { value: string }) {
+  addRelay(el: { value: string }): void {
     if (el.value) {
       this.relays = [...new Set([...this.relays, normalizeURL(el.value)])];
       el.value = ''

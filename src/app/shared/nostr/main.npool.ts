@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { NostrEvent, NostrFilter, NPool, NRelay1 } from '@nostrify/nostrify';
+import { NostrEvent, NostrFilter, NPool, NRelay1, NSet } from '@nostrify/nostrify';
 import { RelayConfigService } from '@shared/relay-config/relay-config.service';
 import { finalize, Observable, Subject } from 'rxjs';
 
@@ -27,6 +27,7 @@ export class NPoolService extends NPool<NRelay1> {
     console.info(new Date().toLocaleString(),'[[subscribe filter]]', filters);
     const abort = new AbortController();
     const subject = new Subject<NostrEvent>();
+    const nset = new NSet();
 
     (async () => {
       for await (const msg of this.req(filters, abort)) {
@@ -34,7 +35,12 @@ export class NPoolService extends NPool<NRelay1> {
           subject.error(msg);
           break;
         } else if (msg[0] === 'EVENT') {
-          subject.next(msg[2]);
+          const nsetSize = nset.size;
+          nset.add(msg[2]);
+
+          if (nsetSize !== nset.size) {
+            subject.next(msg[2]);
+          }
         }
       }
     })();
