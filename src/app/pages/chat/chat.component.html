@@ -55,12 +55,21 @@
     <button
       type="button"
       (click)="findStranger()"
-      [attr.disabled]="currentState === stateSearchingStranger ? 'disabled' : null"
-      *ngIf="currentState === stateDisconnected || currentState === stateSearchingStranger"
+      *ngIf="currentState === stateDisconnected"
       class="btn start bottomLeftRadius"
     >
       Start
     </button>
+
+    <button
+      type="button"
+      class="btn bottomLeftRadius"
+      *ngIf="currentState === stateSearchingStranger"
+      (click)="stopSearching()"
+    >
+      Stop
+    </button>
+
     <button
       type="button"
       class="btn bottomLeftRadius"

@@ -41,6 +41,8 @@ export class ChatComponent implements OnDestroy, OnInit {
 
   messages: Array<[ChatMessage, string | null]> = [];
 
+  controller = new AbortController();
+
   private subscriptions = new Subscription();
 
   constructor(
@@ -84,7 +86,7 @@ export class ChatComponent implements OnDestroy, OnInit {
     const you = this.you = this.findStrangerProxy.connect();
     console.info(new Date().toLocaleString(), 'me: ', you.pubkey);
     this.findStrangerProxy
-      .searchStranger(this.you)
+      .searchStranger(this.you, { signal: this.controller.signal })
       .then(stranger => this.startConversation(you, stranger))
       .catch(e => {
         console.error(new Date().toLocaleString(), e);
@@ -197,6 +199,11 @@ export class ChatComponent implements OnDestroy, OnInit {
 
   cleanMessageField(el: { value: string }): void {
     setTimeout(() => el.value = '');
+  }
+
+  stopSearching(): void {
+    this.controller.abort();
+    this.disconnect();
   }
 
   onTyping(): void {

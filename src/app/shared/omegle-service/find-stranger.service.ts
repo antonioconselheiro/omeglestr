@@ -7,6 +7,7 @@ import { NPoolService } from '@shared/nostr/main.npool';
 import { NostrEventFactory } from '@shared/nostr/nostr-event.factory';
 import { catchError, Subscription, throwError, timeout } from 'rxjs';
 import { FindStrangerNostr } from './find-stranger.nostr';
+import { NpoolOpts } from '@domain/npool-opts.interface';
 
 @Injectable()
 export class FindStrangerService {
@@ -23,12 +24,12 @@ export class FindStrangerService {
     return this.npool.event(event);
   }
 
-  async searchStranger(me: Required<OmeglestrUser>): Promise<OmeglestrUser> {
-    const wannaChat = await this.findStrangerNostr.queryChatAvailable();
+  async searchStranger(me: Required<OmeglestrUser>, opts: NpoolOpts): Promise<OmeglestrUser> {
+    const wannaChat = await this.findStrangerNostr.queryChatAvailable(opts);
     const includePow = true;
     if (wannaChat) {
       console.info(new Date().toLocaleString(), 'inviting ', wannaChat.pubkey, ' to chat and listening confirmation');
-      const listening = this.listenChatingConfirmation(wannaChat, me);
+      const listening = this.listenChatingConfirmation(wannaChat, me, opts);
       await this.inviteToChating(me, wannaChat, includePow);
       const isChatingConfirmation = await listening;
       this.ignoreListService.saveInList(wannaChat.pubkey);
@@ -37,20 +38,20 @@ export class FindStrangerService {
         return Promise.resolve(OmeglestrUser.fromPubkey(wannaChat.pubkey));
       } else {
         await this.disconnect(me);
-        return this.searchStranger(me);
+        return this.searchStranger(me, opts);
       }
     }
 
     await this.publishWannaChatStatus(me, includePow);
     return new Promise(resolve => {
       const sub = this.findStrangerNostr
-        .listenWannachatResponse(me)
+        .listenWannachatResponse(me, opts)
         .pipe(
           timeout(this.config.wannachatStatusDefaultTimeoutInSeconds * 1000),
           catchError(err => {
             sub.unsubscribe();
             this.deleteUserHistory(me).then(
-              () => this.searchStranger(me).then(stranger => resolve(stranger))
+              () => this.searchStranger(me, opts).then(stranger => resolve(stranger))
             );
 
             return throwError(() => new err)
@@ -99,12 +100,12 @@ export class FindStrangerService {
     return this.publishChatInviteStatus(me, stranger, includePow);
   }
 
-  private async listenChatingConfirmation(strangerWannachatEvent: NostrEvent, me: Required<OmeglestrUser>): Promise<boolean> {
+  private async listenChatingConfirmation(strangerWannachatEvent: NostrEvent, me: Required<OmeglestrUser>, opts: NpoolOpts): Promise<boolean> {
     return new Promise<boolean>(resolve => {
       console.info(new Date().toLocaleString(), 'listening status update from: ', strangerWannachatEvent.pubkey);
       // FIXME: ensure that the error will make the unsubscription trigger the abort signal sending, to clean filters in relay
       const subscription: Subscription = this.findStrangerNostr
-        .listenUserStatusUpdate(strangerWannachatEvent.pubkey)
+        .listenUserStatusUpdate(strangerWannachatEvent.pubkey, opts)
         .pipe(
           timeout(5000),
           catchError(err => throwError(() => new Error('chat confirmation timeout after 5s waiting, there is no stranger connected to this session')))
