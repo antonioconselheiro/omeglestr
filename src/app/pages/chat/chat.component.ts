@@ -10,6 +10,7 @@ import { ChatState } from './chat-state.enum';
 import { ModalService } from '@belomonte/async-modal-ngx';
 import { RelayConfigComponent } from '@shared/relay-config/relay-config.component';
 import { GlobalErrorHandler } from '@shared/error-handling/global.error-handler';
+import { SoundNotificationService } from '@shared/sound/sound-notification.service';
 
 @Component({
   selector: 'omg-chat',
@@ -46,6 +47,7 @@ export class ChatComponent implements OnDestroy, OnInit {
     private globalErrorHandler: GlobalErrorHandler,
     private findStrangerProxy: FindStrangerService,
     private talkToStrangerNostr: TalkToStrangerNostr,
+    private soundNotificationService: SoundNotificationService,
     private modalService: ModalService
   ) { }
 
@@ -123,6 +125,7 @@ export class ChatComponent implements OnDestroy, OnInit {
       this.currentOnline = 2;
     }
 
+    this.soundNotificationService.notify();
     this.subscriptions.add(this.talkToStrangerNostr
       .listenMessages(me, stranger)
       .subscribe({
@@ -137,6 +140,7 @@ export class ChatComponent implements OnDestroy, OnInit {
   }
 
   private addMessageFromStranger(me: Required<OmeglestrUser>, stranger: OmeglestrUser, event: NostrEvent): void {
+    this.soundNotificationService.notify();
     this.talkToStrangerNostr
       .openEncryptedDirectMessage(me, stranger, event)
       .then(text => {

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ChatComponent } from './chat.component';
 import { AuthorPipe } from './author.pipe';
 import { RelayConfigModule } from '@shared/relay-config/relay-config.module';
+import { SoundModule } from '@shared/sound/sound.module';
 
 @NgModule({
   declarations: [
@@ -11,6 +12,7 @@ import { RelayConfigModule } from '@shared/relay-config/relay-config.module';
   ],
   imports: [
     CommonModule,
+    SoundModule,
     RelayConfigModule
   ],
   exports: [
