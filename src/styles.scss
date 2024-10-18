@@ -78,6 +78,18 @@ body {
   margin-bottom: 0.7rem;
 }
 
+.warn {
+  border: 1px solid;
+  border-radius: 5px;
+  display: block;
+  padding: 0.5rem 1rem;
+  background-color: #ffdebd;
+  text-wrap: balance;
+  text-align: center;
+  width: 70%;
+  margin: .5rem auto;
+}
+
 .errorWrap {
   position: relative;
 

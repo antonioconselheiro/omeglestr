@@ -10,6 +10,7 @@ import { ChatState } from './chat-state.enum';
 import { ModalService } from '@belomonte/async-modal-ngx';
 import { RelayConfigComponent } from '@shared/relay-config/relay-config.component';
 import { GlobalErrorHandler } from '@shared/error-handling/global.error-handler';
+import { SoundNotificationService } from '@shared/sound/sound-notification.service';
 
 @Component({
   selector: 'omg-chat',
@@ -40,12 +41,15 @@ export class ChatComponent implements OnDestroy, OnInit {
 
   messages: Array<[ChatMessage, string | null]> = [];
 
+  controller = new AbortController();
+
   private subscriptions = new Subscription();
 
   constructor(
     private globalErrorHandler: GlobalErrorHandler,
     private findStrangerProxy: FindStrangerService,
     private talkToStrangerNostr: TalkToStrangerNostr,
+    private soundNotificationService: SoundNotificationService,
     private modalService: ModalService
   ) { }
 
@@ -82,7 +86,7 @@ export class ChatComponent implements OnDestroy, OnInit {
     const you = this.you = this.findStrangerProxy.connect();
     console.info(new Date().toLocaleString(), 'me: ', you.pubkey);
     this.findStrangerProxy
-      .searchStranger(this.you)
+      .searchStranger(this.you, { signal: this.controller.signal })
       .then(stranger => this.startConversation(you, stranger))
       .catch(e => {
         console.error(new Date().toLocaleString(), e);
@@ -123,6 +127,7 @@ export class ChatComponent implements OnDestroy, OnInit {
       this.currentOnline = 2;
     }
 
+    this.soundNotificationService.notify();
     this.subscriptions.add(this.talkToStrangerNostr
       .listenMessages(me, stranger)
       .subscribe({
@@ -193,6 +198,11 @@ export class ChatComponent implements OnDestroy, OnInit {
 
   cleanMessageField(el: { value: string }): void {
     setTimeout(() => el.value = '');
+  }
+
+  stopSearching(): void {
+    this.controller.abort();
+    this.disconnect();
   }
 
   onTyping(): void {
