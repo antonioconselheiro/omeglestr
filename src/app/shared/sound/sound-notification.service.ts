@@ -6,9 +6,7 @@ import { Injectable } from '@angular/core';
 export class SoundNotificationService {
 
   notify(): void {
-    if (document.hidden) {
-      const audio = new Audio('./assets/sound-notification.wav');
-      audio.play();
-    }
+    const audio = new Audio('./assets/sound-notification.wav');
+    audio.play();
   }
 }

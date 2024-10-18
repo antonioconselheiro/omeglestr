@@ -142,7 +142,6 @@ export class ChatComponent implements OnDestroy, OnInit {
   }
 
   private addMessageFromStranger(me: Required<OmeglestrUser>, stranger: OmeglestrUser, event: NostrEvent): void {
-    this.soundNotificationService.notify();
     this.talkToStrangerNostr
       .openEncryptedDirectMessage(me, stranger, event)
       .then(text => {
