@@ -1,6 +1,6 @@
 {
   "name": "omeglestr",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "author": "António Conselheiro",
   "license": "Ungovernable",
   "scripts": {
@@ -46,6 +46,6 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "~5.4.5"
+    "typescript": "^5.5.4"
   }
 }

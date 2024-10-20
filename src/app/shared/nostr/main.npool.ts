@@ -4,17 +4,6 @@ import { NostrEvent, NostrFilter, NPool, NRelay1 } from '@nostrify/nostrify';
 import { RelayConfigService } from '@shared/relay-config/relay-config.service';
 import { finalize, Observable, Subject } from 'rxjs';
 
-declare var AbortSignal: {
-  prototype: AbortSignal;
-  new(): AbortSignal;
-  /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/AbortSignal/abort_static) */
-  abort(reason?: any): AbortSignal;
-  /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/AbortSignal/any_static) */
-  any(signals: AbortSignal[]): AbortSignal;
-  /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/AbortSignal/timeout_static) */
-  timeout(milliseconds: number): AbortSignal;
-};
-
 @Injectable()
 export class NPoolService extends NPool<NRelay1> {
 
