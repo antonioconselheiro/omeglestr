@@ -21,7 +21,7 @@ export class NostrEventFactory {
   }
 
   /**
-   * @param expireIn time in seconds to expire, default to 10
+   * @param expireIn time in seconds to expire, default to 20
    * @returns expiration timestamp
    */
   private getExpirationTimestamp(
@@ -64,7 +64,7 @@ export class NostrEventFactory {
    */
   createWannaChatUserStatus(user: Required<OmeglestrUser>, includePow = false): Promise<NostrEvent> {
     return this.createUserStatus(user, 'wannachat', [
-        [ 'expiration', this.getExpirationTimestamp() ],
+        [ 'expiration', this.getExpirationTimestamp(25) ],
         [ 't', 'omegle' ],
         [ 't', 'wannachat' ]
       ], includePow);
@@ -135,7 +135,10 @@ export class NostrEventFactory {
     if (includePow) {
       const { data: eventSigner } = await new Promise<{ data: EventTemplate }>(resolve => {
         const worker = new Worker(new URL('../../workers/nostr-event-pow.worker', import.meta.url));
-        worker.onmessage = ({ data }) => resolve(data);
+        worker.onmessage = ({ data }) => {
+          resolve(data)
+          worker.terminate();
+        };
         worker.postMessage({ ...eventTemplate, pubkey: user.pubkey });
       });
 

@@ -25,7 +25,7 @@ export class NPoolService extends NPool<NRelay1> {
   }
 
   observe(filters: Array<NostrFilter>, opts?: NpoolOpts): Observable<NostrEvent> {
-    console.info(new Date().toLocaleString(),'[[subscribe filter]]', filters);
+    console.info(new Date().toLocaleString(), '[' + Math.floor(new Date().getTime() / 1000) + ']','[[subscribe filter]]', filters);
     const controller = new AbortController();
     const signal = opts?.signal ? AbortSignal.any([opts.signal, controller.signal]) : controller.signal;
     const subject = new Subject<NostrEvent>();
@@ -43,8 +43,8 @@ export class NPoolService extends NPool<NRelay1> {
           if (nsetSize !== nset.size) {
             subject.next(msg[2]);
           } else {
-            console.debug(new Date().toLocaleString(), 'event deduplicated, not emiting again: ', msg[2]);
-            console.debug(new Date().toLocaleString(), 'current nset from request: ', nset);
+            console.debug(new Date().toLocaleString(), '[' + Math.floor(new Date().getTime() / 1000) + ']', 'event deduplicated, not emiting again: ', msg[2]);
+            console.debug(new Date().toLocaleString(), '[' + Math.floor(new Date().getTime() / 1000) + ']', 'current nset from request: ', nset);
           }
         }
       }
@@ -54,7 +54,7 @@ export class NPoolService extends NPool<NRelay1> {
       .asObservable()
       .pipe(
         finalize(() => {
-          console.info(new Date().toLocaleString(), '[[unsubscribe filter]]', filters);
+          console.info(new Date().toLocaleString(), '[' + Math.floor(new Date().getTime() / 1000) + ']', '[[unsubscribe filter]]', filters);
           controller.abort();
         })
       );
