@@ -28,7 +28,6 @@
     "@belomonte/async-modal-ngx": "^1.0.0",
     "@nostrify/nostrify": "npm:@jsr/nostrify__nostrify@^0.36.1",
     "ngx-toastr": "^19.0.0",
-    "nostr-tools": "^2.7.2",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.14.8"
@@ -46,6 +45,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "nostr-tools": "^2.9.4",
     "typescript": "^5.5.4"
   }
 }
