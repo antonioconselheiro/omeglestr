@@ -37,7 +37,7 @@ export class FindStrangerService {
       if (isChatingConfirmation) {
         return Promise.resolve(OmeglestrUser.fromPubkey(wannaChat.pubkey));
       } else {
-        await this.disconnect(me);
+        await this.endSession(me);
         return this.searchStranger(me, opts);
       }
     }
@@ -61,7 +61,13 @@ export class FindStrangerService {
           next: event => {
             this.ignoreListService.saveInList(event.pubkey);
             this.replyChatInvitation(event, me)
-              .then(user => user && resolve(user))
+              .then(user => {
+                if (!user) {
+                  throw new Error('internal error: user not found, please report this with the logs from developer tools (F12)');
+                }
+
+                resolve(user)
+              })
               .catch(e => {
                 console.error(e);
                 throw e;
@@ -165,13 +171,13 @@ export class FindStrangerService {
     await this.npool.event(deleteStatus);
   }
 
-  connect(): Required<OmeglestrUser> {
+  createSession(): Required<OmeglestrUser> {
     const session = OmeglestrUser.create();
     this.ignoreListService.saveInList(session.pubkey);
     return session;
   }
 
-  async disconnect(user: Required<OmeglestrUser>): Promise<NostrEvent> {
+  async endSession(user: Required<OmeglestrUser>): Promise<NostrEvent> {
     const disconnectStatus = await this.nostrEventFactory.createDisconnectedUserStatus(user);
     console.info(new Date().toLocaleString(), '[' + Math.floor(new Date().getTime() / 1000) + ']', 'updating my status to: ', disconnectStatus);
     await this.deleteUserHistory(user);

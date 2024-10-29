@@ -69,7 +69,7 @@ export class ChatComponent implements OnDestroy, OnInit {
 
   @HostListener('window:beforeunload')
   async onBeforeUnload(): Promise<true> {
-    await this.disconnect();
+    await this.endSession();
     return true;
   }
 
@@ -83,7 +83,7 @@ export class ChatComponent implements OnDestroy, OnInit {
     this.whoDisconnected = null;
     this.currentState = this.stateSearchingStranger;
     this.messages = [];
-    const you = this.you = this.findStrangerProxy.connect();
+    const you = this.you = this.findStrangerProxy.createSession();
     console.info(new Date().toLocaleString(), 'me: ', you.pubkey);
     this.findStrangerProxy
       .searchStranger(this.you, { signal: this.controller.signal })
@@ -99,11 +99,14 @@ export class ChatComponent implements OnDestroy, OnInit {
       });
   }
 
-  disconnect(): Promise<void> {
+  endSession(): Promise<void> {
+    this.subscriptions.unsubscribe();
+    this.subscriptions = new Subscription();
+
     if (this.you) {
       this.stranger = null;
       return this.findStrangerProxy
-      .disconnect(this.you)
+      .endSession(this.you)
       .then(() => {
         this.currentState = ChatState.DISCONNECTED;
         this.strangeIsTyping = false;
@@ -162,7 +165,7 @@ export class ChatComponent implements OnDestroy, OnInit {
       this.strangeIsTyping = false;
       this.whoDisconnected = MessageAuthor.STRANGE;
       this.currentState = ChatState.DISCONNECTED;
-      this.disconnect();
+      this.endSession();
     } else {
       this.strangeIsTyping = false;
     }
@@ -202,7 +205,7 @@ export class ChatComponent implements OnDestroy, OnInit {
 
   stopSearching(): void {
     this.controller.abort();
-    this.disconnect();
+    this.endSession();
   }
 
   onTyping(): void {

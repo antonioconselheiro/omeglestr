@@ -63,8 +63,9 @@ export class NostrEventFactory {
    * https://github.com/nostr-protocol/nips/blob/master/38.md
    */
   createWannaChatUserStatus(user: Required<OmeglestrUser>, includePow = false): Promise<NostrEvent> {
+    const expireIn = this.globalConfigService.wannachatStatusDefaultTimeoutInSeconds + 5;
     return this.createUserStatus(user, 'wannachat', [
-        [ 'expiration', this.getExpirationTimestamp(25) ],
+        [ 'expiration', this.getExpirationTimestamp(expireIn) ],
         [ 't', 'omegle' ],
         [ 't', 'wannachat' ]
       ], includePow);
@@ -94,7 +95,7 @@ export class NostrEventFactory {
 
   deleteUserHistory(you: Required<OmeglestrUser>): NostrEvent {
     const template: EventTemplate = {
-      kind: 5,
+      kind: kinds.EventDeletion,
       tags: [
         [ 'k', String(kinds.EncryptedDirectMessage) ],
         [ 'k', String(kinds.UserStatuses) ],
