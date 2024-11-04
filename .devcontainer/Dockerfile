@@ -22,12 +22,6 @@ RUN chmod +x /usr/bin/nak
 # Installing client dependencies
 RUN npm install typescript @angular/cli -g
 
-# Credentials
-COPY ./.gitconfig /root/.gitconfig
-COPY ./.ssh /root/.ssh
-RUN chmod 600 -R /root/.ssh
-RUN ssh-add -D && ssh-add /root/.ssh/id_ed25519 || true
-
 WORKDIR /omeglestr
 
 # Keyboard & Timezone
@@ -36,7 +30,6 @@ ENV TZ=America/Sao_Paulo
 
 # Exposing ports
 EXPOSE 9876
-EXPOSE 9229
 EXPOSE 4200
 
 # The run the start script

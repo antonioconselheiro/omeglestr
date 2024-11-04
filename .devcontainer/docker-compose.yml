@@ -8,7 +8,6 @@ services:
     working_dir: /omeglestr
     ports:
       - "9876:9876"
-      - "9229:9229"
       - "4200:4200"
     volumes:
       - ..:/omeglestr:cached

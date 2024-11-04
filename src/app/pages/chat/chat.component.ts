@@ -28,7 +28,8 @@ export class ChatComponent implements OnDestroy, OnInit {
 
   readonly typingTimeoutAmount = 2_000;
 
-  @ViewChild('conversation') conversationEl!: ElementRef;
+  @ViewChild('conversation')
+  conversationEl!: ElementRef;
 
   typingTimeoutId = 0;
   currentOnline = 1;
@@ -90,8 +91,8 @@ export class ChatComponent implements OnDestroy, OnInit {
       .then(stranger => this.startConversation(you, stranger))
       .catch(e => {
         console.error(new Date().toLocaleString(), e);
-        this.strangeIsTyping = false;
         this.currentState = ChatState.DISCONNECTED;
+        this.strangeIsTyping = false;
         this.whoDisconnected = null;
         this.stranger = null;
 
