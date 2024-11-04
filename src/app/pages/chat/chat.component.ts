@@ -103,19 +103,17 @@ export class ChatComponent implements OnDestroy, OnInit {
 
     this.stranger = null;
     return this.findStrangerProxy
-    .endSession()
-    .then(() => {
-      this.currentState = ChatState.DISCONNECTED;
-      this.strangeIsTyping = false;
+      .endSession()
+      .then(() => {
+        this.currentState = ChatState.DISCONNECTED;
+        this.strangeIsTyping = false;
 
-      if (!this.whoDisconnected) {
-        this.whoDisconnected = MessageAuthor.YOU;
-      }
+        if (!this.whoDisconnected) {
+          this.whoDisconnected = MessageAuthor.YOU;
+        }
 
-      return Promise.resolve();
-    });
-
-    return Promise.resolve();
+        return Promise.resolve();
+      });
   }
 
   private startConversation(stranger: NostrPublicUser): void {
