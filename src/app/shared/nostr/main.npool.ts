@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { NpoolOpts } from '@domain/npool-opts.interface';
 import { NostrEvent, NostrFilter, NPool, NRelay1 } from '@nostrify/nostrify';
 import { RelayConfigService } from '@shared/relay-config/relay-config.service';
 import { finalize, Observable, Subject } from 'rxjs';
@@ -24,7 +23,9 @@ export class NPoolService extends NPool<NRelay1> {
     });
   }
 
-  observe(filters: Array<NostrFilter>, opts?: NpoolOpts): Observable<NostrEvent> {
+  observe(filters: Array<NostrFilter>, opts?: {
+    signal?: AbortSignal;
+  }): Observable<NostrEvent> {
     console.info(new Date().toLocaleString(), '[' + Math.floor(new Date().getTime() / 1000) + ']','[[subscribe filter]]', filters);
     const controller = new AbortController();
     const signal = opts?.signal ? AbortSignal.any([opts.signal, controller.signal]) : controller.signal;

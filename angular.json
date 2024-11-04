@@ -77,7 +77,8 @@
               "buildTarget": "omeglestr:build:production"
             },
             "development": {
-              "buildTarget": "omeglestr:build:development"
+              "buildTarget": "omeglestr:build:development",
+              "port": 4222
             }
           },
           "defaultConfiguration": "development"
@@ -96,16 +97,6 @@
               "zone.js/testing"
             ],
             "tsConfig": "tsconfig.spec.json",
-            "inlineStyleLanguage": "scss",
-            "assets": [
-              "src/favicon.ico",
-              "src/assets"
-            ],
-            "styles": [
-              "src/styles.scss",
-              "node_modules/ngx-toastr/toastr.css"
-            ],
-            "scripts": [],
             "browsers": "ChromeHeadlessCI",
             "karmaConfig": "karma.conf.js",
             "webWorkerTsConfig": "tsconfig.worker.json"

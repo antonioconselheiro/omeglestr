@@ -1,16 +1,14 @@
 import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ChatMessage } from '@domain/chat-message.interface';
 import { MessageAuthor } from '@domain/message-author.enum';
-import { OmeglestrUser } from '@domain/omeglestr-user';
 import { NostrEvent } from '@nostrify/nostrify';
-import { FindStrangerService } from '@shared/omegle-service/find-stranger.service';
-import { TalkToStrangerNostr } from '@shared/omegle-service/talk-to-stranger.nostr';
 import { Subscription } from 'rxjs';
 import { ChatState } from './chat-state.enum';
 import { ModalService } from '@belomonte/async-modal-ngx';
 import { RelayConfigComponent } from '@shared/relay-config/relay-config.component';
 import { GlobalErrorHandler } from '@shared/error-handling/global.error-handler';
 import { SoundNotificationService } from '@shared/sound/sound-notification.service';
+import {FindStrangerService, NostrPublicUser, TalkToStrangerNostr } from '@belomonte/ngx-parody-api';
 
 @Component({
   selector: 'omg-chat',
@@ -37,8 +35,7 @@ export class ChatComponent implements OnDestroy, OnInit {
   currentState = ChatState.DISCONNECTED;
   whoDisconnected: MessageAuthor | null = null;
 
-  you: Required<OmeglestrUser> | null = null;
-  stranger: OmeglestrUser | null = null;
+  stranger: NostrPublicUser | null = null;
 
   messages: Array<[ChatMessage, string | null]> = [];
 
@@ -84,11 +81,11 @@ export class ChatComponent implements OnDestroy, OnInit {
     this.whoDisconnected = null;
     this.currentState = this.stateSearchingStranger;
     this.messages = [];
-    const you = this.you = this.findStrangerProxy.createSession();
-    console.info(new Date().toLocaleString(), 'me: ', you.pubkey);
+    this.findStrangerProxy.createSession();
+
     this.findStrangerProxy
-      .searchStranger(this.you, { signal: this.controller.signal })
-      .then(stranger => this.startConversation(you, stranger))
+      .searchStranger({ signal: this.controller.signal })
+      .then(stranger => this.startConversation(stranger))
       .catch(e => {
         console.error(new Date().toLocaleString(), e);
         this.currentState = ChatState.DISCONNECTED;
@@ -104,26 +101,24 @@ export class ChatComponent implements OnDestroy, OnInit {
     this.subscriptions.unsubscribe();
     this.subscriptions = new Subscription();
 
-    if (this.you) {
-      this.stranger = null;
-      return this.findStrangerProxy
-      .endSession(this.you)
-      .then(() => {
-        this.currentState = ChatState.DISCONNECTED;
-        this.strangeIsTyping = false;
+    this.stranger = null;
+    return this.findStrangerProxy
+    .endSession()
+    .then(() => {
+      this.currentState = ChatState.DISCONNECTED;
+      this.strangeIsTyping = false;
 
-        if (!this.whoDisconnected) {
-          this.whoDisconnected = MessageAuthor.YOU;
-        }
+      if (!this.whoDisconnected) {
+        this.whoDisconnected = MessageAuthor.YOU;
+      }
 
-        return Promise.resolve();
-      });
-    }
+      return Promise.resolve();
+    });
 
     return Promise.resolve();
   }
 
-  private startConversation(me: Required<OmeglestrUser>, stranger: OmeglestrUser): void {
+  private startConversation(stranger: NostrPublicUser): void {
     console.log(new Date().toLocaleString(), 'starting conversation, stranger: ', stranger);
     this.stranger = stranger;
     this.currentState = ChatState.CONNECTED;
@@ -133,9 +128,9 @@ export class ChatComponent implements OnDestroy, OnInit {
 
     this.soundNotificationService.notify();
     this.subscriptions.add(this.talkToStrangerNostr
-      .listenMessages(me, stranger)
+      .listenMessages(stranger)
       .subscribe({
-        next: event => this.addMessageFromStranger(me, stranger, event)
+        next: event => this.addMessageFromStranger(stranger, event)
       }));
 
     this.subscriptions.add(this.talkToStrangerNostr
@@ -145,9 +140,9 @@ export class ChatComponent implements OnDestroy, OnInit {
       }));
   }
 
-  private addMessageFromStranger(me: Required<OmeglestrUser>, stranger: OmeglestrUser, event: NostrEvent): void {
+  private addMessageFromStranger(stranger: NostrPublicUser, event: NostrEvent): void {
     this.talkToStrangerNostr
-      .openEncryptedDirectMessage(me, stranger, event)
+      .openEncryptedDirectMessage(stranger, event)
       .then(text => {
         this.messages.push([{
           text,
@@ -173,9 +168,8 @@ export class ChatComponent implements OnDestroy, OnInit {
   }
 
   async sendMessage(message: string): Promise<void> {
-    const me = this.you;
     const stranger = this.stranger;
-    if (me && stranger && message.length) {
+    if (stranger && message.length) {
       const touple: [ChatMessage, string | null] = [{
         author: MessageAuthor.YOU,
         text: message,
@@ -186,7 +180,7 @@ export class ChatComponent implements OnDestroy, OnInit {
       this.scrollConversationToTheEnd();
 
       try {
-        await this.talkToStrangerNostr.sendMessage(me, stranger, message);
+        await this.talkToStrangerNostr.sendMessage(stranger, message);
       } catch (e) {
         touple[1] = this.globalErrorHandler.getErrorMessage(e as Error).join('; ');
       }
@@ -210,17 +204,14 @@ export class ChatComponent implements OnDestroy, OnInit {
   }
 
   onTyping(): void {
-    const you = this.you;
-    if (you) {
-      if (!this.typingTimeoutId) {
-        this.talkToStrangerNostr.isTyping(you);
-      }
-
-      clearTimeout(this.typingTimeoutId);
-      this.typingTimeoutId = Number(setTimeout(() => {
-        this.talkToStrangerNostr.stopTyping(you);
-        this.typingTimeoutId = 0;
-      }, this.typingTimeoutAmount));
+    if (!this.typingTimeoutId) {
+      this.talkToStrangerNostr.isTyping();
     }
+
+    clearTimeout(this.typingTimeoutId);
+    this.typingTimeoutId = Number(setTimeout(() => {
+      this.talkToStrangerNostr.stopTyping();
+      this.typingTimeoutId = 0;
+    }, this.typingTimeoutAmount));
   }
 }
