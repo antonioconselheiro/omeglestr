@@ -82,9 +82,10 @@ export class ChatComponent implements OnDestroy, OnInit {
     this.currentState = this.stateSearchingStranger;
     this.messages = [];
     this.findStrangerProxy.createSession();
+    const powComplexity = 11;
 
     this.findStrangerProxy
-      .searchStranger({ signal: this.controller.signal })
+      .searchStranger({ signal: this.controller.signal }, powComplexity)
       .then(stranger => this.startConversation(stranger))
       .catch(e => {
         console.error(new Date().toLocaleString(), e);

@@ -29,19 +29,12 @@
             "assets": [
               "src/manifest.webmanifest",
               "src/favicon.ico",
-              "src/assets",
-              {
-                "glob": "**/*",
-                "input": "src/app/workers",
-                "output": "/workers"
-              }
+              "src/assets"
             ],
             "styles": [
               "src/styles.scss",
               "node_modules/ngx-toastr/toastr.css"
-            ],
-            "scripts": [],
-            "webWorkerTsConfig": "tsconfig.worker.json"
+            ]
           },
           "configurations": {
             "production": {
@@ -98,8 +91,7 @@
             ],
             "tsConfig": "tsconfig.spec.json",
             "browsers": "ChromeHeadlessCI",
-            "karmaConfig": "karma.conf.js",
-            "webWorkerTsConfig": "tsconfig.worker.json"
+            "karmaConfig": "karma.conf.js"
           }
         }
       }
