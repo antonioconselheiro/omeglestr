@@ -21,7 +21,7 @@ export class ChatComponent implements OnDestroy, OnInit {
   readonly stateDisconnected = ChatState.DISCONNECTED;
   readonly stateSearchingStranger = ChatState.SEARCHING_STRANGER;
 
-  readonly authorStrange = MessageAuthor.STRANGE;
+  readonly authorStranger = MessageAuthor.STRANGER;
   readonly authorYou = MessageAuthor.YOU;
 
   readonly typingTimeoutAmount = 2_000;
@@ -31,7 +31,7 @@ export class ChatComponent implements OnDestroy, OnInit {
 
   typingTimeoutId = 0;
   currentOnline = 1;
-  strangeIsTyping = false;
+  strangerIsTyping = false;
   currentState = ChatState.DISCONNECTED;
   whoDisconnected: MessageAuthor | null = null;
 
@@ -85,12 +85,17 @@ export class ChatComponent implements OnDestroy, OnInit {
     const powComplexity = 11;
 
     this.findStrangerProxy
-      .searchStranger({ signal: this.controller.signal }, powComplexity)
+      .searchStranger({
+        signal: this.controller.signal,
+        powComplexity,
+        searchTags: [ 'omegle' ],
+        userTags: [ 'omegle' ]
+      })
       .then(stranger => this.startConversation(stranger))
       .catch(e => {
         console.error(new Date().toLocaleString(), e);
         this.currentState = ChatState.DISCONNECTED;
-        this.strangeIsTyping = false;
+        this.strangerIsTyping = false;
         this.whoDisconnected = null;
         this.stranger = null;
 
@@ -107,7 +112,7 @@ export class ChatComponent implements OnDestroy, OnInit {
       .endSession()
       .then(() => {
         this.currentState = ChatState.DISCONNECTED;
-        this.strangeIsTyping = false;
+        this.strangerIsTyping = false;
 
         if (!this.whoDisconnected) {
           this.whoDisconnected = MessageAuthor.YOU;
@@ -145,7 +150,7 @@ export class ChatComponent implements OnDestroy, OnInit {
       .then(text => {
         this.messages.push([{
           text,
-          author: MessageAuthor.STRANGE,
+          author: MessageAuthor.STRANGER,
           time: event.created_at
         }, null]);
         this.scrollConversationToTheEnd();
@@ -154,15 +159,15 @@ export class ChatComponent implements OnDestroy, OnInit {
 
   private handleStrangerStatus(event: NostrEvent): void {
     if (event.content === 'typing') {
-      this.strangeIsTyping = true;
+      this.strangerIsTyping = true;
       this.scrollConversationToTheEnd();
     } else if (event.content === 'disconnected') {
-      this.strangeIsTyping = false;
-      this.whoDisconnected = MessageAuthor.STRANGE;
+      this.strangerIsTyping = false;
+      this.whoDisconnected = MessageAuthor.STRANGER;
       this.currentState = ChatState.DISCONNECTED;
       this.endSession();
     } else {
-      this.strangeIsTyping = false;
+      this.strangerIsTyping = false;
     }
   }
 

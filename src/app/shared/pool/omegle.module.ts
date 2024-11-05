@@ -6,7 +6,7 @@ import { POOL_OPTIONS_TOKEN, TalkToStrangerModule } from '@belomonte/ngx-parody-
 @NgModule({
   imports: [
     CommonModule,
-    TalkToStrangerModule,
+    TalkToStrangerModule
   ],
   providers: [
     {
