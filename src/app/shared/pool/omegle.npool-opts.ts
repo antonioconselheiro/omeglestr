@@ -15,9 +15,9 @@ export class OmegleNPoolOpts implements NPoolOpts<NRelay1> {
 
   async reqRouter(filters: NostrFilter[]): Promise<Map<string, NostrFilter[]>> {
     const toupleList: Array<[string, NostrFilter[]]> = [];
-    this.relayConfigService.getConfig().forEach(relay => {
-      toupleList.push([relay, filters]);
-    });
+    this.relayConfigService
+      .getConfig()
+      .forEach(relay => toupleList.push([relay, filters]));
 
     return new Map(toupleList);
   }

@@ -8,7 +8,7 @@ import { ModalService } from '@belomonte/async-modal-ngx';
 import { RelayConfigComponent } from '@shared/relay-config/relay-config.component';
 import { GlobalErrorHandler } from '@shared/error-handling/global.error-handler';
 import { SoundNotificationService } from '@shared/sound/sound-notification.service';
-import {FindStrangerService, NostrPublicUser, TalkToStrangerNostr } from '@belomonte/ngx-parody-api';
+import { FindStrangerService, NostrPublicUser, TalkToStrangerNostr } from '@belomonte/ngx-parody-api';
 
 @Component({
   selector: 'omg-chat',
@@ -82,12 +82,10 @@ export class ChatComponent implements OnDestroy, OnInit {
     this.currentState = this.stateSearchingStranger;
     this.messages = [];
     this.findStrangerProxy.createSession();
-    const powComplexity = 11;
 
     this.findStrangerProxy
       .searchStranger({
         signal: this.controller.signal,
-        powComplexity,
         searchTags: [ 'omegle' ],
         userTags: [ 'omegle' ]
       })

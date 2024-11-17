@@ -91,7 +91,8 @@
             ],
             "tsConfig": "tsconfig.spec.json",
             "browsers": "ChromeHeadlessCI",
-            "karmaConfig": "karma.conf.js"
+            "karmaConfig": "karma.conf.js",
+            "webWorkerTsConfig": "tsconfig.worker.json"
           }
         }
       }
