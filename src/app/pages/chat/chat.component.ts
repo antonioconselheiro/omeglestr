@@ -45,7 +45,7 @@ export class ChatComponent implements OnDestroy, OnInit {
 
   constructor(
     private globalErrorHandler: GlobalErrorHandler,
-    private findStrangerProxy: FindStrangerService,
+    private findStrangerService: FindStrangerService,
     private talkToStrangerNostr: TalkToStrangerNostr,
     private soundNotificationService: SoundNotificationService,
     private modalService: ModalService
@@ -81,9 +81,8 @@ export class ChatComponent implements OnDestroy, OnInit {
     this.whoDisconnected = null;
     this.currentState = this.stateSearchingStranger;
     this.messages = [];
-    this.findStrangerProxy.createSession();
 
-    this.findStrangerProxy
+    this.findStrangerService
       .searchStranger({
         signal: this.controller.signal,
         searchTags: [ 'omegle' ],
@@ -101,12 +100,13 @@ export class ChatComponent implements OnDestroy, OnInit {
       });
   }
 
+  //  FIXME: preciso revisar este método, pois o endSession já é executado internamente na biblioteca quando se recebe um status de disconnected
   endSession(): Promise<void> {
     this.subscriptions.unsubscribe();
     this.subscriptions = new Subscription();
 
     this.stranger = null;
-    return this.findStrangerProxy
+    return this.findStrangerService
       .endSession()
       .then(() => {
         this.currentState = ChatState.DISCONNECTED;

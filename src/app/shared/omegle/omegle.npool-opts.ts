@@ -8,7 +8,7 @@ export class OmegleNPoolOpts implements NPoolOpts<NRelay1> {
   constructor(
     private relayConfigService: RelayConfigService
   ) { }
-  
+
   open(url: string): NRelay1 {
     return new NRelay1(url);
   }
