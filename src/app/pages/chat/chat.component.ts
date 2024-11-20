@@ -8,7 +8,7 @@ import { ModalService } from '@belomonte/async-modal-ngx';
 import { RelayConfigComponent } from '@shared/relay-config/relay-config.component';
 import { GlobalErrorHandler } from '@shared/error-handling/global.error-handler';
 import { SoundNotificationService } from '@shared/sound/sound-notification.service';
-import { FindStrangerService, NostrPublicUser, TalkToStrangerNostr } from '@belomonte/ngx-parody-api';
+import { FindStrangerParody, NostrPublicUser, TalkToStrangerParody } from '@belomonte/ngx-parody-api';
 
 @Component({
   selector: 'omg-chat',
@@ -45,8 +45,8 @@ export class ChatComponent implements OnDestroy, OnInit {
 
   constructor(
     private globalErrorHandler: GlobalErrorHandler,
-    private findStrangerService: FindStrangerService,
-    private talkToStrangerNostr: TalkToStrangerNostr,
+    private findStrangerParody: FindStrangerParody,
+    private talkToStrangerParody: TalkToStrangerParody,
     private soundNotificationService: SoundNotificationService,
     private modalService: ModalService
   ) { }
@@ -56,7 +56,7 @@ export class ChatComponent implements OnDestroy, OnInit {
   }
   
   private countStrangers(): void {
-    this.subscriptions.add(this.talkToStrangerNostr
+    this.subscriptions.add(this.talkToStrangerParody
       .listenCurrenOnlineUsers()
       .subscribe(currentOnline => this.currentOnline = currentOnline || 1));
   }
@@ -82,7 +82,7 @@ export class ChatComponent implements OnDestroy, OnInit {
     this.currentState = this.stateSearchingStranger;
     this.messages = [];
 
-    this.findStrangerService
+    this.findStrangerParody
       .searchStranger({
         signal: this.controller.signal,
         searchTags: [ 'omegle' ],
@@ -91,33 +91,24 @@ export class ChatComponent implements OnDestroy, OnInit {
       .then(stranger => this.startConversation(stranger))
       .catch(e => {
         console.error(new Date().toLocaleString(), e);
-        this.currentState = ChatState.DISCONNECTED;
-        this.strangerIsTyping = false;
-        this.whoDisconnected = null;
-        this.stranger = null;
-
+        this.clearSession();
         throw e;
       });
   }
 
-  //  FIXME: preciso revisar este método, pois o endSession já é executado internamente na biblioteca quando se recebe um status de disconnected
-  endSession(): Promise<void> {
+  clearSession(): void {
+    this.currentState = ChatState.DISCONNECTED;
+    this.strangerIsTyping = false;
+    this.whoDisconnected = null;
+    this.stranger = null;
     this.subscriptions.unsubscribe();
     this.subscriptions = new Subscription();
+  }
 
-    this.stranger = null;
-    return this.findStrangerService
+  endSession(): Promise<void> {
+    return this.findStrangerParody
       .endSession()
-      .then(() => {
-        this.currentState = ChatState.DISCONNECTED;
-        this.strangerIsTyping = false;
-
-        if (!this.whoDisconnected) {
-          this.whoDisconnected = MessageAuthor.YOU;
-        }
-
-        return Promise.resolve();
-      });
+      .then(() => this.clearSession());
   }
 
   private startConversation(stranger: NostrPublicUser): void {
@@ -129,13 +120,13 @@ export class ChatComponent implements OnDestroy, OnInit {
     }
 
     this.soundNotificationService.notify();
-    this.subscriptions.add(this.talkToStrangerNostr
+    this.subscriptions.add(this.talkToStrangerParody
       .listenMessages(stranger)
       .subscribe({
         next: event => this.addMessageFromStranger(stranger, event)
       }));
 
-    this.subscriptions.add(this.talkToStrangerNostr
+    this.subscriptions.add(this.talkToStrangerParody
       .listenStrangerStatus(stranger)
       .subscribe({
         next: event => this.handleStrangerStatus(event)
@@ -143,7 +134,7 @@ export class ChatComponent implements OnDestroy, OnInit {
   }
 
   private addMessageFromStranger(stranger: NostrPublicUser, event: NostrEvent): void {
-    this.talkToStrangerNostr
+    this.talkToStrangerParody
       .openEncryptedDirectMessage(stranger, event)
       .then(text => {
         this.messages.push([{
@@ -182,7 +173,9 @@ export class ChatComponent implements OnDestroy, OnInit {
       this.scrollConversationToTheEnd();
 
       try {
-        await this.talkToStrangerNostr.sendMessage(stranger, message);
+        const typingPromise = this.talkToStrangerParody.isTyping();
+        const messagePromise = this.talkToStrangerParody.sendMessage(stranger, message);
+        await Promise.all([typingPromise, messagePromise]);
       } catch (e) {
         touple[1] = this.globalErrorHandler.getErrorMessage(e as Error).join('; ');
       }
@@ -207,12 +200,12 @@ export class ChatComponent implements OnDestroy, OnInit {
 
   onTyping(): void {
     if (!this.typingTimeoutId) {
-      this.talkToStrangerNostr.isTyping();
+      this.talkToStrangerParody.isTyping();
     }
 
     clearTimeout(this.typingTimeoutId);
     this.typingTimeoutId = Number(setTimeout(() => {
-      this.talkToStrangerNostr.stopTyping();
+      this.talkToStrangerParody.stopTyping();
       this.typingTimeoutId = 0;
     }, this.typingTimeoutAmount));
   }
