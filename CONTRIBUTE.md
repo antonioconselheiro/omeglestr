@@ -1,8 +1,5 @@
 # Contribute
 _working from individuals to individuals_
-
-![destroy the levithan](https://raw.githubusercontent.com/antonioconselheiro/antonioconselheiro/main/img/destroy-leviathan.jpg)
-
 _against the Beast and his Antichrist_
 
 ### Small changes and Bugs

@@ -25,7 +25,7 @@
       class="chat"
      >
      <span
-      [class.authorStranger]="message[0].author === authorStrange"
+      [class.authorStranger]="message[0].author === authorStranger"
       [class.authorYou]="message[0].author === authorYou"
      >{{message[0].author | author}}: </span>
      <span class="text">{{message[0].text}}</span>
@@ -38,11 +38,11 @@
      </span>
     </div>
 
-    <div class="message" *ngIf="strangeIsTyping">
+    <div class="message" *ngIf="strangerIsTyping">
       Stranger is typing...
     </div>
     <ng-container *ngIf="currentState === stateDisconnected">
-      <div class="message" *ngIf="whoDisconnected === authorStrange">Stranger has disconnected.</div>
+      <div class="message" *ngIf="whoDisconnected === authorStranger">Stranger has disconnected.</div>
       <div class="message" *ngIf="whoDisconnected === authorYou">You have disconnected.</div>
     </ng-container>
   </section>
@@ -81,7 +81,7 @@
     <button
       type="button"
       class="btn bottomLeftRadius bold"
-      (click)="disconnect(); cleanMessageField(messageField)"
+      (click)="endSession(); cleanMessageField(messageField)"
       *ngIf="currentState === stateUpToDisconnect"
     >
       Really?

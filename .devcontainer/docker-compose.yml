@@ -7,9 +7,7 @@ services:
       dockerfile: ./.devcontainer/Dockerfile
     working_dir: /omeglestr
     ports:
-      - "9876:9876"
-      - "9229:9229"
-      - "4200:4200"
+      - "4222:4222"
     volumes:
       - ..:/omeglestr:cached
       - /var/run/docker.sock:/var/run/docker.sock

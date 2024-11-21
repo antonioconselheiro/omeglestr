@@ -2,7 +2,7 @@ import { NostrEvent, NostrFilter } from "@nostrify/nostrify";
 import { matchFilters } from "nostr-tools";
 
 describe('Testing filter', () => {
-  
+
   it('event should match', () => {
     const event: NostrEvent = {
       content: "chating",
@@ -25,7 +25,7 @@ describe('Testing filter', () => {
         "#t": [ "wannachat", "omegle"],
         since: 1728387745
       },
-    
+
       {
         kinds: [30315],
         "#t": ["chating", "omegle"],

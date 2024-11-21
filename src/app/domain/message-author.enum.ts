@@ -1,4 +1,4 @@
 export enum MessageAuthor {
-  STRANGE = 'STRANGE',
+  STRANGER = 'STRANGER',
   YOU = 'YOU'
 }

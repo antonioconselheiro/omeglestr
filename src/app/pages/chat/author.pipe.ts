@@ -9,7 +9,7 @@ export class AuthorPipe implements PipeTransform {
   authorTypes: {
     [key in MessageAuthor]: string
   } = {
-    [MessageAuthor.STRANGE]: 'Stranger',
+    [MessageAuthor.STRANGER]: 'Stranger',
     [MessageAuthor.YOU]: 'You'
   };
 

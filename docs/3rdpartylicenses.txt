@@ -151,6 +151,9 @@ THE SOFTWARE.
 @belomonte/async-modal-ngx
 Unlicense
 
+@belomonte/ngx-parody-api
+Ungovernable
+
 @jsr/nostrify__nostrify
 MIT License
 

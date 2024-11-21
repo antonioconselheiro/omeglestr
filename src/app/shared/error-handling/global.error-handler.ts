@@ -16,14 +16,14 @@ export class GlobalErrorHandler extends ErrorHandler {
     if (!(/^AbortError/.test(String(error)))) {
       if (error.errors && error.errors.length) {
         error.errors.forEach(err => {
-          console.error(new Date().toLocaleString(), err.message);
+          console.error(new Date().toLocaleString(), '[' + Math.floor(new Date().getTime() / 1000) + ']', err.message);
           this.error$.next(err.message);
         });
       } else if (error.message) {
-        console.error(new Date().toLocaleString(), error.message);
+        console.error(new Date().toLocaleString(), '[' + Math.floor(new Date().getTime() / 1000) + ']', error.message);
         this.error$.next(error.message);
       } else {
-        console.error(new Date().toLocaleString(), 'application throw unkown error');
+        console.error(new Date().toLocaleString(), '[' + Math.floor(new Date().getTime() / 1000) + ']', 'application throw unkown error');
         this.error$.next('application throw unkown error');
       }
     }
