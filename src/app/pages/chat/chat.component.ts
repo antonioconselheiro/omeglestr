@@ -173,7 +173,7 @@ export class ChatComponent implements OnDestroy, OnInit {
       this.scrollConversationToTheEnd();
 
       try {
-        const typingPromise = this.talkToStrangerParody.isTyping();
+        const typingPromise = this.talkToStrangerParody.stopTyping();
         const messagePromise = this.talkToStrangerParody.sendMessage(stranger, message);
         await Promise.all([typingPromise, messagePromise]);
       } catch (e) {
