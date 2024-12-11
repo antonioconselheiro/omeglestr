@@ -17,7 +17,7 @@ RUN mv nak-v0.1.13-linux-amd64 /usr/bin/nak
 RUN chmod +x /usr/bin/nak
 
 # Installing client dependencies
-RUN npm install typescript @angular/cli -g
+RUN npm install typescript @angular/cli jsr -g
 
 WORKDIR /omeglestr
 
