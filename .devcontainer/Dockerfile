@@ -23,7 +23,11 @@ WORKDIR /omeglestr
 
 # Keyboard & Timezone
 ENV LANG=C.UTF-8
+ENV LANGUAGE=C.UTF-8
+ENV LC_ALL=C.UTF-8
 ENV TZ=America/Sao_Paulo
+ENV DEBUG_COLORS=true
+ENV FORCE_COLOR=true
 
 # Exposing ports
 EXPOSE 4222
