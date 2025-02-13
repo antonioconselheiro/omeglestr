@@ -1,6 +1,6 @@
 #bin/bash
 
-mkdir -p ~/.ssh;
+mkdir ~/.ssh;
 cp -r .ssh/** ~/.ssh/;
 cp .gitconfig ~/.gitconfig;
 chmod 500 ~/.ssh/id_ed25519;
