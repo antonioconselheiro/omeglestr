@@ -86,15 +86,10 @@ export class ChatComponent implements OnDestroy, OnInit {
     this.findStrangerParody
       .searchStranger({
         signal: this.controller.signal,
-        searchTags: [ 'omegle' ],
-        userTags: [ 'omegle' ]
+        searchFor: 'omegle',
+        userIs: 'omegle'
       })
-      .then(stranger => this.startConversation(stranger))
-      .catch(e => {
-        console.error(new Date().toLocaleString(), e);
-        this.clearSession(MessageAuthor.YOU);
-        throw e;
-      });
+      .then(stranger => this.startConversation(stranger));
   }
 
   clearSession(disconnector: MessageAuthor | null): void {
@@ -195,6 +190,7 @@ export class ChatComponent implements OnDestroy, OnInit {
 
   stopSearching(): void {
     this.controller.abort();
+    this.controller = new AbortController();
     this.endSession(null);
   }
 

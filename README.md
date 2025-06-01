@@ -19,14 +19,6 @@ This also have a hardcoded relay included, no custom relays are need, if you wan
 Need support to [NIP-04](https://github.com/nostr-protocol/nips/blob/master/04.md), [NIP-38](https://github.com/nostr-protocol/nips/blob/master/38.md) and [NIP-40](https://github.com/nostr-protocol/nips/blob/master/40.md).
 
 ## Donate
-Do you want more protests in favor of free speech, freedom of software and freedom of work similar to this one?
-
-This client nostr is a demonstration of a fraction of my power, as I have no funding other than my goodwill, with a contribution in satoshis you help me fund other products.
-
-Any open source that has its code physically decentralized around the world is likely to be a perpetual service to every human being with access to technology.
-
-There's still a lot of work to do.
-
 Lighting donate: <a href="lightning:antonioconselheiro@getalby.com">lightning:antonioconselheiro@getalby.com</a>
 
 ![zap me](https://raw.githubusercontent.com/antonioconselheiro/antonioconselheiro/main/img/qrcode-wallet-lighting.png)
