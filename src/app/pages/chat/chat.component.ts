@@ -67,7 +67,7 @@ export class ChatComponent implements OnDestroy, OnInit {
 
   @HostListener('window:beforeunload')
   async onBeforeUnload(): Promise<true> {
-    await this.endSession();
+    await this.endSession(null);
     return true;
   }
 
@@ -91,24 +91,24 @@ export class ChatComponent implements OnDestroy, OnInit {
       .then(stranger => this.startConversation(stranger))
       .catch(e => {
         console.error(new Date().toLocaleString(), e);
-        this.clearSession();
+        this.clearSession(MessageAuthor.YOU);
         throw e;
       });
   }
 
-  clearSession(): void {
+  clearSession(disconnector: MessageAuthor | null): void {
     this.currentState = ChatState.DISCONNECTED;
     this.strangerIsTyping = false;
-    this.whoDisconnected = null;
+    this.whoDisconnected = disconnector;
     this.stranger = null;
     this.subscriptions.unsubscribe();
     this.subscriptions = new Subscription();
   }
 
-  endSession(): Promise<void> {
+  endSession(disconnector: MessageAuthor | null): Promise<void> {
     return this.findStrangerParody
       .endSession()
-      .then(() => this.clearSession());
+      .then(() => this.clearSession(disconnector));
   }
 
   private startConversation(stranger: NostrPublicUser): void {
@@ -152,9 +152,8 @@ export class ChatComponent implements OnDestroy, OnInit {
       this.scrollConversationToTheEnd();
     } else if (event.content === 'disconnected') {
       this.strangerIsTyping = false;
-      this.whoDisconnected = MessageAuthor.STRANGER;
       this.currentState = ChatState.DISCONNECTED;
-      this.endSession();
+      this.endSession(MessageAuthor.STRANGER);
     } else {
       this.strangerIsTyping = false;
     }
@@ -195,7 +194,7 @@ export class ChatComponent implements OnDestroy, OnInit {
 
   stopSearching(): void {
     this.controller.abort();
-    this.endSession();
+    this.endSession(null);
   }
 
   onTyping(): void {
