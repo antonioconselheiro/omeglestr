@@ -9,7 +9,7 @@
     <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
   </svg>
 
-  <h2 class="online">{{currentOnline}}</h2>
+  <h2 *ngIf="currentOnline > minOnlineToShow" class="online">{{currentOnline}}</h2>
 </section>
 
 <main class="main">

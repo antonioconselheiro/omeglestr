@@ -25,6 +25,7 @@ export class ChatComponent implements OnDestroy, OnInit {
   readonly authorYou = MessageAuthor.YOU;
 
   readonly typingTimeoutAmount = 2_000;
+  readonly minOnlineToShow = 10;
 
   @ViewChild('conversation')
   conversationEl!: ElementRef;
@@ -198,6 +199,7 @@ export class ChatComponent implements OnDestroy, OnInit {
   }
 
   onTyping(): void {
+    this.currentState = ChatState.CONNECTED;
     if (!this.typingTimeoutId) {
       this.talkToStrangerParody.isTyping();
     }
