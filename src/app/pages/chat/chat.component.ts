@@ -14,7 +14,7 @@ import { FindStrangerParody, NostrPublicUser, TalkToStrangerParody } from '@belo
   selector: 'omg-chat',
   templateUrl: './chat.component.html'
 })
-export class ChatComponent implements OnDestroy, OnInit {
+export class ChatComponent implements OnDestroy {
 
   readonly stateConnected = ChatState.CONNECTED;
   readonly stateUpToDisconnect = ChatState.UP_TO_DISCONNECT;
@@ -51,16 +51,6 @@ export class ChatComponent implements OnDestroy, OnInit {
     private soundNotificationService: SoundNotificationService,
     private modalService: ModalService
   ) { }
-
-  ngOnInit(): void {
-    this.countStrangers();
-  }
-  
-  private countStrangers(): void {
-    this.subscriptions.add(this.talkToStrangerParody
-      .listenCurrenOnlineUsers()
-      .subscribe(currentOnline => this.currentOnline = currentOnline || 1));
-  }
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();

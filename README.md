@@ -8,9 +8,6 @@
 - [hosted in github pages](https://antonioconselheiro.github.io/omeglestr),
 - [tor address](http://omegleau2uz72h5rmzm2vik5tgkcazsl5tfg7oafp4h3agbqomyvicqd.onion)
 
-## Not the phoenix we want, the phonix we need.
-![ostrich](./phoenix.jpg)
-
 ## Implementation
 It'll not need your `nsec` or connect to your signer, this will generate one nsec to each talk and in the end of each talk will clean all events emitted from your session. If the events are not deleted at the end, it'll expire into relay and be deleted anyway.
 This also have a hardcoded relay included, no custom relays are need, if you want change it and find stranger to talk in other relays you must [fork](https://guides.github.com/activities/forking/) this repository by [clicking here](https://github.com/antonioconselheiro/omeglestr/fork). But this will be configurable in the future.
@@ -31,7 +28,8 @@ Bitcoin onchain donate: <a href="bitcoin:bc1qrm99lmmpwk7zsh7njpgthw87yvdm38j2lzp
 - See [CONTRIBUTE.md](./CONTRIBUTE.md)
 
 ## References
+- https://www.omegle.com/
 - https://angular.dev/style-guide
 - https://github.com/nostr-protocol/nips
 - https://nostrify.dev/
-- https://www.omegle.com/
+- https://github.com/antonioconselheiro/ngx-parody-api
