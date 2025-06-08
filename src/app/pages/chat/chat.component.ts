@@ -1,20 +1,20 @@
-import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, ViewChild } from '@angular/core';
+import { ModalService } from '@belomonte/async-modal-ngx';
+import { FindStrangerParody, NostrPublicUser, TalkToStrangerParody } from '@belomonte/ngx-parody-api';
 import { ChatMessage } from '@domain/chat-message.interface';
 import { MessageAuthor } from '@domain/message-author.enum';
 import { NostrEvent } from '@nostrify/nostrify';
+import { GlobalErrorHandler } from '@shared/error-handling/global.error-handler';
+import { RelayConfigComponent } from '@shared/relay-config/relay-config.component';
+import { SoundNotificationService } from '@shared/sound/sound-notification.service';
 import { Subscription } from 'rxjs';
 import { ChatState } from './chat-state.enum';
-import { ModalService } from '@belomonte/async-modal-ngx';
-import { RelayConfigComponent } from '@shared/relay-config/relay-config.component';
-import { GlobalErrorHandler } from '@shared/error-handling/global.error-handler';
-import { SoundNotificationService } from '@shared/sound/sound-notification.service';
-import { FindStrangerParody, NostrPublicUser, TalkToStrangerParody } from '@belomonte/ngx-parody-api';
 
 @Component({
   selector: 'omg-chat',
   templateUrl: './chat.component.html'
 })
-export class ChatComponent implements OnDestroy, OnInit {
+export class ChatComponent implements OnDestroy {
 
   readonly stateConnected = ChatState.CONNECTED;
   readonly stateUpToDisconnect = ChatState.UP_TO_DISCONNECT;
@@ -24,13 +24,12 @@ export class ChatComponent implements OnDestroy, OnInit {
   readonly authorStranger = MessageAuthor.STRANGER;
   readonly authorYou = MessageAuthor.YOU;
 
-  readonly typingTimeoutAmount = 2_000;
-
   @ViewChild('conversation')
   conversationEl!: ElementRef;
 
-  typingTimeoutId = 0;
-  currentOnline = 1;
+  @ViewChild('messageField')
+  messageFieldEl!: ElementRef;
+
   strangerIsTyping = false;
   currentState = ChatState.DISCONNECTED;
   whoDisconnected: MessageAuthor | null = null;
@@ -39,7 +38,7 @@ export class ChatComponent implements OnDestroy, OnInit {
 
   messages: Array<[ChatMessage, string | null]> = [];
 
-  controller = new AbortController();
+  controller: AbortController | null = null;
 
   private subscriptions = new Subscription();
 
@@ -51,23 +50,13 @@ export class ChatComponent implements OnDestroy, OnInit {
     private modalService: ModalService
   ) { }
 
-  ngOnInit(): void {
-    this.countStrangers();
-  }
-  
-  private countStrangers(): void {
-    this.subscriptions.add(this.talkToStrangerParody
-      .listenCurrenOnlineUsers()
-      .subscribe(currentOnline => this.currentOnline = currentOnline || 1));
-  }
-
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
 
   @HostListener('window:beforeunload')
   async onBeforeUnload(): Promise<true> {
-    await this.endSession();
+    await this.endSession(null);
     return true;
   }
 
@@ -78,46 +67,45 @@ export class ChatComponent implements OnDestroy, OnInit {
   }
 
   findStranger(): void {
+    this.cleanMessageField(this.messageFieldEl.nativeElement);
+    if (this.controller) {
+      return;
+    }
+
     this.whoDisconnected = null;
+    this.controller = new AbortController();
     this.currentState = this.stateSearchingStranger;
     this.messages = [];
 
     this.findStrangerParody
       .searchStranger({
         signal: this.controller.signal,
-        searchTags: [ 'omegle' ],
-        userTags: [ 'omegle' ]
+        searchFor: 'omegle',
+        userIs: 'omegle'
       })
-      .then(stranger => this.startConversation(stranger))
-      .catch(e => {
-        console.error(new Date().toLocaleString(), e);
-        this.clearSession();
-        throw e;
-      });
+      .then(stranger => this.startConversation(stranger));
   }
 
-  clearSession(): void {
+  clearSession(disconnector: MessageAuthor | null): void {
     this.currentState = ChatState.DISCONNECTED;
     this.strangerIsTyping = false;
-    this.whoDisconnected = null;
+    this.whoDisconnected = disconnector;
     this.stranger = null;
     this.subscriptions.unsubscribe();
     this.subscriptions = new Subscription();
+    this.controller = null;
   }
 
-  endSession(): Promise<void> {
+  endSession(disconnector: MessageAuthor | null): Promise<NostrEvent> {
     return this.findStrangerParody
       .endSession()
-      .then(() => this.clearSession());
+      .finally(() => this.clearSession(disconnector));
   }
 
   private startConversation(stranger: NostrPublicUser): void {
     console.log(new Date().toLocaleString(), 'starting conversation, stranger: ', stranger);
     this.stranger = stranger;
     this.currentState = ChatState.CONNECTED;
-    if (this.currentOnline === 1) {
-      this.currentOnline = 2;
-    }
 
     this.soundNotificationService.notify();
     this.subscriptions.add(this.talkToStrangerParody
@@ -149,12 +137,13 @@ export class ChatComponent implements OnDestroy, OnInit {
   private handleStrangerStatus(event: NostrEvent): void {
     if (event.content === 'typing') {
       this.strangerIsTyping = true;
+      //  FIXME: devo trocar o scroll to the end para o scroll de alguns pixels abaixo,
+      //  evitando reset do scroll em caso do usuário realmente estar voltando a conversa
       this.scrollConversationToTheEnd();
     } else if (event.content === 'disconnected') {
       this.strangerIsTyping = false;
-      this.whoDisconnected = MessageAuthor.STRANGER;
       this.currentState = ChatState.DISCONNECTED;
-      this.endSession();
+      this.endSession(MessageAuthor.STRANGER);
     } else {
       this.strangerIsTyping = false;
     }
@@ -194,19 +183,10 @@ export class ChatComponent implements OnDestroy, OnInit {
   }
 
   stopSearching(): void {
-    this.controller.abort();
-    this.endSession();
-  }
-
-  onTyping(): void {
-    if (!this.typingTimeoutId) {
-      this.talkToStrangerParody.isTyping();
+    if (this.controller) {
+      this.controller.abort();
+      this.controller = null;
     }
-
-    clearTimeout(this.typingTimeoutId);
-    this.typingTimeoutId = Number(setTimeout(() => {
-      this.talkToStrangerParody.stopTyping();
-      this.typingTimeoutId = 0;
-    }, this.typingTimeoutAmount));
+    this.endSession(null);
   }
 }
