@@ -1,5 +1,6 @@
 import { ErrorHandler, Injectable } from '@angular/core';
 import { ErrorMessagesObservable } from './error-messages.observable';
+import { log } from '@belomonte/ngx-parody-api';
 
 @Injectable({
   providedIn: 'root'
@@ -13,17 +14,17 @@ export class GlobalErrorHandler extends ErrorHandler {
   }
 
   override handleError(error: Error & { errors?: Array<Error> }): void {
-    if (!(/^AbortError/.test(String(error)))) {
+    if (!(/AbortSignal/.test(String(error)))) {
       if (error.errors && error.errors.length) {
         error.errors.forEach(err => {
-          console.error(new Date().toLocaleString(), '[' + Math.floor(new Date().getTime() / 1000) + ']', err.message);
+          log.error(err.message);
           this.error$.next(err.message);
         });
       } else if (error.message) {
-        console.error(new Date().toLocaleString(), '[' + Math.floor(new Date().getTime() / 1000) + ']', error.message);
+        log.error(error.message);
         this.error$.next(error.message);
       } else {
-        console.error(new Date().toLocaleString(), '[' + Math.floor(new Date().getTime() / 1000) + ']', 'application throw unkown error', error);
+        log.error('application throw unkown error', error);
         this.error$.next('application throw unkown error');
       }
     }
