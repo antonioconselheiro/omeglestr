@@ -33,3 +33,4 @@ Bitcoin onchain donate: <a href="bitcoin:bc1qrm99lmmpwk7zsh7njpgthw87yvdm38j2lzp
 - https://github.com/nostr-protocol/nips
 - https://nostrify.dev/
 - https://github.com/antonioconselheiro/ngx-parody-api
+- https://www.npmjs.com/package/@belomonte/ngx-parody-api
