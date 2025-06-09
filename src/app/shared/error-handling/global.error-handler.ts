@@ -7,6 +7,8 @@ import { log } from '@belomonte/ngx-parody-api';
 })
 export class GlobalErrorHandler extends ErrorHandler {
 
+  private readonly isntAbortError = /AbortError|AbortSignal/;
+
   constructor(
     private error$: ErrorMessagesObservable
   ) { 
@@ -14,7 +16,7 @@ export class GlobalErrorHandler extends ErrorHandler {
   }
 
   override handleError(error: Error & { errors?: Array<Error> }): void {
-    if (!(/AbortSignal/.test(String(error)))) {
+    if (!(this.isntAbortError.test(String(error)))) {
       if (error.errors && error.errors.length) {
         error.errors.forEach(err => {
           log.error(err.message);
@@ -27,11 +29,13 @@ export class GlobalErrorHandler extends ErrorHandler {
         log.error('application throw unkown error', error);
         this.error$.next('application throw unkown error');
       }
+    } else {
+      console.warn(error.message);
     }
   }
 
   getErrorMessage(error: Error & { errors?: Array<Error> }): string[] {
-    if (!(/^AbortError/.test(String(error)))) {
+    if (!(this.isntAbortError.test(String(error)))) {
       if (error.errors && error.errors.length) {
         return error.errors.map(err => err.message);
       } else if (error.message) {

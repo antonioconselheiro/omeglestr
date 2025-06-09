@@ -1,6 +1,6 @@
 import { Component, ElementRef, HostListener, OnDestroy, ViewChild } from '@angular/core';
 import { ModalService } from '@belomonte/async-modal-ngx';
-import { FindStrangerParody, NostrPublicUser, TalkToStrangerParody } from '@belomonte/ngx-parody-api';
+import { FindStrangerParody, log, NostrPublicUser, TalkToStrangerParody } from '@belomonte/ngx-parody-api';
 import { ChatMessage } from '@domain/chat-message.interface';
 import { MessageAuthor } from '@domain/message-author.enum';
 import { NostrEvent } from '@nostrify/nostrify';
@@ -103,7 +103,7 @@ export class ChatComponent implements OnDestroy {
   }
 
   private startConversation(stranger: NostrPublicUser): void {
-    console.log(new Date().toLocaleString(), 'starting conversation, stranger: ', stranger);
+    log.debug('starting conversation, stranger: ', stranger);
     this.stranger = stranger;
     this.currentState = ChatState.CONNECTED;
 
