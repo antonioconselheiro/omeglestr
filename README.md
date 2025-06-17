@@ -5,8 +5,7 @@
 *don't thread on Omegle*
 
 ## Fully Open Source Omegle
-- [hosted in github pages](https://antonioconselheiro.github.io/omeglestr),
-- [tor address](http://omegleau2uz72h5rmzm2vik5tgkcazsl5tfg7oafp4h3agbqomyvicqd.onion)
+- [hosted in github pages](https://antonioconselheiro.github.io/omeglestr)
 
 ![Omeglestr](https://raw.githubusercontent.com/antonioconselheiro/ngx-parody-api/refs/heads/main/docs/imgs/omeglestr/2-omeglestr-chat-n-status.png)
 
