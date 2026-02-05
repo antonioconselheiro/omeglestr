@@ -6,7 +6,7 @@
   "scripts": {
     "start": "npm run dev",
     "dev": "ng serve --configuration development --host=0.0.0.0",
-    "build": "NG_APP_RELAYS=wss://relay.nostr.net NG_APP_USE_HASH=1 ng build --configuration production",
+    "build": "CI=TRUE NG_APP_RELAYS=wss://relay.nostr.net NG_APP_USE_HASH=1 ng build --configuration production",
     "build:docker": "docker build -t omeglestr:latest .",
     "watch": "ng build --watch --configuration development",
     "test": "ng test --no-watch --browsers=ChromeHeadlessCI",
@@ -26,7 +26,7 @@
     "@angular/platform-browser-dynamic": "^18.2.8",
     "@angular/router": "^18.2.8",
     "@belomonte/async-modal-ngx": "^1.0.0",
-    "@belomonte/ngx-parody-api": "^0.2.1",
+    "@belomonte/ngx-parody-api": "^0.2.2",
     "@nostrify/nostrify": "npm:@jsr/nostrify__nostrify@^0.36.2",
     "ngx-toastr": "^19.0.0",
     "nostr-tools": "^2.10.4",
